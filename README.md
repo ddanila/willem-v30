@@ -2,6 +2,8 @@
 
 Small, auditable MS-DOS tools for classic LPT-connected Willem EPROM
 programmers, targeting the NEC V20/V30 and 8086 instruction set.
+The DOS program is a headerless `.COM` built in the tiny memory model, keeping
+code, data, heap, and stack within one 64 KiB segment.
 
 The initial hardware target is a Willem PCB5.0E operating in its PCB3B
 compatibility mode. The initial device targets are:
@@ -23,3 +25,8 @@ Real-hardware work is staged conservatively:
 3. Enable AT28C64 programming only after read operation is proven.
 
 The final DOS distribution will use 8.3 filenames and CRLF text files.
+
+Every real-hardware run writes a human-readable `WILLEM.LOG` while also showing
+the same operational messages on screen. A compact full LPT trace can be
+enabled for hardware diagnosis and emulator comparison; see
+[`docs/logging.md`](docs/logging.md).
