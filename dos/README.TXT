@@ -1,6 +1,8 @@
 WILLEM V30 DOS UTILITY
 ======================
 
+VERSION 0.0.2
+
 This is an 8086-compatible .COM program for a classic parallel-port Willem
 programmer.  It targets a PCB5.0E set to PCB3B compatibility mode.  It runs
 under MS-DOS 6.22 and is suitable for the NEC V30.

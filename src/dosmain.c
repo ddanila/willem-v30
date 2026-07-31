@@ -8,6 +8,7 @@
 #define LOG_NAME "WILLEM.LOG"
 #define TRACE_NAME "WTRACE.BIN"
 #define WRITE_GATE_NAME "WRITE.OK"
+#define WILLEM_VERSION "0.0.2"
 
 #define ACTION_READ 1
 #define ACTION_BLANK 2
@@ -349,7 +350,8 @@ char **argv;
     context.sequence = 0;
     log_file = open_append(LOG_NAME, 0);
     logmsg("================ BEGIN RUN ================");
-    logmsg("Willem V30 utility; 8086-compatible; 24-bit address build");
+    logmsg("Willem V30 version %s; 8086-compatible; 24-bit address build",
+           WILLEM_VERSION);
     logmsg("Command-line argc=%d", argc);
     for (address = 0; address < (unsigned)argc; address++)
         logmsg("argv[%u]=<%s>", address, argv[address]);

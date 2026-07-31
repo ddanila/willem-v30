@@ -1,5 +1,7 @@
 # Willem V30
 
+Current version: `0.0.2`
+
 Small, auditable MS-DOS tools for classic LPT-connected Willem EPROM
 programmers, targeting the NEC V20/V30 and 8086 instruction set.
 The DOS program is a headerless `.COM` built in the tiny memory model, keeping
