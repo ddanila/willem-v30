@@ -28,28 +28,21 @@ _dos_inb:
     ret
 
 ; void dos_wait_us(unsigned usec)
-; AT/compatible BIOS wait where available. Short waits and the XT fallback use
-; a non-destructive latch/read of PIT channel 0, whose 1.193182 MHz clock is
-; independent of 8086/V30 execution speed.
+; Non-destructively latch/read PIT channel 0.  Its 1.193182 MHz clock is
+; independent of 8086/V30 instruction speed, so a faster V30 cannot shorten
+; programmer setup or pulse timing.  The largest caller delay is 50 ms, less
+; than one 16-bit PIT period (~54.9 ms), making modulo subtraction unambiguous.
 _dos_wait_us:
     push bp
     mov bp, sp
     push bx
     push cx
     push dx
-    mov dx, [bp+4]
-    cmp dx, 1000
-    jb .pit_wait
-    xor cx, cx
-    mov ah, 086h
-    int 015h
-    jnc .done
-.pit_wait:
     mov ax, [bp+4]
     or ax, ax
     jz .done
     ; 1.25 ticks/us is deliberately rounded above the real 1.193182 value.
-    ; All currently requested delays are <=10 ms, so this cannot overflow.
+    ; 50,000 us becomes 62,500 ticks and still fits in 16 bits.
     mov bx, ax
     shr ax, 1
     shr ax, 1

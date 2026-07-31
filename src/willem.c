@@ -175,6 +175,22 @@ struct willem *wl;
     delay_us(wl, 5000);
 }
 
+void wl_begin_28c64_read(wl)
+struct willem *wl;
+{
+    wl_vpp(wl, 0);
+    wl_we(wl, 1);
+    wl_oe(wl, 1);
+    wl_vcc(wl, 1);
+    /* Geepro allows 200 ms after enabling 5 V for the 2864 family. */
+    delay_us(wl, 50000);
+    delay_us(wl, 50000);
+    delay_us(wl, 50000);
+    delay_us(wl, 50000);
+    wl_oe(wl, 0);
+    wl_we(wl, 1);
+}
+
 void wl_end_read(wl)
 struct willem *wl;
 {

@@ -57,8 +57,10 @@ Sub-millisecond waits do not use instruction-counted delay loops. The DOS I/O
 layer latches and reads PC PIT channel 0 and waits for elapsed ticks from its
 fixed 1.193182 MHz input clock. Latching does not reprogram the timer. This
 makes minimum signal spacing independent of whether the host is an Intel 8086,
-NEC V30, or a faster compatible CPU. Longer waits use BIOS `INT 15h/AH=86h`
-when available and fall back to the same PIT measurement on XT-class BIOSes.
+NEC V30, or a faster compatible CPU. All current waits use this path, including
+the 50 ms chunks used for the 28C64 power-on delay. Each chunk is shorter than
+one approximately 54.9 ms PIT period, so 16-bit modulo elapsed-time arithmetic
+remains unambiguous. No AT-only `INT 15h/AH=86h` BIOS service is required.
 
 ## Device settings found in Geepro
 

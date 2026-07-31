@@ -131,5 +131,20 @@ int main()
 
     printf("virtual 2764 read passed: %u bytes, %lu status reads\n",
            ROM_SIZE, v.status_reads);
+
+    v.status_reads = 0;
+    wl_begin_28c64_read(&wl);
+    for (address = 0; address < ROM_SIZE; address++) {
+        actual = wl_read_byte(&wl, address);
+        if (actual != pattern(address)) {
+            fprintf(stderr, "28C64 mismatch at %04x: got %02x expected %02x\n",
+                    address, actual, pattern(address));
+            return 1;
+        }
+    }
+    wl_end_read(&wl);
+    if (v.status_reads != ROM_SIZE * 8UL) return 1;
+    printf("virtual 28C64 read passed: %u bytes, %lu status reads\n",
+           ROM_SIZE, v.status_reads);
     return 0;
 }
