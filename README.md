@@ -36,8 +36,9 @@ enabled for hardware diagnosis and emulator comparison; see
 
 ## DOS commands
 
-The current safety-gated build supports read, blank-check, and verify. It does
-not contain a programming command yet.
+The build supports read, blank-check, and verify directly. AT28C64 writing is
+present but remains locked until the host validator creates `WRITE.OK` from two
+matching known-Juku physical reads.
 
 ```text
 WILLEM R2764  OUT.BIN [378] [/TRACE]
@@ -46,12 +47,20 @@ WILLEM B2764          [378] [/TRACE]
 WILLEM B28C64         [378] [/TRACE]
 WILLEM V2764  ROM.BIN [378] [/TRACE]
 WILLEM V28C64 ROM.BIN [378] [/TRACE]
+WILLEM W28C64 ROM.BIN [378] /WRITE [/TRACE]
 ```
 
 The optional LPT base is hexadecimal and defaults to `378`. Every operation
 prints and logs a visual 12-switch DIP diagram. Geepro's mask maps bit 0 to
 physical switch 1; follow the numbering and the `ON` mark printed on the DIP
 bank. Verification images must be exactly 8192 bytes.
+
+`W28C64` additionally requires an explicit `/WRITE` and a valid `WRITE.OK` in
+the current DOS directory. The normal distribution intentionally contains no
+token. A successful `validate_read.py --unlock WRITE.OK ...` run creates it;
+copy it to the DOS disk only after reviewing the reported identities. The
+writer keeps VPP off, skips already matching bytes, D7-polls every changed
+byte, and performs a complete post-write verification.
 
 ## Build and test
 
@@ -71,7 +80,8 @@ power procedure have been verified.
 After two physical reads, enforce the hardware gate on the modern host with:
 
 ```sh
-python3 tools/validate_read.py EXPECTED.BIN READ1.BIN READ2.BIN
+python3 tools/validate_read.py --unlock WRITE.OK \
+    EXPECTED.BIN READ1.BIN READ2.BIN
 ```
 
 The tool rejects wrong sizes, non-repeatable reads, disagreement with the known

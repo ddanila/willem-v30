@@ -15,7 +15,7 @@ Contacts 1, 2, 31, and 32 stay empty.  Match the chip notch to the socket
 notch.  Use normal 28-pin routing, normal parked large-device jumpers, and 5 V
 VCC.  Do not select a special 2716, 2732, 2816, 28F, 29C, or large-chip mode.
 
-The utility always keeps VPP disabled during read, blank-check, and verify.
+The utility always keeps VPP disabled, including during AT28C64 writes.
 It prints a numbered DIP diagram before applying chip power.  Follow the
 numbers and the ON mark printed on the physical 12-switch bank.
 
@@ -41,5 +41,5 @@ Use the known original Juku 2764 and perform a read only:
   WILLEM R2764 JUKUROM.BIN 378 /TRACE
 
 Keep WILLEM.LOG, WTRACE.BIN, and JUKUROM.BIN.  Read twice and compare both
-images on the modern host before any EEPROM-writing command is implemented or
-enabled.
+images on the modern host.  Only a passing validator run may create WRITE.OK;
+without that file the EEPROM-writing command refuses to access the hardware.

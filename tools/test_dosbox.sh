@@ -19,9 +19,11 @@ run_dosbox() {
     mkdir -p "$drive"
     cp "$program" "$drive/WILLEM.COM"
     dd if=/dev/zero of="$drive/ZERO.BIN" bs=8192 count=1 status=none
+    printf 'WILLEM-WRITE-GATE-1\r\n' >"$drive/WRITE.OK"
 
     local args=(
         dosbox-x -fastlaunch
+        -set "dosbox quit warning=false"
         -set "cpu cputype=$cpu"
         -set "cpu cycles=max"
         -set "midi mididevice=none"
@@ -33,13 +35,34 @@ run_dosbox() {
         -c "WILLEM V28C64 ZERO.BIN 378"
         -c "WILLEM B2764 378"
         -c "WILLEM B28C64 378"
+        -c "WILLEM W28C64 ZERO.BIN 378 /WRITE"
         -c "exit"
     )
 
     if [[ -n ${DISPLAY:-} ]]; then
-        timeout 40s "${args[@]}" >"$drive/DOSBOX.OUT" 2>&1
+        timeout 90s "${args[@]}" >"$drive/DOSBOX.OUT" 2>&1
     else
-        timeout 40s xvfb-run -a "${args[@]}" >"$drive/DOSBOX.OUT" 2>&1
+        timeout 90s xvfb-run -a "${args[@]}" >"$drive/DOSBOX.OUT" 2>&1
+    fi
+
+    # Remove the generated authorization outside DOS, then prove a fresh DOS
+    # session refuses the same write command before it touches programmer I/O.
+    unlink "$drive/WRITE.OK"
+    local locked_args=(
+        dosbox-x -fastlaunch
+        -set "dosbox quit warning=false"
+        -set "cpu cputype=$cpu"
+        -set "cpu cycles=max"
+        -set "midi mididevice=none"
+        -c "mount c $drive"
+        -c "c:"
+        -c "WILLEM W28C64 ZERO.BIN 378 /WRITE"
+        -c "exit"
+    )
+    if [[ -n ${DISPLAY:-} ]]; then
+        timeout 30s "${locked_args[@]}" >>"$drive/DOSBOX.OUT" 2>&1
+    else
+        timeout 30s xvfb-run -a "${locked_args[@]}" >>"$drive/DOSBOX.OUT" 2>&1
     fi
 
     [[ $(stat -c %s "$drive/R2764.BIN") == 8192 ]]
@@ -49,9 +72,11 @@ run_dosbox() {
     [[ $(grep -c 'Read complete: bytes=8192' "$drive/WILLEM.LOG") == 2 ]]
     [[ $(grep -c 'VERIFY PASSED: all 8192 bytes match ZERO.BIN' "$drive/WILLEM.LOG") == 2 ]]
     [[ $(grep -c 'BLANK FAILED: mismatches=8192' "$drive/WILLEM.LOG") == 2 ]]
-    [[ $(grep -c 'Safe shutdown complete: VCC off, VPP off' "$drive/WILLEM.LOG") == 6 ]]
+    [[ $(grep -c 'Safe shutdown complete: VCC off, VPP off' "$drive/WILLEM.LOG") == 7 ]]
+    [[ $(grep -c 'physical read gate is locked' "$drive/WILLEM.LOG") == 1 ]]
+    [[ $(grep -c 'WRITE PASSED: programmed=0 unchanged=8192 verified=8192' "$drive/WILLEM.LOG") == 1 ]]
     [[ $(grep -c 'DIP ON.*\[X\]\[X\]\[ \]\[X\]\[ \]\[X\]\[ \]\[ \]\[X\]' "$drive/WILLEM.LOG") == 3 ]]
-    [[ $(grep -c 'DIP ON.*\[ \]\[ \]\[ \]\[X\]\[ \]\[X\]\[ \]\[ \]\[X\]' "$drive/WILLEM.LOG") == 3 ]]
+    [[ $(grep -c 'DIP ON.*\[ \]\[ \]\[ \]\[X\]\[ \]\[X\]\[ \]\[ \]\[X\]' "$drive/WILLEM.LOG") == 4 ]]
     echo "DOSBox-X $cpu diagnostic matrix passed"
 }
 

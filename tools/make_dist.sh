@@ -12,6 +12,10 @@ out=$3
 
 mkdir -p "$out"
 cp "$program" "$out/WILLEM.COM"
+if [[ -e "$out/WRITE.OK" ]]; then
+    echo "refusing to package a write authorization token" >&2
+    exit 1
+fi
 
 for name in README.TXT HWSETUP.TXT; do
     sed 's/$/\r/' "$textdir/$name" >"$out/$name"

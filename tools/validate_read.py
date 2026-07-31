@@ -48,7 +48,21 @@ def main():
     parser.add_argument("expected", type=pathlib.Path, help="authoritative 8192-byte image")
     parser.add_argument("read1", type=pathlib.Path, help="first physical read")
     parser.add_argument("read2", type=pathlib.Path, help="second physical read after reseating/power cycle")
+    parser.add_argument(
+        "--unlock",
+        type=pathlib.Path,
+        metavar="WRITE.OK",
+        help="create the DOS write-gate token after, and only after, a passing validation",
+    )
     args = parser.parse_args()
+
+    if args.unlock and args.unlock.name.upper() != "WRITE.OK":
+        parser.error("the DOS gate token must be named WRITE.OK")
+    if args.unlock:
+        try:
+            args.unlock.unlink()
+        except FileNotFoundError:
+            pass
 
     try:
         expected = load_image(args.expected)
@@ -87,6 +101,15 @@ def main():
     if failed:
         print("READ GATE: FAILED; AT28C64 hardware writing must remain disabled")
         return 2
+    if args.unlock:
+        digest = hashlib.sha256(expected).hexdigest()
+        token = (
+            "WILLEM-WRITE-GATE-1\r\n"
+            f"EXPECTED={digest}\r\n"
+            f"READ={hashlib.sha256(read1).hexdigest()}\r\n"
+        ).encode("ascii")
+        args.unlock.write_bytes(token)
+        print(f"WRITE GATE: created {args.unlock}")
     print("READ GATE: PASSED")
     return 0
 

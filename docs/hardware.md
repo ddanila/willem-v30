@@ -4,6 +4,15 @@ This document separates settings supported by schematics/manual evidence from
 settings that must be checked on the exact physical board. Willem PCB5.0E
 clones are not completely uniform.
 
+## Observed on the user's board
+
+The July 2026 photographs show a board marked `2015 PCB 5.0E`. The main ZIF
+socket is empty, and the 12-way DIP bank is currently set to the documented
+2764/27C64 pattern: switches 1, 2, 4, 6, and 9 toward the bank's printed `ON`
+side. The photographs do not yet reveal enough silkscreen or copper routing to
+identify the PCB3B selector side or the power-source jumper with confidence.
+Do not move those jumpers based on these observations alone.
+
 ## Confirmed common settings
 
 Both supported devices are 28-pin JEDEC parts placed in the 32-pin ZIF socket
@@ -80,13 +89,16 @@ separate reads, compare them byte-for-byte, and compare against the known Juku
 image on the modern host. The repository supplies the strict acceptance test:
 
 ```sh
-python3 tools/validate_read.py EXPECTED.BIN READ1.BIN READ2.BIN
+python3 tools/validate_read.py --unlock WRITE.OK \
+    EXPECTED.BIN READ1.BIN READ2.BIN
 ```
 
 It requires exact 8192-byte sizes, rejects uniform stuck-bus captures, compares
 both reads byte-for-byte, compares the first read with the expected image, and
-prints CRC16-CCITT plus SHA-256 identities. AT28C64 programming remains
-disabled until it prints `READ GATE: PASSED`.
+prints CRC16-CCITT plus SHA-256 identities. It deletes any stale token before
+checking and creates the CRLF `WRITE.OK` only on success. Copy that token to
+the DOS directory to unlock `W28C64`; without it, the command exits before
+opening a trace or touching LPT registers.
 
 For the EKTA 3.7 pair already prepared in the Jukuravi DOS ROM kit, select the
 reference matching the socket from which the physical chip was removed:

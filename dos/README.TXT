@@ -9,8 +9,8 @@ CURRENT SAFETY STAGE
 --------------------
 
 This build can read, blank-check, and verify 2764/27C64 and AT28C64 devices.
-It cannot write a chip.  Writing stays disabled until a known Juku 2764 has
-been read correctly on the real programmer.
+AT28C64 writing is locked until a known Juku 2764 has been read correctly on
+the real programmer and the host validator has created WRITE.OK.
 
 COMMANDS
 --------
@@ -21,10 +21,20 @@ WILLEM B2764          [378] [/TRACE]
 WILLEM B28C64         [378] [/TRACE]
 WILLEM V2764  ROM.BIN [378] [/TRACE]
 WILLEM V28C64 ROM.BIN [378] [/TRACE]
+WILLEM W28C64 ROM.BIN [378] /WRITE [/TRACE]
 
 The LPT address is hexadecimal and defaults to 378.  A verify image must be
 exactly 8192 bytes.  Result 0 means success, 1 means an error, and 2 means a
 blank-check or verify mismatch.
+
+The write command requires both /WRITE and WRITE.OK in the current directory.
+The normal kit deliberately has no WRITE.OK.  On the modern host, create it
+only after two independent known-ROM reads pass:
+
+  python3 tools/validate_read.py --unlock WRITE.OK EXPECTED READ1 READ2
+
+Copy that token to the DOS disk.  The writer skips matching bytes, polls each
+changed byte, verifies all 8192 bytes, and never enables VPP.
 
 LOG FILES
 ---------

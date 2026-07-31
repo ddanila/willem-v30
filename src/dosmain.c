@@ -7,10 +7,12 @@
 #define ROM_SIZE 8192
 #define LOG_NAME "WILLEM.LOG"
 #define TRACE_NAME "WTRACE.BIN"
+#define WRITE_GATE_NAME "WRITE.OK"
 
 #define ACTION_READ 1
 #define ACTION_BLANK 2
 #define ACTION_VERIFY 3
+#define ACTION_WRITE 4
 #define DEVICE_2764 1
 #define DEVICE_28C64 2
 
@@ -177,6 +179,32 @@ char **argv;
     return 0;
 }
 
+static int wants_write_confirm(argc, argv)
+int argc;
+char **argv;
+{
+    int i;
+    for (i = 1; i < argc; i++)
+        if (same_command(argv[i], "/WRITE") ||
+            same_command(argv[i], "-WRITE")) return 1;
+    return 0;
+}
+
+static int write_gate_valid()
+{
+    FILE *file;
+    char line[32];
+    int valid;
+
+    file = fopen(WRITE_GATE_NAME, "rb");
+    if (!file) return 0;
+    valid = fgets(line, sizeof(line), file) != 0 &&
+            !strncmp(line, "WILLEM-WRITE-GATE-1", 19) &&
+            (line[19] == '\r' || line[19] == '\n' || line[19] == 0);
+    fclose(file);
+    return valid;
+}
+
 static void trace_begin(ctx)
 struct dos_context *ctx;
 {
@@ -217,13 +245,14 @@ struct dos_context *ctx;
 
 static void usage()
 {
-    puts("WILLEM V30 read/blank/verify utility");
+    puts("WILLEM V30 read/check/gated-write utility");
     puts("Usage: WILLEM R2764 output.bin [base] [/TRACE]");
     puts("       WILLEM R28C64 output.bin [base] [/TRACE]");
     puts("       WILLEM B2764 [base] [/TRACE]");
     puts("       WILLEM B28C64 [base] [/TRACE]");
     puts("       WILLEM V2764 image.bin [base] [/TRACE]");
     puts("       WILLEM V28C64 image.bin [base] [/TRACE]");
+    puts("       WILLEM W28C64 image.bin [base] /WRITE [/TRACE]");
 }
 
 static int decode_command(text, action, device)
@@ -243,6 +272,8 @@ int *device;
         *action = ACTION_VERIFY; *device = DEVICE_2764;
     } else if (same_command(text, "V28C64")) {
         *action = ACTION_VERIFY; *device = DEVICE_28C64;
+    } else if (same_command(text, "W28C64")) {
+        *action = ACTION_WRITE; *device = DEVICE_28C64;
     } else {
         return 0;
     }
@@ -254,6 +285,7 @@ int action;
 {
     if (action == ACTION_READ) return "READ";
     if (action == ACTION_BLANK) return "BLANK";
+    if (action == ACTION_WRITE) return "WRITE";
     return "VERIFY";
 }
 
@@ -297,9 +329,10 @@ char **argv;
     struct willem wl;
     FILE *file;
     char *image_name;
-    unsigned address, base, crc, mismatch_count;
+    unsigned address, base, crc, mismatch_count, written, unchanged;
     unsigned char actual, expected;
     int result, action, device, first_option, i, base_seen, powered;
+    int write_failed;
 
     result = 1;
     powered = 0;
@@ -320,7 +353,8 @@ char **argv;
         goto done;
     }
 
-    if (action == ACTION_READ || action == ACTION_VERIFY) {
+    if (action == ACTION_READ || action == ACTION_VERIFY ||
+        action == ACTION_WRITE) {
         if (argc < 3) {
             usage();
             logmsg("ERROR: command requires an image filename");
@@ -337,6 +371,9 @@ char **argv;
     for (i = first_option; i < argc; i++) {
         if (same_command(argv[i], "/TRACE") ||
             same_command(argv[i], "-TRACE")) continue;
+        if (action == ACTION_WRITE &&
+            (same_command(argv[i], "/WRITE") ||
+             same_command(argv[i], "-WRITE"))) continue;
         if (base_seen || !(base = parse_base(argv[i]))) {
             usage();
             logmsg("ERROR: invalid or duplicate option <%s>", argv[i]);
@@ -346,6 +383,18 @@ char **argv;
     }
 
     context.base = base;
+    if (action == ACTION_WRITE) {
+        if (!wants_write_confirm(argc, argv)) {
+            logmsg("ERROR: W28C64 requires explicit /WRITE confirmation");
+            goto done;
+        }
+        if (!write_gate_valid()) {
+            logmsg("ERROR: valid %s is required; physical read gate is locked",
+                   WRITE_GATE_NAME);
+            goto done;
+        }
+        logmsg("Write gate accepted from %s", WRITE_GATE_NAME);
+    }
     if (wants_trace(argc, argv)) {
         context.trace = open_append(TRACE_NAME, 1);
         if (!context.trace) {
@@ -361,7 +410,7 @@ char **argv;
             logmsg("ERROR: cannot create output file %s", image_name);
             goto close_trace;
         }
-    } else if (action == ACTION_VERIFY) {
+    } else if (action == ACTION_VERIFY || action == ACTION_WRITE) {
         file = fopen(image_name, "rb");
         if (!file) {
             logmsg("ERROR: cannot open reference image %s", image_name);
@@ -395,26 +444,70 @@ char **argv;
     logmsg("Initial raw DATA=%02X STATUS=%02X CONTROL=%02X",
            dos_inb(base), dos_inb(base + 1), dos_inb(base + 2));
     logmsg("Power transition: enabling VCC, VPP off");
-    if (device == DEVICE_2764) wl_begin_2764_read(&wl);
+    if (action == ACTION_WRITE) wl_begin_28c64_write(&wl);
+    else if (device == DEVICE_2764) wl_begin_2764_read(&wl);
     else wl_begin_28c64_read(&wl);
     powered = 1;
 
     mismatch_count = 0;
-    for (address = 0; address < ROM_SIZE; address++) {
-        actual = wl_read_byte(&wl, address);
-        if (action == ACTION_READ) {
-            rom_buffer[address] = actual;
-        } else {
-            expected = action == ACTION_BLANK ? 0xffU : rom_buffer[address];
-            if (actual != expected) {
-                mismatch_count++;
-                if (mismatch_count <= 8)
-                    logmsg("Mismatch at %04Xh: read=%02X expected=%02X",
-                           address, actual, expected);
+    written = 0;
+    unchanged = 0;
+    write_failed = 0;
+    if (action == ACTION_WRITE) {
+        crc = crc16(rom_buffer, ROM_SIZE);
+        logmsg("Programming begins: bytes=%u image CRC16-CCITT=%04X",
+               ROM_SIZE, crc);
+        for (address = 0; address < ROM_SIZE; address++) {
+            actual = wl_read_byte(&wl, address);
+            if (actual == rom_buffer[address]) {
+                unchanged++;
+            } else if (!wl_write_28c64_byte(&wl, address,
+                                             rom_buffer[address])) {
+                logmsg("ERROR: byte write/poll failed at %04Xh: wanted=%02X",
+                       address, rom_buffer[address]);
+                write_failed = 1;
+                break;
+            } else {
+                written++;
+            }
+            if ((address & 0x00ffU) == 0x00ffU)
+                logmsg("Write progress: %u/%u bytes, written=%u unchanged=%u",
+                       address + 1, ROM_SIZE, written, unchanged);
+        }
+        if (!write_failed) {
+            logmsg("Programming pass complete: written=%u unchanged=%u",
+                   written, unchanged);
+            for (address = 0; address < ROM_SIZE; address++) {
+                actual = wl_read_byte(&wl, address);
+                expected = rom_buffer[address];
+                if (actual != expected) {
+                    mismatch_count++;
+                    if (mismatch_count <= 8)
+                        logmsg("Post-write mismatch at %04Xh: read=%02X expected=%02X",
+                               address, actual, expected);
+                }
+                if ((address & 0x01ffU) == 0x01ffU)
+                    logmsg("Post-write verify: %u/%u bytes", address + 1,
+                           ROM_SIZE);
             }
         }
-        if ((address & 0x01ffU) == 0x01ffU)
-            logmsg("Scan progress: %u/%u bytes", address + 1, ROM_SIZE);
+    } else {
+        for (address = 0; address < ROM_SIZE; address++) {
+            actual = wl_read_byte(&wl, address);
+            if (action == ACTION_READ) {
+                rom_buffer[address] = actual;
+            } else {
+                expected = action == ACTION_BLANK ? 0xffU : rom_buffer[address];
+                if (actual != expected) {
+                    mismatch_count++;
+                    if (mismatch_count <= 8)
+                        logmsg("Mismatch at %04Xh: read=%02X expected=%02X",
+                               address, actual, expected);
+                }
+            }
+            if ((address & 0x01ffU) == 0x01ffU)
+                logmsg("Scan progress: %u/%u bytes", address + 1, ROM_SIZE);
+        }
     }
 
     logmsg("Power transition: safe shutdown begins");
@@ -422,7 +515,20 @@ char **argv;
     powered = 0;
     logmsg("Safe shutdown complete: VCC off, VPP off");
 
-    if (action == ACTION_READ) {
+    if (action == ACTION_WRITE) {
+        if (write_failed) {
+            logmsg("WRITE FAILED during programming; post-write verify skipped");
+            result = 1;
+        } else if (mismatch_count) {
+            logmsg("WRITE FAILED: post-write mismatches=%u (first 8 shown)",
+                   mismatch_count);
+            result = 2;
+        } else {
+            logmsg("WRITE PASSED: programmed=%u unchanged=%u verified=%u",
+                   written, unchanged, ROM_SIZE);
+            result = 0;
+        }
+    } else if (action == ACTION_READ) {
         if (fwrite(rom_buffer, 1, ROM_SIZE, file) != ROM_SIZE) {
             logmsg("ERROR: failed writing output image");
             fclose(file);

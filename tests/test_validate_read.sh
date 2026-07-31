@@ -13,16 +13,22 @@ pathlib.Path(sys.argv[1]).write_bytes(bytes(((i * 73) ^ (i >> 3) ^ 0xA5) & 0xFF 
 PY
 cp "$work/EXPECTED.BIN" "$work/READ1.BIN"
 cp "$work/EXPECTED.BIN" "$work/READ2.BIN"
-python3 "$root/tools/validate_read.py" \
+python3 "$root/tools/validate_read.py" --unlock "$work/WRITE.OK" \
     "$work/EXPECTED.BIN" "$work/READ1.BIN" "$work/READ2.BIN" >/dev/null
+grep -q $'^WILLEM-WRITE-GATE-1\r$' "$work/WRITE.OK"
+if [[ $(tr -d '\r' <"$work/WRITE.OK" | grep -c '^EXPECTED=.*\|^READ=.*') != 2 ]]; then
+    echo "invalid write token" >&2
+    exit 1
+fi
 
 # A repeatable but stuck bus must not pass merely because both reads agree.
 dd if=/dev/zero of="$work/STUCK.BIN" bs=8192 count=1 status=none
-if python3 "$root/tools/validate_read.py" \
+if python3 "$root/tools/validate_read.py" --unlock "$work/WRITE.OK" \
     "$work/EXPECTED.BIN" "$work/STUCK.BIN" "$work/STUCK.BIN" >/dev/null; then
     echo "stuck image incorrectly passed" >&2
     exit 1
 fi
+[[ ! -e "$work/WRITE.OK" ]]
 
 # One changed byte must be diagnosed as a mismatch.
 cp "$work/EXPECTED.BIN" "$work/BAD.BIN"

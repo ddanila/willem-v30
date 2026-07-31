@@ -87,16 +87,19 @@ against the original Willem application or a reliable PCB5.0E manual.
 
 ## Safety gate
 
-Read-only operation never enables VPP. Physical programming support remains
-disabled until the virtual-board tests, original-software trace comparison,
-and known-Juku-2764 read validation all pass.
+Read-only operation never enables VPP. The AT28C64 write command is locked
+until two physical reads of the known Juku 2764 match each other and the known
+image. The host validator enforces that gate by creating `WRITE.OK` only after
+all comparisons pass; DOS additionally requires the explicit `/WRITE` option.
+Original-software trace comparison remains desirable protocol corroboration,
+but is not encoded in the file-token gate.
 
 ## AT28C64B byte-write core
 
-The portable core contains a virtual-test-only AT28C64B byte-write primitive;
-the DOS front end deliberately exposes no write command before the physical
-read gate passes. The sequence follows the manufacturer's single-5 V SRAM-like
-write cycle:
+The portable core and DOS front end contain an AT28C64B byte-write primitive.
+The DOS command is operationally locked behind the `WRITE.OK` artifact produced
+only by a passing physical-read validator, plus an explicit `/WRITE` argument.
+The sequence follows the manufacturer's single-5 V SRAM-like write cycle:
 
 1. keep VPP off, OE inactive, and WE high while applying 5 V VCC;
 2. wait 200 ms after power application (more conservative than the device's
