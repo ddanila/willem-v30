@@ -77,8 +77,16 @@ WILLEM R2764 JUKUROM.BIN 378 /TRACE
 
 Preserve `JUKUROM.BIN`, `WILLEM.LOG`, and `WTRACE.BIN`. Perform at least two
 separate reads, compare them byte-for-byte, and compare against the known Juku
-image on the modern host. AT28C64 programming remains disabled until this
-passes.
+image on the modern host. The repository supplies the strict acceptance test:
+
+```sh
+python3 tools/validate_read.py EXPECTED.BIN READ1.BIN READ2.BIN
+```
+
+It requires exact 8192-byte sizes, rejects uniform stuck-bus captures, compares
+both reads byte-for-byte, compares the first read with the expected image, and
+prints CRC16-CCITT plus SHA-256 identities. AT28C64 programming remains
+disabled until it prints `READ GATE: PASSED`.
 
 ## Sources
 
@@ -86,4 +94,3 @@ passes.
 - [Archived PDF of the same user guide](https://www.mikrocontroller.net/attachment/180082/Standard_Willem_Programmer_User_Guide.pdf)
 - [PCB5.0E J4 field report](https://www.retrobrewcomputers.org/n8vem-gg-archive/html-2011/Apr/msg00267.html)
 - [Report of a clone with reversed selector behavior](https://modelrail.otenko.com/2020/07)
-
