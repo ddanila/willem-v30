@@ -18,6 +18,11 @@ struct virtual_willem {
     unsigned long data_writes;
     unsigned long control_writes;
     unsigned long status_reads;
+    unsigned long byte_writes;
+    int vpp_seen;
+    wl_u16 pending_address;
+    wl_u8 pending_data;
+    int busy_reads;
 };
 
 static void virtual_data_write(ctx, value)
@@ -33,7 +38,7 @@ int value;
     v->data_writes++;
 
     if (v->control & WL_CTL_MUX) {
-        if ((old & WL_D0) && !(value & WL_D0)) {
+        if (!(old & WL_D0) && (value & WL_D0)) {
             v->address_shift = (v->address_shift << 1) |
                                ((value & WL_D1) ? 1UL : 0UL);
             v->address_bits++;
@@ -45,7 +50,14 @@ int value;
         }
 
         if (!(old & WL_D1) && (value & WL_D1) && (value & WL_D2)) {
-            v->read_shift = v->rom[v->address];
+            if (v->busy_reads && v->address == v->pending_address) {
+                v->read_shift = v->pending_data ^ 0x80U;
+                v->busy_reads--;
+                if (!v->busy_reads)
+                    v->rom[v->pending_address] = v->pending_data;
+            } else {
+                v->read_shift = v->rom[v->address];
+            }
             v->read_mask = 0x80;
             v->read_loaded = 1;
         }
@@ -62,9 +74,19 @@ void *ctx;
 int raw_value;
 {
     struct virtual_willem *v;
+    wl_u8 old;
     v = (struct virtual_willem *)ctx;
+    old = v->control;
     v->control = raw_value ^ WL_CTL_XOR;
     v->control_writes++;
+    if (v->control & WL_CTL_VPP) v->vpp_seen = 1;
+    if (!(old & WL_CTL_WE) && (v->control & WL_CTL_WE) &&
+        (v->control & WL_CTL_VCC) && !(v->control & WL_CTL_MUX)) {
+        v->pending_address = v->address;
+        v->pending_data = v->data;
+        v->busy_reads = 3;
+        v->byte_writes++;
+    }
 }
 
 static wl_u8 virtual_status_read(ctx)
@@ -146,5 +168,30 @@ int main()
     if (v.status_reads != ROM_SIZE * 8UL) return 1;
     printf("virtual 28C64 read passed: %u bytes, %lu status reads\n",
            ROM_SIZE, v.status_reads);
+
+    memset(v.rom, 0xff, sizeof(v.rom));
+    v.byte_writes = 0;
+    wl_begin_28c64_write(&wl);
+    for (address = 0; address < ROM_SIZE; address++) {
+        if (!wl_write_28c64_byte(&wl, address, pattern(address))) {
+            fprintf(stderr, "28C64 write failed at %04x: stored=%02x writes=%lu shifted=%04x\n",
+                    address, v.rom[address], v.byte_writes, v.address);
+            return 1;
+        }
+    }
+    wl_end_read(&wl);
+    if (v.byte_writes != ROM_SIZE) {
+        fprintf(stderr, "wrong 28C64 byte write count: %lu\n", v.byte_writes);
+        return 1;
+    }
+    for (address = 0; address < ROM_SIZE; address++)
+        if (v.rom[address] != pattern(address)) return 1;
+    if (v.control & (WL_CTL_VPP | WL_CTL_VCC)) return 1;
+    if (v.vpp_seen) {
+        fprintf(stderr, "unsafe VPP request during virtual tests\n");
+        return 1;
+    }
+    printf("virtual 28C64 write passed: %lu byte writes, VPP never requested\n",
+           v.byte_writes);
     return 0;
 }

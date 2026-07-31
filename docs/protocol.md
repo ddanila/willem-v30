@@ -90,3 +90,26 @@ against the original Willem application or a reliable PCB5.0E manual.
 Read-only operation never enables VPP. Physical programming support remains
 disabled until the virtual-board tests, original-software trace comparison,
 and known-Juku-2764 read validation all pass.
+
+## AT28C64B byte-write core
+
+The portable core contains a virtual-test-only AT28C64B byte-write primitive;
+the DOS front end deliberately exposes no write command before the physical
+read gate passes. The sequence follows the manufacturer's single-5 V SRAM-like
+write cycle:
+
+1. keep VPP off, OE inactive, and WE high while applying 5 V VCC;
+2. wait 200 ms after power application (more conservative than the device's
+   internal power-on write-inhibit interval);
+3. present the 13-bit address and eight data bits;
+4. pulse WE low for 1 us and latch data on the rising edge;
+5. poll the addressed byte until D7 matches the requested D7, with a minimum
+   20 ms timeout allowance, then require all eight bits to match.
+
+The 1 us pulse exceeds the AT28C64B's nanosecond-scale minimum while remaining
+hardware-timed by the PIT on 8086 and V30 hosts. The implementation does not
+use an EPROM VPP/PRESTO algorithm. The virtual Willem holds D7 complemented for
+three poll reads, then commits the byte; the automated test writes and checks
+all 8192 locations and fails if VPP was ever requested.
+
+Reference: [Microchip AT28C64B data sheet](https://ww1.microchip.com/downloads/aemDocuments/documents/MPD/ProductDocuments/DataSheets/AT28C64B-64-Kbit-8Kx8-Parallel-EEPROM-with-Page-Write-and-Software-Data-Protection-DS20006432.pdf).

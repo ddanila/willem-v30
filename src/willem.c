@@ -191,6 +191,49 @@ struct willem *wl;
     wl_we(wl, 1);
 }
 
+void wl_begin_28c64_write(wl)
+struct willem *wl;
+{
+    /* AT28C64B uses only its 5 V supply. External VPP is never enabled. */
+    wl_vpp(wl, 0);
+    wl_we(wl, 1);
+    wl_oe(wl, 1);
+    wl_vcc(wl, 1);
+    delay_us(wl, 50000);
+    delay_us(wl, 50000);
+    delay_us(wl, 50000);
+    delay_us(wl, 50000);
+}
+
+int wl_write_28c64_byte(wl, address, value)
+struct willem *wl;
+wl_u16 address;
+int value;
+{
+    wl_u8 actual;
+    int poll;
+
+    /* Datasheet byte write: OE high, address stable, low WE pulse, data is
+       latched on WE's rising edge. One microsecond exceeds all ns minima. */
+    wl_oe(wl, 1);
+    wl_set_address(wl, (wl_u32)address, 0x1000UL);
+    wl_we(wl, 0);
+    wl_set_data(wl, value);
+    delay_us(wl, 1);
+    wl_we(wl, 1);
+    delay_us(wl, 1);
+
+    /* During the self-timed cycle D7 reads as the complement of written D7.
+       Allow at least 20 ms, twice the AT28C64B's 10 ms maximum tWC. */
+    for (poll = 0; poll < 200; poll++) {
+        actual = wl_read_byte(wl, address);
+        if ((actual & 0x80U) == ((unsigned)value & 0x80U))
+            return actual == (wl_u8)value;
+        delay_us(wl, 100);
+    }
+    return 0;
+}
+
 void wl_end_read(wl)
 struct willem *wl;
 {
