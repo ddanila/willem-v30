@@ -66,6 +66,11 @@ PCB3B (required):           DB25 <- J9  o  o====o -> RIGHT
                                     J10 o  o====o
 ```
 
+The PCB5.0E setup manual that uses these exact `J9` and `J10` designators calls
+the left position `0.98xx` and the right position `0.97xx` / Willem 4.0. The
+latter is the legacy protocol selected here and corresponds to the PCB3B
+interface implemented by Geepro.
+
 An earlier documented PCB5.0E labels the equivalent block `J4` and
 `5.0E <-> 3B`; viewed with its DB25 connector to the left, both shunts move to
 the right (away from DB25) for PCB3B. A contemporary field report confirms
@@ -82,8 +87,10 @@ Never move these shunts while either the programmer or computer is powered.
 
 The parallel cable does not power the programmer. The board manual permits
 either USB 5 V power or a 9/12 V supply through the DC jack, selected by the
-board power-source jumper. Never attach USB power and the DC supply together.
-With USB power, VCC is fixed at 5 V. With DC input, set the VCC selector to 5 V.
+board's separate two-shunt block marked `ADAPT` and `USB`. Never attach USB
+power and the DC supply together. With USB power, VCC is fixed at 5 V. With DC
+input, set the VCC selector to 5 V. This block has not yet been positively
+located in the user's photographs; do not infer it from J9/J10.
 
 A correct external supply does not feed its 9/12 V into the Pocket8086 LPT
 connector; the board regulates its rails and shares logic ground through the
@@ -141,5 +148,6 @@ or D16 before comparing it.
 
 - [MCUmall Standard/Dual Powered Willem User Guide](https://mcumall.com/support/DualPoweredWillemUserGuide.htm)
 - [Archived PDF of the same user guide](https://www.mikrocontroller.net/attachment/180082/Standard_Willem_Programmer_User_Guide.pdf)
+- [PCB5.0E setup manual with J9/J10 and ADAPT/USB diagrams](https://supereyes.ru/img/instructions/WILLEM_PCB50E_models.pdf)
 - [PCB5.0E J4 field report](https://www.retrobrewcomputers.org/n8vem-gg-archive/html-2011/Apr/msg00267.html)
 - [Report of a clone with reversed selector behavior](https://modelrail.otenko.com/2020/07)

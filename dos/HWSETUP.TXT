@@ -14,6 +14,9 @@ AS PHOTOGRAPHED:  DB25 <- J9  o====o  o -> POWER
 PCB3B REQUIRED:   DB25 <- J9  o  o====o -> POWER
                           J10 o  o====o
 
+The matching PCB5.0E manual calls the left position 0.98XX and the right
+position 0.97XX / WILLEM 4.0.  This utility requires the right/0.97XX setting.
+
 Do not confuse J9+J10 with the two closed jumpers by OPEN=3.6V near the PLCC
 sockets.  Leave the OPEN=3.6V jumpers closed.  Move no jumper while the board,
 computer, or any cable is powered.
@@ -44,9 +47,11 @@ FIRST PHYSICAL TEST
 
 The board needs its own power; LPT does not supply it.  With everything off,
 select either USB 5 V or the DC jack, never both.  If using the DC jack, follow
-its marked polarity and 9/12 V rating and set VCC to 5 V.  Connect a straight-
-through DB-25 cable before powering either unit.  Power down before changing
-the chip, cable, or any jumper.
+its marked polarity and 9/12 V rating and set VCC to 5 V.  The source selector
+is a separate two-shunt block marked ADAPT and USB; do not use J9/J10 for this.
+Its location on this exact board still needs visual confirmation.  Connect a
+straight-through DB-25 cable before powering either unit.  Power down before
+changing the chip, cable, or any jumper.
 
 Use the known original Juku 2764 and perform a read only:
 
