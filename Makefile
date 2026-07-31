@@ -1,6 +1,6 @@
 CC ?= cc
 CFLAGS ?= -O2 -Wall -Wextra -Werror -std=c89 -pedantic
-DOSFLAGS = -0 -Md -i -ansi -O
+DOSFLAGS = -0 -Md -ansi -O
 
 .PHONY: all test clean dos
 
@@ -14,7 +14,7 @@ test: build/test_virtual
 	./build/test_virtual
 
 # The DOS front end is added after the portable protocol core passes its
-# virtual-board tests. bcc -0 -Md emits an 8086 small-model DOS .COM file.
+# virtual-board tests. The link-time -i selects bcc's one-segment tiny model.
 build/dos/dosio.o: src/dosio.asm
 	mkdir -p build/dos
 	nasm -f as86 $< -o $@

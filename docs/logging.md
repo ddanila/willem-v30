@@ -12,14 +12,13 @@ line carries the DOS date and time, including hundredths of a second when DOS
 provides them. Each run records at least:
 
 - utility build/version and startup time;
-- detected DOS/CPU environment where available;
 - requested operation, device type, input/output filename, and LPT base;
-- expected DIP mask and an explicit operator confirmation point;
+- expected DIP mask and a visual numbered ON/OFF diagram;
 - initial and final raw data/status/control register values;
 - power-state transitions, especially confirmation that VPP remains off for
   all read-only operations;
-- progress, byte count, checksum, and elapsed time;
-- the first mismatch plus a bounded mismatch summary for verification;
+- progress, byte count, and checksum for reads;
+- the first eight mismatches plus the total mismatch count for checks;
 - every error and the final safe-shutdown state;
 - exit/result code.
 
@@ -29,7 +28,7 @@ so evidence should survive even if the operator must reset a stuck machine.
 
 ## Full port trace
 
-An optional `TRACE.BIN` also opens in append mode and records every LPT
+An optional `WTRACE.BIN` also opens in append mode and records every LPT
 transaction without flooding the screen. Each run begins with a versioned
 header containing its timestamp and a run identifier. A compact fixed-size
 record contains:

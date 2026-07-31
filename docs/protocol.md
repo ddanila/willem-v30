@@ -71,9 +71,19 @@ Geepro's `willem.xml` contains these 12-switch masks:
 | 2764/27128 | `12Bh` |
 | M28C64/2864 | `128h` |
 
-The mask-to-physical-switch orientation and the PCB5.0E socket drawing still
-require confirmation against the original Willem application or a reliable
-PCB5.0E manual. Do not set switches from these masks alone yet.
+Geepro maps mask bit 0 to numbered switch 1, bit 1 to switch 2, and so on.
+Consequently the settings displayed by the DOS utility are:
+
+| Device family | Switches ON | Switches OFF |
+|---|---|---|
+| 2764/27C64 | 1, 2, 4, 6, 9 | 3, 5, 7, 8, 10, 11, 12 |
+| AT28C64 | 4, 6, 9 | 1, 2, 3, 5, 7, 8, 10, 11, 12 |
+
+The utility renders both the ON and OFF rows on screen and in `WILLEM.LOG`.
+Follow the numbers moulded or printed on the DIP bank; move each lever toward
+the bank's printed `ON` side only when the X appears in the rendered ON row.
+The PCB5.0E socket position and other board jumpers still require confirmation
+against the original Willem application or a reliable PCB5.0E manual.
 
 ## Safety gate
 

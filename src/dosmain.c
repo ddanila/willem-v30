@@ -8,6 +8,12 @@
 #define LOG_NAME "WILLEM.LOG"
 #define TRACE_NAME "WTRACE.BIN"
 
+#define ACTION_READ 1
+#define ACTION_BLANK 2
+#define ACTION_VERIFY 3
+#define DEVICE_2764 1
+#define DEVICE_28C64 2
+
 extern void dos_outb(unsigned port, unsigned value);
 extern unsigned dos_inb(unsigned port);
 extern void dos_wait_us(unsigned usec);
@@ -140,8 +146,9 @@ static unsigned parse_base(text)
 char *text;
 {
     unsigned value;
+    char extra;
     if (!text) return 0x378;
-    if (sscanf(text, "%x", &value) != 1) return 0;
+    if (sscanf(text, "%x%c", &value, &extra) != 1) return 0;
     return value;
 }
 
@@ -210,9 +217,75 @@ struct dos_context *ctx;
 
 static void usage()
 {
-    puts("WILLEM V30 read-only prototype");
+    puts("WILLEM V30 read/blank/verify utility");
     puts("Usage: WILLEM R2764 output.bin [base] [/TRACE]");
-    puts("Example: WILLEM R2764 JU1764.BIN 378 /TRACE");
+    puts("       WILLEM R28C64 output.bin [base] [/TRACE]");
+    puts("       WILLEM B2764 [base] [/TRACE]");
+    puts("       WILLEM B28C64 [base] [/TRACE]");
+    puts("       WILLEM V2764 image.bin [base] [/TRACE]");
+    puts("       WILLEM V28C64 image.bin [base] [/TRACE]");
+}
+
+static int decode_command(text, action, device)
+char *text;
+int *action;
+int *device;
+{
+    if (same_command(text, "R2764")) {
+        *action = ACTION_READ; *device = DEVICE_2764;
+    } else if (same_command(text, "R28C64")) {
+        *action = ACTION_READ; *device = DEVICE_28C64;
+    } else if (same_command(text, "B2764")) {
+        *action = ACTION_BLANK; *device = DEVICE_2764;
+    } else if (same_command(text, "B28C64")) {
+        *action = ACTION_BLANK; *device = DEVICE_28C64;
+    } else if (same_command(text, "V2764")) {
+        *action = ACTION_VERIFY; *device = DEVICE_2764;
+    } else if (same_command(text, "V28C64")) {
+        *action = ACTION_VERIFY; *device = DEVICE_28C64;
+    } else {
+        return 0;
+    }
+    return 1;
+}
+
+static char *action_name(action)
+int action;
+{
+    if (action == ACTION_READ) return "READ";
+    if (action == ACTION_BLANK) return "BLANK";
+    return "VERIFY";
+}
+
+static char *device_name(device)
+int device;
+{
+    return device == DEVICE_2764 ? "2764/27C64" : "AT28C64";
+}
+
+static void display_dips(mask)
+unsigned mask;
+{
+    char on_row[40];
+    char off_row[40];
+    int i, pos;
+
+    pos = 0;
+    for (i = 0; i < 12; i++) {
+        on_row[pos] = '[';
+        on_row[pos + 1] = (mask & (1U << i)) ? 'X' : ' ';
+        on_row[pos + 2] = ']';
+        off_row[pos] = '[';
+        off_row[pos + 1] = (mask & (1U << i)) ? ' ' : 'X';
+        off_row[pos + 2] = ']';
+        pos += 3;
+    }
+    on_row[pos] = 0;
+    off_row[pos] = 0;
+    logmsg("DIP number:  1  2  3  4  5  6  7  8  9 10 11 12");
+    logmsg("DIP ON :   %s", on_row);
+    logmsg("DIP OFF:   %s", off_row);
+    logmsg("Set each numbered lever toward the row containing X");
 }
 
 int main(argc, argv)
@@ -222,33 +295,57 @@ char **argv;
     struct dos_context context;
     struct wl_io io;
     struct willem wl;
-    FILE *output;
-    unsigned address, base, crc;
-    int result;
+    FILE *file;
+    char *image_name;
+    unsigned address, base, crc, mismatch_count;
+    unsigned char actual, expected;
+    int result, action, device, first_option, i, base_seen, powered;
 
     result = 1;
+    powered = 0;
+    file = 0;
+    image_name = 0;
+    context.trace = 0;
+    context.sequence = 0;
     log_file = open_append(LOG_NAME, 0);
     logmsg("================ BEGIN RUN ================");
-    logmsg("Willem V30 read-only prototype; 8086 build");
+    logmsg("Willem V30 diagnostic utility; 8086-compatible build");
     logmsg("Command-line argc=%d", argc);
     for (address = 0; address < (unsigned)argc; address++)
         logmsg("argv[%u]=<%s>", address, argv[address]);
 
-    if (argc < 3 || !same_command(argv[1], "R2764")) {
+    if (argc < 2 || !decode_command(argv[1], &action, &device)) {
         usage();
         logmsg("ERROR: invalid command line");
         goto done;
     }
 
-    base = parse_base(argc > 3 ? argv[3] : 0);
-    if (!base) {
-        logmsg("ERROR: invalid LPT base address");
-        goto done;
+    if (action == ACTION_READ || action == ACTION_VERIFY) {
+        if (argc < 3) {
+            usage();
+            logmsg("ERROR: command requires an image filename");
+            goto done;
+        }
+        image_name = argv[2];
+        first_option = 3;
+    } else {
+        first_option = 2;
+    }
+
+    base = 0x378;
+    base_seen = 0;
+    for (i = first_option; i < argc; i++) {
+        if (same_command(argv[i], "/TRACE") ||
+            same_command(argv[i], "-TRACE")) continue;
+        if (base_seen || !(base = parse_base(argv[i]))) {
+            usage();
+            logmsg("ERROR: invalid or duplicate option <%s>", argv[i]);
+            goto done;
+        }
+        base_seen = 1;
     }
 
     context.base = base;
-    context.sequence = 0;
-    context.trace = 0;
     if (wants_trace(argc, argv)) {
         context.trace = open_append(TRACE_NAME, 1);
         if (!context.trace) {
@@ -258,10 +355,27 @@ char **argv;
         trace_begin(&context);
     }
 
-    output = fopen(argv[2], "wb");
-    if (!output) {
-        logmsg("ERROR: cannot create output file %s", argv[2]);
-        goto close_trace;
+    if (action == ACTION_READ) {
+        file = fopen(image_name, "wb");
+        if (!file) {
+            logmsg("ERROR: cannot create output file %s", image_name);
+            goto close_trace;
+        }
+    } else if (action == ACTION_VERIFY) {
+        file = fopen(image_name, "rb");
+        if (!file) {
+            logmsg("ERROR: cannot open reference image %s", image_name);
+            goto close_trace;
+        }
+        if (fread(rom_buffer, 1, ROM_SIZE, file) != ROM_SIZE ||
+            fgetc(file) != EOF) {
+            logmsg("ERROR: reference image must be exactly %u bytes", ROM_SIZE);
+            fclose(file);
+            file = 0;
+            goto close_trace;
+        }
+        fclose(file);
+        file = 0;
     }
 
     io.ctx = &context;
@@ -271,35 +385,72 @@ char **argv;
     io.delay_us = port_delay;
     wl_init(&wl, &io);
 
-    logmsg("Operation=R2764 output=%s LPT=%03Xh trace=%s",
-           argv[2], base, context.trace ? "on" : "off");
-    logmsg("Required Geepro DIP mask=12Bh; VPP MUST remain off");
+    logmsg("Operation=%s device=%s image=%s LPT=%03Xh trace=%s",
+           action_name(action), device_name(device),
+           image_name ? image_name : "(none)", base,
+           context.trace ? "on" : "off");
+    logmsg("Required Geepro DIP mask=%s; VPP MUST remain off",
+           device == DEVICE_2764 ? "12Bh" : "128h");
+    display_dips(device == DEVICE_2764 ? 0x12bU : 0x128U);
     logmsg("Initial raw DATA=%02X STATUS=%02X CONTROL=%02X",
            dos_inb(base), dos_inb(base + 1), dos_inb(base + 2));
     logmsg("Power transition: enabling VCC, VPP off");
-    wl_begin_2764_read(&wl);
+    if (device == DEVICE_2764) wl_begin_2764_read(&wl);
+    else wl_begin_28c64_read(&wl);
+    powered = 1;
 
+    mismatch_count = 0;
     for (address = 0; address < ROM_SIZE; address++) {
-        rom_buffer[address] = wl_read_byte(&wl, address);
+        actual = wl_read_byte(&wl, address);
+        if (action == ACTION_READ) {
+            rom_buffer[address] = actual;
+        } else {
+            expected = action == ACTION_BLANK ? 0xffU : rom_buffer[address];
+            if (actual != expected) {
+                mismatch_count++;
+                if (mismatch_count <= 8)
+                    logmsg("Mismatch at %04Xh: read=%02X expected=%02X",
+                           address, actual, expected);
+            }
+        }
         if ((address & 0x01ffU) == 0x01ffU)
-            logmsg("Read progress: %u/%u bytes", address + 1, ROM_SIZE);
+            logmsg("Scan progress: %u/%u bytes", address + 1, ROM_SIZE);
     }
 
     logmsg("Power transition: safe shutdown begins");
     wl_end_read(&wl);
+    powered = 0;
     logmsg("Safe shutdown complete: VCC off, VPP off");
 
-    if (fwrite(rom_buffer, 1, ROM_SIZE, output) != ROM_SIZE) {
-        logmsg("ERROR: failed writing output image");
-        fclose(output);
-        goto close_trace;
+    if (action == ACTION_READ) {
+        if (fwrite(rom_buffer, 1, ROM_SIZE, file) != ROM_SIZE) {
+            logmsg("ERROR: failed writing output image");
+            fclose(file);
+            file = 0;
+            goto close_trace;
+        }
+        fclose(file);
+        file = 0;
+        crc = crc16(rom_buffer, ROM_SIZE);
+        logmsg("Read complete: bytes=%u CRC16-CCITT=%04X", ROM_SIZE, crc);
+        result = 0;
+    } else if (mismatch_count) {
+        logmsg("%s FAILED: mismatches=%u (first 8 shown)",
+               action_name(action), mismatch_count);
+        result = 2;
+    } else {
+        logmsg("%s PASSED: all %u bytes match %s", action_name(action),
+               ROM_SIZE, action == ACTION_BLANK ? "FFh" : image_name);
+        result = 0;
     }
-    fclose(output);
-    crc = crc16(rom_buffer, ROM_SIZE);
-    logmsg("Read complete: bytes=%u CRC16-CCITT=%04X", ROM_SIZE, crc);
-    result = 0;
 
 close_trace:
+    if (powered) {
+        logmsg("Power transition: emergency safe shutdown begins");
+        wl_end_read(&wl);
+        logmsg("Emergency safe shutdown complete: VCC off, VPP off");
+    }
+    if (file) fclose(file);
     if (context.trace) {
         trace_end(&context);
         fclose(context.trace);

@@ -30,3 +30,22 @@ Every real-hardware run writes a human-readable `WILLEM.LOG` while also showing
 the same operational messages on screen. A compact full LPT trace can be
 enabled for hardware diagnosis and emulator comparison; see
 [`docs/logging.md`](docs/logging.md).
+
+## DOS commands
+
+The current safety-gated build supports read, blank-check, and verify. It does
+not contain a programming command yet.
+
+```text
+WILLEM R2764  OUT.BIN [378] [/TRACE]
+WILLEM R28C64 OUT.BIN [378] [/TRACE]
+WILLEM B2764          [378] [/TRACE]
+WILLEM B28C64         [378] [/TRACE]
+WILLEM V2764  ROM.BIN [378] [/TRACE]
+WILLEM V28C64 ROM.BIN [378] [/TRACE]
+```
+
+The optional LPT base is hexadecimal and defaults to `378`. Every operation
+prints and logs a visual 12-switch DIP diagram. Geepro's mask maps bit 0 to
+physical switch 1; follow the numbering and the `ON` mark printed on the DIP
+bank. Verification images must be exactly 8192 bytes.
