@@ -57,5 +57,9 @@ the runtime configuration used by Geepro:
 | 2764/27C64 | `12Bh` | 1, 2, 4, 6, 9 |
 | M28C64/AT28C64 | `128h` | 4, 6, 9 |
 
+The same pinned tree's `pixmaps/willem_28pin.png` shows a 28-pin package
+centered in the 32-pin ZIF, with two unused contact pairs at both ends and the
+package notch toward the ZIF lever/pivot end.
+
 The physical read gate validates the 2764 path first. AT28C64 writing remains
 locked until those reads are repeatable and match the known Juku image.

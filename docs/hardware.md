@@ -30,10 +30,12 @@ with an offset of two socket positions:
 28-pin chip pin:     -  -  1  2 ... 27 28  -  -
 ```
 
-Thus socket contacts 1, 2, 31, and 32 remain empty. The chip notch points in
-the same direction as the ZIF/silkscreen notch. This placement is corroborated
-electrically by the manual's ZIF address map: A12 is on socket contact 4,
-whereas A12 is pin 2 on both a 2764 and an AT28C64.
+Thus socket contacts 1, 2, 31, and 32 remain empty: two empty contact pairs are
+visible at the lever end and two at the opposite end. The chip notch points
+toward the ZIF lever/pivot end. This placement is corroborated both by Geepro's
+`willem_28pin.png` socket artwork and electrically by the manual's ZIF address
+map: A12 is on socket contact 4, whereas A12 is pin 2 on both a 2764 and an
+AT28C64.
 
 For both read-only device families:
 

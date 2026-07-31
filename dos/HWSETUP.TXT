@@ -26,9 +26,10 @@ Place either supported 28-pin chip in the 32-pin ZIF as follows:
 ZIF CONTACT:  1  2  3  4 ... 29 30 31 32
 CHIP PIN:     -  -  1  2 ... 27 28  -  -
 
-Contacts 1, 2, 31, and 32 stay empty.  Match the chip notch to the socket
-notch.  Use normal 28-pin routing, normal parked large-device jumpers, and 5 V
-VCC.  Do not select a special 2716, 2732, 2816, 28F, 29C, or large-chip mode.
+Contacts 1, 2, 31, and 32 stay empty: two empty contact pairs at each end.
+Point the chip notch toward the ZIF lever/pivot end.  Use normal 28-pin
+routing, normal parked large-device jumpers, and 5 V VCC.  Do not select a
+special 2716, 2732, 2816, 28F, 29C, or large-chip mode.
 
 The utility always keeps VPP disabled, including during AT28C64 writes.
 It prints a numbered DIP diagram before applying chip power.  Follow the
