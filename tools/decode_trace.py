@@ -13,7 +13,7 @@ RECORD = struct.Struct("<IBBH")
 FOOTER = struct.Struct("<4sII")
 
 
-def decode(path: Path) -> int:
+def decode(path: Path, recover: bool = False) -> int:
     data = path.read_bytes()
     offset = 0
     run = 0
@@ -32,9 +32,23 @@ def decode(path: Path) -> int:
         records = 0
         while True:
             if len(data) - offset < 4:
+                if recover:
+                    print(
+                        f"decode_trace: run {run} interrupted after "
+                        f"{records} complete records (no footer)",
+                        file=sys.stderr,
+                    )
+                    return run
                 raise ValueError(f"run {run} has no footer")
             if data[offset : offset + 4] == b"WLE1":
                 if len(data) - offset < FOOTER.size:
+                    if recover:
+                        print(
+                            f"decode_trace: run {run} interrupted after "
+                            f"{records} complete records (truncated footer)",
+                            file=sys.stderr,
+                        )
+                        return run
                     raise ValueError(f"truncated footer at byte {offset}")
                 _, expected, _ = FOOTER.unpack_from(data, offset)
                 offset += FOOTER.size
@@ -45,6 +59,13 @@ def decode(path: Path) -> int:
                 print(f"# end run {run}: {records} records")
                 break
             if len(data) - offset < RECORD.size:
+                if recover:
+                    print(
+                        f"decode_trace: run {run} interrupted after "
+                        f"{records} complete records (partial record)",
+                        file=sys.stderr,
+                    )
+                    return run
                 raise ValueError(f"truncated record at byte {offset}")
             sequence, operation, register, value = RECORD.unpack_from(data, offset)
             offset += RECORD.size
@@ -63,10 +84,15 @@ def decode(path: Path) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--recover",
+        action="store_true",
+        help="decode complete records from an interrupted final run",
+    )
     parser.add_argument("trace", type=Path)
     args = parser.parse_args()
     try:
-        runs = decode(args.trace)
+        runs = decode(args.trace, args.recover)
     except (OSError, ValueError) as error:
         print(f"decode_trace: {error}", file=sys.stderr)
         return 1

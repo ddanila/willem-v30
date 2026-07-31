@@ -30,8 +30,8 @@ so evidence should survive even if the operator must reset a stuck machine.
 
 An optional `WTRACE.BIN` also opens in append mode and records every LPT
 transaction without flooding the screen. Each run begins with a versioned
-header containing its timestamp and a run identifier. A compact fixed-size
-record contains:
+header containing its timestamp and LPT base. A compact fixed-size record
+contains:
 
 - monotonically increasing operation number;
 - operation (`OUT`, `IN`, or delay);
@@ -45,6 +45,15 @@ decoder converts it to readable text:
 
 ```sh
 python3 tools/decode_trace.py WTRACE.BIN > WTRACE.TXT
+```
+
+A reset or power loss can leave the final run without its footer and may leave
+one partial buffered record. Strict decoding rejects that incomplete session.
+To salvage every complete record from the interrupted final run while still
+rejecting corrupt sequence numbers or bad headers, use:
+
+```sh
+python3 tools/decode_trace.py --recover WTRACE.BIN > WTRACE.TXT
 ```
 
 Session logging remains enabled even when full tracing is disabled. Full trace

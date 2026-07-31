@@ -13,6 +13,7 @@ build/test_virtual: src/willem.c tests/test_virtual.c include/willem.h
 test: build/test_virtual
 	./build/test_virtual
 	bash tests/test_validate_read.sh
+	python3 tests/test_trace.py
 
 # The DOS front end is added after the portable protocol core passes its
 # virtual-board tests. The link-time -i selects bcc's one-segment tiny model.

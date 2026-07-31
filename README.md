@@ -74,6 +74,9 @@ make dos-test   # run all six diagnostic paths as 8086 and 80186
 make dist       # create the validated DOS directory in build/dist
 ```
 
+`make test` also exercises append-only trace decoding, interrupted-run
+recovery, corruption rejection, and the physical-read acceptance gate.
+
 The distribution builder rejects non-8.3 filenames and verifies that every
 text file contains CRLF rather than bare LF line endings. `HWSETUP.TXT` keeps
 unconfirmed physical-board details prominently gated; it must not be treated
