@@ -49,3 +49,18 @@ The optional LPT base is hexadecimal and defaults to `378`. Every operation
 prints and logs a visual 12-switch DIP diagram. Geepro's mask maps bit 0 to
 physical switch 1; follow the numbering and the `ON` mark printed on the DIP
 bank. Verification images must be exactly 8192 bytes.
+
+## Build and test
+
+```sh
+make test       # portable virtual Willem with known 8 KiB contents
+make dos        # build the 8086 tiny-model WILLEM.COM
+make dos-test   # run all six diagnostic paths as 8086 and 80186
+make dist       # create the validated DOS directory in build/dist
+```
+
+The distribution builder rejects non-8.3 filenames and verifies that every
+text file contains CRLF rather than bare LF line endings. `HWSETUP.TXT` keeps
+unconfirmed physical-board details prominently gated; it must not be treated
+as final hardware instructions until the PCB5.0E jumpers, socket position, and
+power procedure have been verified.

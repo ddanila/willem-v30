@@ -1,0 +1,28 @@
+WILLEM PCB5.0E HARDWARE SETUP
+============================
+
+STOP: the exact PCB5.0E socket position, board-version jumper position, and
+external-power procedure still require confirmation.  Do not use this draft
+kit for a physical chip until those items are replaced with verified settings.
+
+The utility always keeps VPP disabled during read, blank-check, and verify.
+It prints a numbered DIP diagram before applying chip power.  Follow the
+numbers and the ON mark printed on the physical 12-switch bank.
+
+2764/27C64 DIP MASK 12BH
+  ON : 1 2 4 6 9
+  OFF: 3 5 7 8 10 11 12
+
+AT28C64 DIP MASK 128H
+  ON : 4 6 9
+  OFF: 1 2 3 5 7 8 10 11 12
+
+FIRST PHYSICAL TEST
+-------------------
+
+Use the known original Juku 2764 and perform a read only:
+
+  WILLEM R2764 JUKUROM.BIN 378 /TRACE
+
+Keep WILLEM.LOG, WTRACE.BIN, and JUKUROM.BIN.  Compare the image on the modern
+host before any EEPROM-writing command is implemented or enabled.

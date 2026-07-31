@@ -2,7 +2,7 @@ CC ?= cc
 CFLAGS ?= -O2 -Wall -Wextra -Werror -std=c89 -pedantic
 DOSFLAGS = -0 -Md -ansi -O
 
-.PHONY: all test clean dos
+.PHONY: all test clean dos dos-test dist
 
 all: test
 
@@ -32,6 +32,13 @@ build/dos/WILLEM.COM: build/dos/dosmain.o build/dos/willem.o build/dos/dosio.o
 
 dos: build/dos/WILLEM.COM
 	file build/dos/WILLEM.COM
+
+dos-test: dos
+	bash tools/test_dosbox.sh
+
+dist: dos
+	rm -rf build/dist
+	bash tools/make_dist.sh build/dos/WILLEM.COM dos build/dist
 
 clean:
 	rm -rf build
