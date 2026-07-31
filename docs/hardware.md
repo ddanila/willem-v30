@@ -10,10 +10,9 @@ The July 2026 photographs show a board marked `2015 PCB 5.0E`. The main ZIF
 socket is empty, and the 12-way DIP bank is currently set to the documented
 2764/27C64 pattern: switches 1, 2, 4, 6, and 9 toward the bank's printed `ON`
 side. The paired three-pin headers `J9` and `J10` form the compatibility
-selector. Their two shunts are in the PCB5.0E position, toward the DB25
-connector (left in the board's natural silkscreen orientation). Both shunts
-must be moved one position right, away from DB25, for this utility's PCB3B
-protocol. The photographs do not yet reveal the power-source selector legend
+selector. Physical ROM reads proved that this clone's modes are reversed
+relative to its setup manual: both shunts toward DB25 select the PCB3B serial
+protocol required by this utility. The photographs do not yet reveal the power-source selector legend
 with enough confidence. Do not move that jumper based on these observations
 alone. The user reports that a 12 V barrel adapter powers the board and permits
 the existing software to access the inserted 2764, whereas the unpowered board
@@ -59,31 +58,27 @@ The 2764/27C64 DIP mask is `12Bh` (ON: 1, 2, 4, 6, 9). The AT28C64 mask is
 The utility implements the PCB3B serial address/data protocol. On the user's
 2015 clone, the two adjacent three-pin headers `J9` and `J10` together form
 the six-contact compatibility selector. They are between the LPT logic ICs
-near the DB25 end of the board. The photographed setting has one shunt on each
-header toward DB25 and leaves the two pins away from DB25 exposed. This is
-PCB5.0E mode. With all cables and power removed, move both shunts together one
-position to the right, leaving the two left/DB25-side pins exposed. Here each
+near the DB25 end of the board. Electrical testing overrides the manual and
+labels for this particular board: both shunts must be toward DB25. Here each
 `====` represents one shunt bridging two adjacent pins:
 
 ```text
 Natural board orientation: DB25/LPT LEFT, power connectors RIGHT
 
-PCB5.0E (as photographed):  DB25 <- J9  o====o  o -> RIGHT
+PCB3B (tested/required):    DB25 <- J9  o====o  o -> RIGHT
                                     J10 o====o  o
 
-PCB3B (required):           DB25 <- J9  o  o====o -> RIGHT
+256-byte alias (wrong):     DB25 <- J9  o  o====o -> RIGHT
                                     J10 o  o====o
 ```
 
-The PCB5.0E setup manual that uses these exact `J9` and `J10` designators calls
-the left position `0.98xx` and the right position `0.97xx` / Willem 4.0. The
-latter is the legacy protocol selected here and corresponds to the PCB3B
-interface implemented by Geepro.
-
-An earlier documented PCB5.0E labels the equivalent block `J4` and
-`5.0E <-> 3B`; viewed with its DB25 connector to the left, both shunts move to
-the right (away from DB25) for PCB3B. A contemporary field report confirms
-that direction on the KEE layout.
+The PCB5.0E setup manual calls the left position `0.98xx`/PCB35A and the right
+position `0.97xx`/PCB3B. That description is wrong for this specimen. With the
+shunts right, three independent reads returned the first 256 ROM bytes 32
+times. With both shunts left, all 13 device address bits worked and the D15
+dump matched the known EktaSoft serial-0031 family. Other PCB5.0E clones have
+also been reported with the mode positions reversed, so copied labels or a
+generic manual must not override a read-only address test.
 
 Do not confuse `J9` + `J10` with the pair of closed jumpers next to the text
 `OPEN=3.6V` beside the PLCC sockets. Those belong to the PLCC voltage/routing
