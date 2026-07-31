@@ -67,3 +67,12 @@ text file contains CRLF rather than bare LF line endings. `HWSETUP.TXT` keeps
 unconfirmed physical-board details prominently gated; it must not be treated
 as final hardware instructions until the PCB5.0E jumpers, socket position, and
 power procedure have been verified.
+
+After two physical reads, enforce the hardware gate on the modern host with:
+
+```sh
+python3 tools/validate_read.py EXPECTED.BIN READ1.BIN READ2.BIN
+```
+
+The tool rejects wrong sizes, non-repeatable reads, disagreement with the known
+image, and repeatable all-zero/all-FF stuck-bus captures.

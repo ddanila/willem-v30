@@ -88,6 +88,17 @@ both reads byte-for-byte, compares the first read with the expected image, and
 prints CRC16-CCITT plus SHA-256 identities. AT28C64 programming remains
 disabled until it prints `READ GATE: PASSED`.
 
+For the EKTA 3.7 pair already prepared in the Jukuravi DOS ROM kit, select the
+reference matching the socket from which the physical chip was removed:
+
+| Socket | DOS reference | CRC16-CCITT | SHA-256 |
+|---|---|---:|---|
+| D15 | `D15EK37.BIN` | `060D` | `d6c4ec7418f05e5761ef450e6ee36fb2579d65d9cbf87dce265eaf1c0d077596` |
+| D16 | `D16EK37.BIN` | `BE00` | `35b348ae7c88dc8cb24d1bc9d62a06212fdc2c2f601eddf8e00b233893d92817` |
+
+Do not guess the socket identity: record whether the known EPROM came from D15
+or D16 before comparing it.
+
 ## Sources
 
 - [MCUmall Standard/Dual Powered Willem User Guide](https://mcumall.com/support/DualPoweredWillemUserGuide.htm)
