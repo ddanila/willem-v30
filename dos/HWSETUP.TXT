@@ -21,19 +21,21 @@ Do not confuse J9+J10 with the two closed jumpers by OPEN=3.6V near the PLCC
 sockets.  Leave the OPEN=3.6V jumpers closed.  Move no jumper while the board,
 computer, or any cable is powered.
 
-Place either supported 28-pin chip in the 32-pin ZIF as follows:
+Place either supported 28-pin chip against the ZIF end opposite the lever.
+Do not center it.  Leave two complete contact rows empty at the lever end:
 
-ZIF CONTACT:  1  2  3  4 ... 29 30 31 32
-CHIP PIN:     -  -  1  2 ... 27 28  -  -
+ZIF PAIR:    1/32  2/31  3/30 ... 16/17
+CHIP PAIR:    -/-   -/-  1/28 ... 14/15
 
-Contacts 1, 2, 31, and 32 stay empty: two empty contact pairs at each end.
-Point the chip notch toward the ZIF lever/pivot end.  Use normal 28-pin
-routing, normal parked large-device jumpers, and 5 V VCC.  Do not select a
-special 2716, 2732, 2816, 28F, 29C, or large-chip mode.
+The empty rows are contact pairs 1/32 and 2/31, both beside the lever.  Point
+the chip notch toward those empty rows and the lever/pivot.  Chip pins 14/15
+occupy the last socket row at the opposite end.  Use normal 28-pin routing,
+normal parked large-device jumpers, and 5 V VCC.  Do not select a special
+2716, 2732, 2816, 28F, 29C, or large-chip mode.
 
 The utility always keeps VPP disabled, including during AT28C64 writes.
-It prints a numbered DIP diagram before applying chip power.  Follow the
-numbers and the ON mark printed on the physical 12-switch bank.
+Before applying chip power it prints the ZIF placement reminder and a numbered
+DIP diagram.  Follow the numbers and the ON mark on the physical switch bank.
 
 2764/27C64 DIP MASK 12BH
   ON : 1 2 4 6 9

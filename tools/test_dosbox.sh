@@ -77,6 +77,7 @@ run_dosbox() {
     [[ $(grep -c 'WRITE PASSED: programmed=0 unchanged=8192 verified=8192' "$drive/WILLEM.LOG") == 1 ]]
     [[ $(grep -c 'DIP ON.*\[X\]\[X\]\[ \]\[X\]\[ \]\[X\]\[ \]\[ \]\[X\]' "$drive/WILLEM.LOG") == 3 ]]
     [[ $(grep -c 'DIP ON.*\[ \]\[ \]\[ \]\[X\]\[ \]\[X\]\[ \]\[ \]\[X\]' "$drive/WILLEM.LOG") == 4 ]]
+    [[ $(grep -c 'Leave TWO complete rows empty at lever end' "$drive/WILLEM.LOG") == 7 ]]
     echo "DOSBox-X $cpu diagnostic matrix passed"
 }
 

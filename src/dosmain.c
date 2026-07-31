@@ -320,6 +320,13 @@ unsigned mask;
     logmsg("Set each numbered lever toward the row containing X");
 }
 
+static void display_zif()
+{
+    logmsg("ZIF pair: lever/notch -> [--][--][1/28] ... [14/15] <- far end");
+    logmsg("Leave TWO complete rows empty at lever end; do NOT center chip");
+    logmsg("Place chip against far end; notch faces empty rows and lever");
+}
+
 int main(argc, argv)
 int argc;
 char **argv;
@@ -441,6 +448,7 @@ char **argv;
     logmsg("Required Geepro DIP mask=%s; VPP MUST remain off",
            device == DEVICE_2764 ? "12Bh" : "128h");
     display_dips(device == DEVICE_2764 ? 0x12bU : 0x128U);
+    display_zif();
     logmsg("Initial raw DATA=%02X STATUS=%02X CONTROL=%02X",
            dos_inb(base), dos_inb(base + 1), dos_inb(base + 2));
     logmsg("Power transition: enabling VCC, VPP off");

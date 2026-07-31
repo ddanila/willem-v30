@@ -22,20 +22,24 @@ its label.
 
 ## Confirmed common settings
 
-Both supported devices are 28-pin JEDEC parts placed in the 32-pin ZIF socket
-with an offset of two socket positions:
+Both supported devices are 28-pin JEDEC parts placed at the end of the 32-pin
+ZIF opposite its lever/pivot. They are not centered. Leave the first two
+physical contact pairs at the lever/notch end empty:
 
 ```text
-32-pin ZIF contact:  1  2  3  4 ... 29 30 31 32
-28-pin chip pin:     -  -  1  2 ... 27 28  -  -
+lever/notch end
+ZIF contact pair:    1/32   2/31   3/30  ...  16/17
+28-pin chip pair:     -/-    -/-   1/28  ...  14/15
+                                             far end
 ```
 
-Thus socket contacts 1, 2, 31, and 32 remain empty: two empty contact pairs are
-visible at the lever end and two at the opposite end. The chip notch points
-toward the ZIF lever/pivot end. This placement is corroborated both by Geepro's
-`willem_28pin.png` socket artwork and electrically by the manual's ZIF address
-map: A12 is on socket contact 4, whereas A12 is pin 2 on both a 2764 and an
-AT28C64.
+Thus socket contacts 1/32 and 2/31 are the two empty rows, all at the lever
+end. Chip pins 14/15 occupy the final socket row 16/17 at the opposite end.
+The chip notch points toward the empty rows and the ZIF lever/pivot. This
+placement is corroborated by the user's previously working placement, by
+Geepro's `willem_28pin.png` socket artwork, and electrically by the manual's
+ZIF address map: A12 is on socket contact 4, whereas A12 is pin 2 on both a
+2764 and an AT28C64.
 
 For both read-only device families:
 
@@ -114,7 +118,7 @@ Safe connection sequence for the first test:
 1. Shut down the Pocket8086 and remove programmer power.
 2. Set J9+J10 to PCB3B, normal routing, 5 V VCC, DIP switches, and the
    power-source jumper.
-3. Insert the chip with all four unused ZIF contacts visible as described.
+3. Insert the chip with both unused contact rows at the lever end as described.
 4. Attach a straight-through DB-25 male-to-female cable and secure it.
 5. Attach only the selected programmer supply, then boot the Pocket8086.
 6. Run the read command; after it returns and reports safe shutdown, shut down
