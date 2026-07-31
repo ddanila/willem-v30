@@ -1,10 +1,22 @@
 WILLEM PCB5.0E HARDWARE SETUP
 ============================
 
-STOP: PCB5.0E clones differ.  Confirm that the exact board's six-pin version
-selector is visibly set to the side marked 3B.  Documented KEE boards use both
-J4 shunts on the right, but at least one clone is electrically reversed.  Move
-no jumper while the board or computer is powered.
+STOP: On the photographed 2015 PCB5.0E, adjacent three-pin headers J9 and J10
+together form the compatibility selector between the LPT logic chips near the
+DB25 connector.  Each has one shunt.  In the natural board orientation DB25 is
+on the left and the power connectors are on the right.  Both shunts are now to
+the left, which is PCB5.0E mode.  With all cables and power removed, move both
+shunts one position to the right for PCB3B mode.  Each ==== below is a shunt:
+
+AS PHOTOGRAPHED:  DB25 <- J9  o====o  o -> POWER
+                          J10 o====o  o
+
+PCB3B REQUIRED:   DB25 <- J9  o  o====o -> POWER
+                          J10 o  o====o
+
+Do not confuse J9+J10 with the two closed jumpers by OPEN=3.6V near the PLCC
+sockets.  Leave the OPEN=3.6V jumpers closed.  Move no jumper while the board,
+computer, or any cable is powered.
 
 Place either supported 28-pin chip in the 32-pin ZIF as follows:
 
