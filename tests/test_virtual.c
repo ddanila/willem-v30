@@ -23,6 +23,9 @@ struct virtual_willem {
     wl_u16 pending_address;
     wl_u8 pending_data;
     int busy_reads;
+    int busy_forever;
+    int corrupt_commit;
+    unsigned long delay_us;
 };
 
 static void virtual_data_write(ctx, value)
@@ -50,11 +53,15 @@ int value;
         }
 
         if (!(old & WL_D1) && (value & WL_D1) && (value & WL_D2)) {
-            if (v->busy_reads && v->address == v->pending_address) {
+            if ((v->busy_reads || v->busy_forever) &&
+                v->address == v->pending_address) {
                 v->read_shift = v->pending_data ^ 0x80U;
-                v->busy_reads--;
-                if (!v->busy_reads)
-                    v->rom[v->pending_address] = v->pending_data;
+                if (!v->busy_forever) {
+                    v->busy_reads--;
+                    if (!v->busy_reads)
+                        v->rom[v->pending_address] = v->corrupt_commit ?
+                            (wl_u8)(v->pending_data ^ 0x01U) : v->pending_data;
+                }
             } else {
                 v->read_shift = v->rom[v->address];
             }
@@ -103,8 +110,9 @@ static void virtual_delay(ctx, usec)
 void *ctx;
 int usec;
 {
-    (void)ctx;
-    (void)usec;
+    struct virtual_willem *v;
+    v = (struct virtual_willem *)ctx;
+    v->delay_us += (unsigned long)usec;
 }
 
 static wl_u8 pattern(address)
@@ -193,5 +201,42 @@ int main()
     }
     printf("virtual 28C64 write passed: %lu byte writes, VPP never requested\n",
            v.byte_writes);
+
+    /* A device that never leaves its self-timed cycle must fail after the
+       complete polling allowance, not loop forever or report success. */
+    v.busy_forever = 1;
+    v.delay_us = 0;
+    wl_begin_28c64_write(&wl);
+    v.delay_us = 0;
+    if (wl_write_28c64_byte(&wl, 0x0123U, 0x5aU)) {
+        fprintf(stderr, "permanently busy 28C64 incorrectly passed\n");
+        return 1;
+    }
+    if (v.delay_us < 20000UL) {
+        fprintf(stderr, "28C64 timeout too short: %lu us\n", v.delay_us);
+        return 1;
+    }
+    wl_end_read(&wl);
+    if (v.control & (WL_CTL_VPP | WL_CTL_VCC)) {
+        fprintf(stderr, "unsafe state after 28C64 timeout: %02x\n", v.control);
+        return 1;
+    }
+    v.busy_forever = 0;
+
+    /* D7 completion alone is insufficient: the returned byte must match in
+       full. Simulate a device that completes with one corrupt low bit. */
+    v.corrupt_commit = 1;
+    wl_begin_28c64_write(&wl);
+    if (wl_write_28c64_byte(&wl, 0x0456U, 0xa4U)) {
+        fprintf(stderr, "corrupt 28C64 completion incorrectly passed\n");
+        return 1;
+    }
+    wl_end_read(&wl);
+    if (v.control & (WL_CTL_VPP | WL_CTL_VCC)) {
+        fprintf(stderr, "unsafe state after corrupt completion: %02x\n",
+                v.control);
+        return 1;
+    }
+    printf("virtual 28C64 failure paths passed: timeout and corrupt data\n");
     return 0;
 }
