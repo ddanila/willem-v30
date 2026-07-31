@@ -1,9 +1,19 @@
 WILLEM PCB5.0E HARDWARE SETUP
 ============================
 
-STOP: the exact PCB5.0E socket position, board-version jumper position, and
-external-power procedure still require confirmation.  Do not use this draft
-kit for a physical chip until those items are replaced with verified settings.
+STOP: PCB5.0E clones differ.  Confirm that the exact board's six-pin version
+selector is visibly set to the side marked 3B.  Documented KEE boards use both
+J4 shunts on the right, but at least one clone is electrically reversed.  Move
+no jumper while the board or computer is powered.
+
+Place either supported 28-pin chip in the 32-pin ZIF as follows:
+
+ZIF CONTACT:  1  2  3  4 ... 29 30 31 32
+CHIP PIN:     -  -  1  2 ... 27 28  -  -
+
+Contacts 1, 2, 31, and 32 stay empty.  Match the chip notch to the socket
+notch.  Use normal 28-pin routing, normal parked large-device jumpers, and 5 V
+VCC.  Do not select a special 2716, 2732, 2816, 28F, 29C, or large-chip mode.
 
 The utility always keeps VPP disabled during read, blank-check, and verify.
 It prints a numbered DIP diagram before applying chip power.  Follow the
@@ -20,9 +30,16 @@ AT28C64 DIP MASK 128H
 FIRST PHYSICAL TEST
 -------------------
 
+The board needs its own power; LPT does not supply it.  With everything off,
+select either USB 5 V or the DC jack, never both.  If using the DC jack, follow
+its marked polarity and 9/12 V rating and set VCC to 5 V.  Connect a straight-
+through DB-25 cable before powering either unit.  Power down before changing
+the chip, cable, or any jumper.
+
 Use the known original Juku 2764 and perform a read only:
 
   WILLEM R2764 JUKUROM.BIN 378 /TRACE
 
-Keep WILLEM.LOG, WTRACE.BIN, and JUKUROM.BIN.  Compare the image on the modern
-host before any EEPROM-writing command is implemented or enabled.
+Keep WILLEM.LOG, WTRACE.BIN, and JUKUROM.BIN.  Read twice and compare both
+images on the modern host before any EEPROM-writing command is implemented or
+enabled.

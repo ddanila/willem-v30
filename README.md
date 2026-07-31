@@ -11,6 +11,9 @@ compatibility mode. The initial device targets are:
 - 2764/27C64: read, blank-check, and verify first
 - AT28C64: read, blank-check, program, and verify
 
+Physical ZIF placement, compatibility selection, power precautions, and the
+first-read gate are documented in [`docs/hardware.md`](docs/hardware.md).
+
 ## Development strategy
 
 The classic Willem port protocol will be derived primarily from the GPL-2.0
