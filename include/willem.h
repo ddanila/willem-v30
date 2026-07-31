@@ -15,6 +15,7 @@ typedef unsigned long wl_u32;
 #define WL_CTL_WE   0x08 /* DB-25 pin 17, physically inverted */
 #define WL_CTL_XOR  0x0b /* PC control-register inversion */
 #define WL_ST_ACK   0x40 /* DB-25 pin 10 */
+#define WL_ADDR_FIRST_BIT 0x800000UL /* Geepro's complete 24-bit chain */
 
 struct wl_io {
     void *ctx;

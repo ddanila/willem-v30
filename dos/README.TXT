@@ -5,6 +5,9 @@ This is an 8086-compatible .COM program for a classic parallel-port Willem
 programmer.  It targets a PCB5.0E set to PCB3B compatibility mode.  It runs
 under MS-DOS 6.22 and is suitable for the NEC V30.
 
+This build clocks the complete 24-bit Willem address-register chain, including
+when reading an 8 KiB 2764 or 28C64.
+
 CURRENT SAFETY STAGE
 --------------------
 

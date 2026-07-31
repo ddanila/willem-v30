@@ -18,13 +18,19 @@ and
 | `wl_oe` | `willem_set_oe_pin` | control bit 1 / DB25 pin 14 |
 | `wl_vcc` | `willem_vcc_on/off` | control bit 2 / DB25 pin 16 |
 | `wl_we` | `willem_set_we_pin` | control bit 3 / DB25 pin 17 |
-| `wl_set_address` | `willem_set_par_addr_pin` | D1 data, D0 clock, MSB first |
+| `wl_set_address` | `willem_set_par_addr_pin` | D1 data, D0 clock, 24 bits MSB first |
 | `wl_set_data` | `willem_set_par_data_pin` | data register D7..D0 |
 | `wl_get_data` | `willem_get_par_data_pin` | D1/D2 latch-clock, ACK input |
 
 Both implementations XOR control-register writes with `0Bh`, accounting for
 the PC parallel port's electrically inverted control pins 1, 14, and 17. Both
 read ACK as active-low and assemble the byte from D7 through D0.
+
+Geepro initializes `addr_init_mask` to `800000h`, so every address update
+clocks the board's full 24-stage chain even for smaller devices. The physical
+PCB5.0E test caught an earlier mistaken `1000h` starting mask: it reproduced
+the first 256 ROM bytes across all 32 pages because only A0 through A7 reached
+their intended stages.
 
 ## 2764 read sequence
 

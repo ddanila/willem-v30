@@ -45,7 +45,7 @@ int value;
             v->address_shift = (v->address_shift << 1) |
                                ((value & WL_D1) ? 1UL : 0UL);
             v->address_bits++;
-            if (v->address_bits == 13) {
+            if (v->address_bits == 24) {
                 v->address = (wl_u16)(v->address_shift & 0x1fffUL);
                 v->address_bits = 0;
                 v->address_shift = 0;

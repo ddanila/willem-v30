@@ -45,9 +45,13 @@ DB-25 pins 1, 14, and 17. Therefore logical connector values are XORed with
 
 ## Address and data read
 
-For an 8 KiB device, addresses are shifted MSB-first from A12 through A0.
-Geepro initializes its address mask to bit 12 (`1000h`). Each address bit is
-placed on D1, then clocked with a high-to-low pulse on D0.
+The board has a complete 24-stage address chain even when the selected device
+uses fewer address lines. Geepro therefore initializes its mask to bit 23
+(`800000h`) and always emits all 24 bits MSB-first; an 8 KiB address occupies
+the final A12 through A0 positions. Each bit is placed on D1, then clocked with
+a high-to-low pulse on D0. Sending only the 13 significant bits leaves the
+upper device-address stages unchanged and aliases an 8 KiB ROM every 256
+bytes on the tested PCB5.0E.
 
 The ROM data bus is parallel inside the programmer but is read back through a
 parallel-in/serial-out chain. The host latches it with D1/D2, then samples the
@@ -109,7 +113,7 @@ The sequence follows the manufacturer's single-5 V SRAM-like write cycle:
 1. keep VPP off, OE inactive, and WE high while applying 5 V VCC;
 2. wait 200 ms after power application (more conservative than the device's
    internal power-on write-inhibit interval);
-3. present the 13-bit address and eight data bits;
+3. present the 24-bit address frame and eight data bits;
 4. pulse WE low for 1 us and latch data on the rising edge;
 5. poll the addressed byte until D7 matches the requested D7, with a minimum
    20 ms timeout allowance, then require all eight bits to match.

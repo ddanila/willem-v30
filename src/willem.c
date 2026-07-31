@@ -157,7 +157,7 @@ struct willem *wl;
 wl_u16 address;
 {
     wl_u8 value;
-    wl_set_address(wl, (wl_u32)address, 0x1000UL);
+    wl_set_address(wl, (wl_u32)address, WL_ADDR_FIRST_BIT);
     wl_oe(wl, 0);
     delay_us(wl, 1);
     value = wl_get_data(wl);
@@ -216,7 +216,7 @@ int value;
     /* Datasheet byte write: OE high, address stable, low WE pulse, data is
        latched on WE's rising edge. One microsecond exceeds all ns minima. */
     wl_oe(wl, 1);
-    wl_set_address(wl, (wl_u32)address, 0x1000UL);
+    wl_set_address(wl, (wl_u32)address, WL_ADDR_FIRST_BIT);
     wl_we(wl, 0);
     wl_set_data(wl, value);
     delay_us(wl, 1);
@@ -241,6 +241,6 @@ struct willem *wl;
     wl_oe(wl, 0);
     wl_we(wl, 0);
     wl_vcc(wl, 0);
-    wl_set_address(wl, 0, 0x1000UL);
+    wl_set_address(wl, 0, WL_ADDR_FIRST_BIT);
     wl_set_data(wl, 0);
 }

@@ -349,7 +349,7 @@ char **argv;
     context.sequence = 0;
     log_file = open_append(LOG_NAME, 0);
     logmsg("================ BEGIN RUN ================");
-    logmsg("Willem V30 diagnostic utility; 8086-compatible build");
+    logmsg("Willem V30 utility; 8086-compatible; 24-bit address build");
     logmsg("Command-line argc=%d", argc);
     for (address = 0; address < (unsigned)argc; address++)
         logmsg("argv[%u]=<%s>", address, argv[address]);
