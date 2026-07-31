@@ -9,6 +9,8 @@ The initial protocol implementation is a clean, reduced port of the GPL-2.0
 Geepro Willem driver, particularly `drivers/willem.cpp` and `src/parport.cpp`.
 Geepro is copyright 2006 Krzysztof Komarnicki and contributors. See
 <https://github.com/danielg4/geepro>.
+The line-by-line provenance audit is pinned to an exact upstream commit in
+[`geepro-audit.md`](geepro-audit.md).
 
 The implementation will also be compared with I/O traces from the original
 Willem DOS software before it is used to write a physical device.
@@ -64,7 +66,7 @@ remains unambiguous. No AT-only `INT 15h/AH=86h` BIOS service is required.
 
 ## Device settings found in Geepro
 
-Geepro's `willem.xml` contains these 12-switch masks:
+Geepro's checked-in runtime `willem.xml` contains these 12-switch masks:
 
 | Device family | DIP mask |
 |---|---:|
@@ -72,6 +74,9 @@ Geepro's `willem.xml` contains these 12-switch masks:
 | M28C64/2864 | `128h` |
 
 Geepro maps mask bit 0 to numbered switch 1, bit 1 to switch 2, and so on.
+Its `willem.xml.in` template disagrees for the 2864 family (`12Bh`); the
+runtime file says `128h`. The utility follows the runtime file. See
+[`geepro-audit.md`](geepro-audit.md) for the pinned evidence.
 Consequently the settings displayed by the DOS utility are:
 
 | Device family | Switches ON | Switches OFF |

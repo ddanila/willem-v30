@@ -15,7 +15,10 @@ connector (left in the board's natural silkscreen orientation). Both shunts
 must be moved one position right, away from DB25, for this utility's PCB3B
 protocol. The photographs do not yet reveal the power-source selector legend
 with enough confidence. Do not move that jumper based on these observations
-alone.
+alone. The user reports that a 12 V barrel adapter powers the board and permits
+the existing software to access the inserted 2764, whereas the unpowered board
+does not. The adapter's current rating and polarity remain to be recorded from
+its label.
 
 ## Confirmed common settings
 
@@ -91,6 +94,12 @@ board's separate two-shunt block marked `ADAPT` and `USB`. Never attach USB
 power and the DC supply together. With USB power, VCC is fixed at 5 V. With DC
 input, set the VCC selector to 5 V. This block has not yet been positively
 located in the user's photographs; do not infer it from J9/J10.
+
+For this board, retain the already working 12 V barrel configuration and leave
+USB power disconnected. Do not change the power-source jumpers until their
+`ADAPT`/`USB` markings are positively located. A successful access with the
+existing software confirms that the selected barrel-input path supplies the
+board; it does not by itself validate ROM data or the new LPT implementation.
 
 A correct external supply does not feed its 9/12 V into the Pocket8086 LPT
 connector; the board regulates its rails and shares logic ground through the

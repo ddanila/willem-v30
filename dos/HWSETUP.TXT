@@ -53,6 +53,10 @@ Its location on this exact board still needs visual confirmation.  Connect a
 straight-through DB-25 cable before powering either unit.  Power down before
 changing the chip, cable, or any jumper.
 
+The 12 V barrel-adapter setup has already powered this board successfully.
+Keep that working setup unchanged and leave USB power disconnected.  Record
+the adapter polarity and current rating from its label before the first run.
+
 Use the known original Juku 2764 and perform a read only:
 
   WILLEM R2764 JUKUROM.BIN 378 /TRACE
