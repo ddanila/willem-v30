@@ -46,6 +46,13 @@ AT28C64 DIP MASK 128H
   ON : 4 6 9
   OFF: 1 2 3 5 7 8 10 11 12
 
+AT28C64 CONTROL DIAGNOSTIC DIP MASK 12BH
+  ON : 1 2 4 6 9
+  OFF: 3 5 7 8 10 11 12
+
+Run WILLEM D28C64 /TRACE only with the chip removed.  It holds control signals
+long enough to measure them and never issues an EEPROM write cycle.
+
 FIRST PHYSICAL TEST
 -------------------
 

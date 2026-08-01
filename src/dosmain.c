@@ -8,12 +8,13 @@
 #define LOG_NAME "WILLEM.LOG"
 #define TRACE_NAME "WTRACE.BIN"
 #define WRITE_GATE_NAME "WRITE.OK"
-#define WILLEM_VERSION "0.0.2"
+#define WILLEM_VERSION "0.0.3"
 
 #define ACTION_READ 1
 #define ACTION_BLANK 2
 #define ACTION_VERIFY 3
 #define ACTION_WRITE 4
+#define ACTION_DIAG 5
 #define DEVICE_2764 1
 #define DEVICE_28C64 2
 
@@ -254,6 +255,7 @@ static void usage()
     puts("       WILLEM V2764 image.bin [base] [/TRACE]");
     puts("       WILLEM V28C64 image.bin [base] [/TRACE]");
     puts("       WILLEM W28C64 image.bin [base] /WRITE [/TRACE]");
+    puts("       WILLEM D28C64 [base] [/TRACE]  (chip removed)");
 }
 
 static int decode_command(text, action, device)
@@ -275,6 +277,8 @@ int *device;
         *action = ACTION_VERIFY; *device = DEVICE_28C64;
     } else if (same_command(text, "W28C64")) {
         *action = ACTION_WRITE; *device = DEVICE_28C64;
+    } else if (same_command(text, "D28C64")) {
+        *action = ACTION_DIAG; *device = DEVICE_28C64;
     } else {
         return 0;
     }
@@ -287,6 +291,7 @@ int action;
     if (action == ACTION_READ) return "READ";
     if (action == ACTION_BLANK) return "BLANK";
     if (action == ACTION_WRITE) return "WRITE";
+    if (action == ACTION_DIAG) return "DIAGNOSTIC";
     return "VERIFY";
 }
 
@@ -326,6 +331,76 @@ static void display_zif()
     logmsg("ZIF pair: lever/notch -> [--][--][1/28] ... [14/15] <- far end");
     logmsg("Leave TWO complete rows empty at lever end; do NOT center chip");
     logmsg("Place chip against far end; notch faces empty rows and lever");
+}
+
+static void wait_enter(message)
+char *message;
+{
+    int ch;
+    logmsg("PAUSE: %s", message);
+    logmsg("Press ENTER to continue");
+    fflush(stdout);
+    do {
+        ch = getchar();
+    } while (ch != '\n' && ch != '\r' && ch != EOF);
+}
+
+static void log_ports(context, label)
+struct dos_context *context;
+char *label;
+{
+    unsigned base;
+    base = context->base;
+    logmsg("%s: DATA=%02X STATUS=%02X CONTROL=%02X",
+           label, dos_inb(base), dos_inb(base + 1), dos_inb(base + 2));
+}
+
+static void run_28c64_diagnostic(wl, context)
+struct willem *wl;
+struct dos_context *context;
+{
+    wl_u8 empty_read;
+
+    logmsg("DIAGNOSTIC IS NON-WRITING AND MUST BE RUN WITH SOCKET EMPTY");
+    logmsg("Use DIP 12Bh for this routing test: ON 1,2,4,6,9");
+    wait_enter("Confirm chip REMOVED; meter ground: AT pin 14 = ZIF contact 16");
+
+    wl_vpp(wl, 0);
+    wl_oe(wl, 1);
+    wl_we(wl, 1);
+    wl_vcc(wl, 1);
+    port_delay(context, 50000);
+    port_delay(context, 50000);
+    port_delay(context, 50000);
+    port_delay(context, 50000);
+    log_ports(context, "VCC on; OE inactive; WE inactive");
+    logmsg("Measure AT pins (ZIF contacts): VCC 28(30), WE 27(29), OE 22(24), CE 20(22)");
+    wait_enter("Expect VCC about 5V, /WE HIGH, /OE HIGH; record /CE");
+
+    wl_set_address(wl, 0x0000UL, WL_ADDR_FIRST_BIT);
+    wl_set_data(wl, 0x55);
+    log_ports(context, "Address 0000h; data 55h; controls inactive");
+    wl_set_address(wl, 0x1fffUL, WL_ADDR_FIRST_BIT);
+    wl_set_data(wl, 0xaa);
+    log_ports(context, "Address 1FFFh; data AAh; controls inactive");
+
+    wl_set_address(wl, 0x0000UL, WL_ADDR_FIRST_BIT);
+    wl_set_data(wl, 0x3e);
+    wl_we(wl, 0);
+    log_ports(context, "WE asserted and held; OE inactive; data 3Eh");
+    wait_enter("Measure /WE AT27(ZIF29) LOW; record /CE AT20(ZIF22); CHIP OUT");
+    wl_we(wl, 1);
+    log_ports(context, "WE returned inactive");
+
+    wl_oe(wl, 0);
+    log_ports(context, "OE asserted and held; WE inactive");
+    wait_enter("Measure /OE AT22(ZIF24) LOW; record /CE AT20(ZIF22); CHIP OUT");
+    empty_read = wl_get_data(wl);
+    logmsg("Empty-socket serial read sample=%02X (normally FF; informational only)",
+           empty_read);
+    wl_oe(wl, 1);
+    wl_we(wl, 1);
+    log_ports(context, "Controls returned inactive before shutdown");
 }
 
 int main(argc, argv)
@@ -447,12 +522,24 @@ char **argv;
            action_name(action), device_name(device),
            image_name ? image_name : "(none)", base,
            context.trace ? "on" : "off");
-    logmsg("Required Geepro DIP mask=%s; VPP MUST remain off",
-           device == DEVICE_2764 ? "12Bh" : "128h");
-    display_dips(device == DEVICE_2764 ? 0x12bU : 0x128U);
+    logmsg("Required DIP mask=%s; VPP MUST remain off",
+           (device == DEVICE_2764 || action == ACTION_DIAG) ? "12Bh" : "128h");
+    display_dips((device == DEVICE_2764 || action == ACTION_DIAG) ?
+                 0x12bU : 0x128U);
     display_zif();
     logmsg("Initial raw DATA=%02X STATUS=%02X CONTROL=%02X",
            dos_inb(base), dos_inb(base + 1), dos_inb(base + 2));
+    if (action == ACTION_DIAG) {
+        run_28c64_diagnostic(&wl, &context);
+        powered = 1;
+        logmsg("Diagnostic complete; power transition: safe shutdown begins");
+        wl_end_read(&wl);
+        powered = 0;
+        logmsg("Safe shutdown complete: VCC off, VPP off");
+        result = 0;
+        goto close_trace;
+    }
+
     logmsg("Power transition: enabling VCC, VPP off");
     if (action == ACTION_WRITE) wl_begin_28c64_write(&wl);
     else if (device == DEVICE_2764) wl_begin_2764_read(&wl);

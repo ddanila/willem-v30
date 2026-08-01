@@ -20,6 +20,7 @@ run_dosbox() {
     cp "$program" "$drive/WILLEM.COM"
     dd if=/dev/zero of="$drive/ZERO.BIN" bs=8192 count=1 status=none
     printf 'WILLEM-WRITE-GATE-1\r\n' >"$drive/WRITE.OK"
+    printf '\r\n\r\n\r\n\r\n' >"$drive/ENTERS.TXT"
 
     local args=(
         dosbox-x -fastlaunch
@@ -36,6 +37,7 @@ run_dosbox() {
         -c "WILLEM B2764 378"
         -c "WILLEM B28C64 378"
         -c "WILLEM W28C64 ZERO.BIN 378 /WRITE"
+        -c "WILLEM D28C64 378 /TRACE < ENTERS.TXT"
         -c "exit"
     )
 
@@ -72,12 +74,14 @@ run_dosbox() {
     [[ $(grep -c 'Read complete: bytes=8192' "$drive/WILLEM.LOG") == 2 ]]
     [[ $(grep -c 'VERIFY PASSED: all 8192 bytes match ZERO.BIN' "$drive/WILLEM.LOG") == 2 ]]
     [[ $(grep -c 'BLANK FAILED: mismatches=8192' "$drive/WILLEM.LOG") == 2 ]]
-    [[ $(grep -c 'Safe shutdown complete: VCC off, VPP off' "$drive/WILLEM.LOG") == 7 ]]
+    [[ $(grep -c 'Safe shutdown complete: VCC off, VPP off' "$drive/WILLEM.LOG") == 8 ]]
     [[ $(grep -c 'physical read gate is locked' "$drive/WILLEM.LOG") == 1 ]]
     [[ $(grep -c 'WRITE PASSED: programmed=0 unchanged=8192 verified=8192' "$drive/WILLEM.LOG") == 1 ]]
-    [[ $(grep -c 'DIP ON.*\[X\]\[X\]\[ \]\[X\]\[ \]\[X\]\[ \]\[ \]\[X\]' "$drive/WILLEM.LOG") == 3 ]]
+    [[ $(grep -c 'DIP ON.*\[X\]\[X\]\[ \]\[X\]\[ \]\[X\]\[ \]\[ \]\[X\]' "$drive/WILLEM.LOG") == 4 ]]
     [[ $(grep -c 'DIP ON.*\[ \]\[ \]\[ \]\[X\]\[ \]\[X\]\[ \]\[ \]\[X\]' "$drive/WILLEM.LOG") == 4 ]]
-    [[ $(grep -c 'Leave TWO complete rows empty at lever end' "$drive/WILLEM.LOG") == 7 ]]
+    [[ $(grep -c 'Leave TWO complete rows empty at lever end' "$drive/WILLEM.LOG") == 8 ]]
+    [[ $(grep -c 'Diagnostic complete; power transition: safe shutdown begins' "$drive/WILLEM.LOG") == 1 ]]
+    [[ -s "$drive/WTRACE.BIN" ]]
     echo "DOSBox-X $cpu diagnostic matrix passed"
 }
 

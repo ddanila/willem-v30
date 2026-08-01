@@ -1,7 +1,7 @@
 WILLEM V30 DOS UTILITY
 ======================
 
-VERSION 0.0.2
+VERSION 0.0.3
 
 This is an 8086-compatible .COM program for a classic parallel-port Willem
 programmer.  It targets a PCB5.0E set to PCB3B compatibility mode.  It runs
@@ -27,6 +27,7 @@ WILLEM B28C64         [378] [/TRACE]
 WILLEM V2764  ROM.BIN [378] [/TRACE]
 WILLEM V28C64 ROM.BIN [378] [/TRACE]
 WILLEM W28C64 ROM.BIN [378] /WRITE [/TRACE]
+WILLEM D28C64         [378] [/TRACE]
 
 The LPT address is hexadecimal and defaults to 378.  A verify image must be
 exactly 8192 bytes.  Result 0 means success, 1 means an error, and 2 means a
@@ -40,6 +41,13 @@ only after two independent known-ROM reads pass:
 
 Copy that token to the DOS disk.  The writer skips matching bytes, polls each
 changed byte, verifies all 8192 bytes, and never enables VPP.
+
+D28C64 is a non-writing socket diagnostic.  REMOVE THE CHIP before running it.
+It pauses while holding the 28C64 control pins in measurable states.  Follow
+the on-screen instructions and record AT28C64 pin voltages.  With the chip in
+its normal bottom-aligned position, the corresponding 32-pin ZIF contacts are:
+VCC 28=30, /WE 27=29, /OE 22=24, /CE 20=22, and GND 14=16.  Use DIP 12Bh:
+ON 1,2,4,6,9.
 
 LOG FILES
 ---------

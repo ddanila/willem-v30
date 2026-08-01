@@ -21,6 +21,10 @@ for name in README.TXT HWSETUP.TXT; do
     sed 's/$/\r/' "$textdir/$name" >"$out/$name"
 done
 
+if [[ -f "$textdir/GO.BAT" ]]; then
+    sed 's/$/\r/' "$textdir/GO.BAT" >"$out/GO.BAT"
+fi
+
 (
     cd "$out"
     sha256sum WILLEM.COM README.TXT HWSETUP.TXT | sed 's/$/\r/' >SHA256.TXT
@@ -39,7 +43,7 @@ import pathlib
 import sys
 
 root = pathlib.Path(sys.argv[1])
-for path in root.glob("*.TXT"):
+for path in list(root.glob("*.TXT")) + list(root.glob("*.BAT")):
     data = path.read_bytes()
     if b"\n" in data.replace(b"\r\n", b""):
         raise SystemExit(f"bare LF in {path}")
