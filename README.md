@@ -52,7 +52,7 @@ WILLEM B2764          [378] [/TRACE]
 WILLEM B28C64         [378] [/TRACE]
 WILLEM V2764  ROM.BIN [378] [/TRACE]
 WILLEM V28C64 ROM.BIN [378] [/TRACE]
-WILLEM W28C64 ROM.BIN [378] /WRITE [/TRACE]
+WILLEM W28C64 ROM.BIN [378] /WRITE
 ```
 
 The optional LPT base is hexadecimal and defaults to `378`. Every operation
@@ -64,8 +64,9 @@ bank. Verification images must be exactly 8192 bytes.
 the current DOS directory. The normal distribution intentionally contains no
 token. A successful `validate_read.py --unlock WRITE.OK ...` run creates it;
 copy it to the DOS disk only after reviewing the reported identities. The
-writer keeps VPP off, skips already matching bytes, D7-polls every changed
-byte, and performs a complete post-write verification.
+writer keeps VPP off, skips already matching bytes, uses the manufacturer's
+SDP protected-write sequence, and performs a complete post-write verification.
+`/TRACE` is rejected during writes to preserve the 150 us command timing.
 
 ## Build and test
 

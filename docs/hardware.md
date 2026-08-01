@@ -50,8 +50,9 @@ For both read-only device families:
 - place the A19/large-device routing jumper in its normal parked position;
 - use exactly one board power source.
 
-The 2764/27C64 DIP mask is `12Bh` (ON: 1, 2, 4, 6, 9). The AT28C64 mask is
-`128h` (ON: 4, 6, 9). Mask bit 0 maps to numbered switch 1 in Geepro.
+The 2764/27C64 and AT28C64 DIP mask is `12Bh` (ON: 1, 2, 4, 6, 9).
+AT28C64 control-pin measurements confirmed the required idle, read, and write
+levels with this setting. Mask bit 0 maps to numbered switch 1 in Geepro.
 
 ## PCB3B compatibility selector (`J9` + `J10` on this board)
 

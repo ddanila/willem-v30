@@ -75,18 +75,18 @@ Geepro's checked-in runtime `willem.xml` contains these 12-switch masks:
 | Device family | DIP mask |
 |---|---:|
 | 2764/27128 | `12Bh` |
-| M28C64/2864 | `128h` |
+| M28C64/2864 | `12Bh` (physically validated; template value) |
 
 Geepro maps mask bit 0 to numbered switch 1, bit 1 to switch 2, and so on.
 Its `willem.xml.in` template disagrees for the 2864 family (`12Bh`); the
-runtime file says `128h`. The utility follows the runtime file. See
-[`geepro-audit.md`](geepro-audit.md) for the pinned evidence.
+runtime file says `128h`. Physical control-pin tests validated `12Bh`, which
+the utility now follows. See [`geepro-audit.md`](geepro-audit.md).
 Consequently the settings displayed by the DOS utility are:
 
 | Device family | Switches ON | Switches OFF |
 |---|---|---|
 | 2764/27C64 | 1, 2, 4, 6, 9 | 3, 5, 7, 8, 10, 11, 12 |
-| AT28C64 | 4, 6, 9 | 1, 2, 3, 5, 7, 8, 10, 11, 12 |
+| AT28C64 | 1, 2, 4, 6, 9 | 3, 5, 7, 8, 10, 11, 12 |
 
 The utility renders both the ON and OFF rows on screen and in `WILLEM.LOG`.
 Follow the numbers moulded or printed on the DIP bank; move each lever toward
@@ -103,25 +103,25 @@ all comparisons pass; DOS additionally requires the explicit `/WRITE` option.
 Original-software trace comparison remains desirable protocol corroboration,
 but is not encoded in the file-token gate.
 
-## AT28C64B byte-write core
+## AT28C64B protected-write core
 
 The portable core and DOS front end contain an AT28C64B byte-write primitive.
 The DOS command is operationally locked behind the `WRITE.OK` artifact produced
 only by a passing physical-read validator, plus an explicit `/WRITE` argument.
-The sequence follows the manufacturer's single-5 V SRAM-like write cycle:
+The DOS sequence follows the manufacturer's SDP protected-write algorithm:
 
 1. keep VPP off, OE inactive, and WE high while applying 5 V VCC;
 2. wait 200 ms after power application (more conservative than the device's
    internal power-on write-inhibit interval);
-3. present the 24-bit address frame and eight data bits;
-4. pulse WE low for 1 us and latch data on the rising edge;
-5. poll the addressed byte until D7 matches the requested D7, with a minimum
-   20 ms timeout allowance, then require all eight bits to match.
+3. load `1555h/AAh`, `0AAAh/55h`, and `1555h/A0h`;
+4. immediately load the target address and byte;
+5. wait 12 ms, exceeding the specified 10 ms maximum write cycle, and require
+   a full-byte readback match.
 
-The 1 us pulse exceeds the AT28C64B's nanosecond-scale minimum while remaining
-hardware-timed by the PIT on 8086 and V30 hosts. The implementation does not
-use an EPROM VPP/PRESTO algorithm. The virtual Willem holds D7 complemented for
-three poll reads, then commits the byte; the automated test writes and checks
-all 8192 locations and fails if VPP was ever requested.
+The DOS path emits the four loads through compact 8086 assembly with no file
+I/O or tracing between them, keeping below the specified 150 us byte-load
+limit on the V30. `/TRACE` is rejected for writes. The implementation does not
+use an EPROM VPP/PRESTO algorithm. Virtual tests prove that a protected device
+rejects an ordinary write, accepts the exact SDP sequence, and never sees VPP.
 
 Reference: [Microchip AT28C64B data sheet](https://ww1.microchip.com/downloads/aemDocuments/documents/MPD/ProductDocuments/DataSheets/AT28C64B-64-Kbit-8Kx8-Parallel-EEPROM-with-Page-Write-and-Software-Data-Protection-DS20006432.pdf).

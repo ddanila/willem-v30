@@ -8,7 +8,7 @@
 #define LOG_NAME "WILLEM.LOG"
 #define TRACE_NAME "WTRACE.BIN"
 #define WRITE_GATE_NAME "WRITE.OK"
-#define WILLEM_VERSION "0.0.3"
+#define WILLEM_VERSION "0.0.4"
 
 #define ACTION_READ 1
 #define ACTION_BLANK 2
@@ -22,6 +22,7 @@ extern void dos_outb(unsigned port, unsigned value);
 extern unsigned dos_inb(unsigned port);
 extern void dos_wait_us(unsigned usec);
 extern void dos_datetime(unsigned *fields);
+extern void dos_sdp_write(unsigned base, unsigned address, unsigned value);
 
 struct dos_context {
     unsigned base;
@@ -478,6 +479,10 @@ char **argv;
             goto done;
         }
         logmsg("Write gate accepted from %s", WRITE_GATE_NAME);
+        if (wants_trace(argc, argv)) {
+            logmsg("ERROR: /TRACE is forbidden during SDP writes; it can violate tBLC=150us");
+            goto done;
+        }
     }
     if (wants_trace(argc, argv)) {
         context.trace = open_append(TRACE_NAME, 1);
@@ -522,10 +527,8 @@ char **argv;
            action_name(action), device_name(device),
            image_name ? image_name : "(none)", base,
            context.trace ? "on" : "off");
-    logmsg("Required DIP mask=%s; VPP MUST remain off",
-           (device == DEVICE_2764 || action == ACTION_DIAG) ? "12Bh" : "128h");
-    display_dips((device == DEVICE_2764 || action == ACTION_DIAG) ?
-                 0x12bU : 0x128U);
+    logmsg("Required DIP mask=12Bh; VPP MUST remain off");
+    display_dips(0x12bU);
     display_zif();
     logmsg("Initial raw DATA=%02X STATUS=%02X CONTROL=%02X",
            dos_inb(base), dos_inb(base + 1), dos_inb(base + 2));
@@ -552,20 +555,26 @@ char **argv;
     write_failed = 0;
     if (action == ACTION_WRITE) {
         crc = crc16(rom_buffer, ROM_SIZE);
-        logmsg("Programming begins: bytes=%u image CRC16-CCITT=%04X",
+        logmsg("SDP protected programming begins: bytes=%u image CRC16-CCITT=%04X",
                ROM_SIZE, crc);
         for (address = 0; address < ROM_SIZE; address++) {
             actual = wl_read_byte(&wl, address);
             if (actual == rom_buffer[address]) {
                 unchanged++;
-            } else if (!wl_write_28c64_byte(&wl, address,
-                                             rom_buffer[address])) {
-                logmsg("ERROR: byte write/poll failed at %04Xh: wanted=%02X",
-                       address, rom_buffer[address]);
-                write_failed = 1;
-                break;
             } else {
-                written++;
+                /* Direct assembly keeps the four SDP loads within tBLC on
+                   the V30. The datasheet maximum tWC is 10 ms. */
+                dos_sdp_write(base, address, rom_buffer[address]);
+                dos_wait_us(12000U);
+                actual = wl_read_byte(&wl, address);
+                if (actual == rom_buffer[address]) {
+                    written++;
+                } else {
+                    logmsg("ERROR: SDP write verify failed at %04Xh: read=%02X wanted=%02X",
+                           address, actual, rom_buffer[address]);
+                    write_failed = 1;
+                    break;
+                }
             }
             if ((address & 0x00ffU) == 0x00ffU)
                 logmsg("Write progress: %u/%u bytes, written=%u unchanged=%u",

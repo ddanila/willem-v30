@@ -47,21 +47,22 @@ Geepro's
 enables 8 KiB M28C64 read, verify, and blank-check through the same address and
 readback primitives. Its 2864 write registration is commented out, so this
 project does not claim that its AT28C64B write algorithm came from Geepro. The
-writer instead follows the Microchip AT28C64B byte-write and D7 polling data
-sheet sequence, while reusing Geepro's proven Willem signal primitives.
+writer instead follows the Microchip AT28C64B SDP protected-write sequence,
+while reusing Geepro's proven Willem signal primitives.
 
 ## DIP configuration discrepancy
 
 At the pinned commit, the checked-in runtime `drivers/willem.xml` specifies
 `128h` for family `2864_128`, but `drivers/willem.xml.in` contains `12Bh` at
 the corresponding location. They are not generated-equivalent: the repository
-diff shows this as a real value difference. The utility deliberately follows
-the runtime configuration used by Geepro:
+diff shows this as a real value difference. Physical control-pin measurements
+on the PCB5.0E established that `12Bh` routes valid AT28C64 read and write
+states, so the utility follows the source template and measured hardware:
 
 | Device | Runtime mask | Switches ON |
 |---|---:|---|
 | 2764/27C64 | `12Bh` | 1, 2, 4, 6, 9 |
-| M28C64/AT28C64 | `128h` | 4, 6, 9 |
+| M28C64/AT28C64 | `12Bh` | 1, 2, 4, 6, 9 |
 
 The same pinned tree's `pixmaps/willem_28pin.png` shows a 28-pin package placed
 against the ZIF end opposite the lever, not centered. The two unused physical

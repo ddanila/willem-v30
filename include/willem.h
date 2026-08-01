@@ -46,5 +46,6 @@ void wl_begin_28c64_write(struct willem *wl);
 void wl_end_read(struct willem *wl);
 wl_u8 wl_read_byte(struct willem *wl, wl_u16 address);
 int wl_write_28c64_byte(struct willem *wl, wl_u16 address, int value);
+int wl_write_28c64_sdp_byte(struct willem *wl, wl_u16 address, int value);
 
 #endif

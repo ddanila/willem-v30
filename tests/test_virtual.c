@@ -25,6 +25,9 @@ struct virtual_willem {
     int busy_reads;
     int busy_forever;
     int corrupt_commit;
+    int require_sdp;
+    int sdp_state;
+    unsigned long sdp_commands;
     unsigned long delay_us;
 };
 
@@ -89,6 +92,29 @@ int raw_value;
     if (v->control & WL_CTL_VPP) v->vpp_seen = 1;
     if (!(old & WL_CTL_WE) && (v->control & WL_CTL_WE) &&
         (v->control & WL_CTL_VCC) && !(v->control & WL_CTL_MUX)) {
+        if (v->require_sdp && v->sdp_state == 0 &&
+            v->address == 0x1555U && v->data == 0xaaU) {
+            v->sdp_state = 1;
+            v->sdp_commands++;
+            return;
+        }
+        if (v->require_sdp && v->sdp_state == 1 &&
+            v->address == 0x0aaaU && v->data == 0x55U) {
+            v->sdp_state = 2;
+            v->sdp_commands++;
+            return;
+        }
+        if (v->require_sdp && v->sdp_state == 2 &&
+            v->address == 0x1555U && v->data == 0xa0U) {
+            v->sdp_state = 3;
+            v->sdp_commands++;
+            return;
+        }
+        if (v->require_sdp && v->sdp_state != 3) {
+            v->sdp_state = 0;
+            return;
+        }
+        v->sdp_state = 0;
         v->pending_address = v->address;
         v->pending_data = v->data;
         v->busy_reads = 3;
@@ -201,6 +227,32 @@ int main()
     }
     printf("virtual 28C64 write passed: %lu byte writes, VPP never requested\n",
            v.byte_writes);
+
+    /* A protected part rejects an ordinary byte write but accepts the exact
+       Microchip three-load SDP prefix followed by the data byte. */
+    v.require_sdp = 1;
+    v.sdp_state = 0;
+    v.sdp_commands = 0;
+    v.byte_writes = 0;
+    v.rom[0x0123U] = 0x00U;
+    wl_begin_28c64_write(&wl);
+    if (wl_write_28c64_byte(&wl, 0x0123U, 0x5aU)) {
+        fprintf(stderr, "SDP-protected device accepted ordinary write\n");
+        return 1;
+    }
+    if (!wl_write_28c64_sdp_byte(&wl, 0x0123U, 0x5aU)) {
+        fprintf(stderr, "SDP protected write sequence failed\n");
+        return 1;
+    }
+    wl_end_read(&wl);
+    if (v.rom[0x0123U] != 0x5aU || v.byte_writes != 1UL ||
+        v.sdp_commands != 3UL) {
+        fprintf(stderr, "wrong SDP sequence result: data=%02x writes=%lu commands=%lu\n",
+                v.rom[0x0123U], v.byte_writes, v.sdp_commands);
+        return 1;
+    }
+    printf("virtual SDP rejection and protected write passed\n");
+    v.require_sdp = 0;
 
     /* A device that never leaves its self-timed cycle must fail after the
        complete polling allowance, not loop forever or report success. */

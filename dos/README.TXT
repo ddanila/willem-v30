@@ -1,7 +1,7 @@
 WILLEM V30 DOS UTILITY
 ======================
 
-VERSION 0.0.3
+VERSION 0.0.4
 
 This is an 8086-compatible .COM program for a classic parallel-port Willem
 programmer.  It targets a PCB5.0E set to PCB3B compatibility mode.  It runs
@@ -39,8 +39,14 @@ only after two independent known-ROM reads pass:
 
   python3 tools/validate_read.py --unlock WRITE.OK EXPECTED READ1 READ2
 
-Copy that token to the DOS disk.  The writer skips matching bytes, polls each
-changed byte, verifies all 8192 bytes, and never enables VPP.
+Copy that token to the DOS disk.  The writer skips matching bytes and uses the
+AT28C64B manufacturer's SDP protected-write sequence for every changed byte:
+1555/AA, 0AAA/55, 1555/A0, then address/data.  It waits beyond the specified
+10 ms maximum write cycle, checks each byte, verifies all 8192 bytes, and never
+enables VPP.  /TRACE is deliberately rejected for writes because trace file
+overhead could violate the sequence's 150 us maximum byte-load interval.
+The DOS build emits each four-load sequence through a compact direct-LPT
+assembly routine specifically to meet that limit on the V30.
 
 D28C64 is a non-writing socket diagnostic.  REMOVE THE CHIP before running it.
 It pauses while holding the 28C64 control pins in measurable states.  Follow

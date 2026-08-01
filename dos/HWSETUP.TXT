@@ -42,9 +42,9 @@ DIP diagram.  Follow the numbers and the ON mark on the physical switch bank.
   ON : 1 2 4 6 9
   OFF: 3 5 7 8 10 11 12
 
-AT28C64 DIP MASK 128H
-  ON : 4 6 9
-  OFF: 1 2 3 5 7 8 10 11 12
+AT28C64 DIP MASK 12BH
+  ON : 1 2 4 6 9
+  OFF: 3 5 7 8 10 11 12
 
 AT28C64 CONTROL DIAGNOSTIC DIP MASK 12BH
   ON : 1 2 4 6 9

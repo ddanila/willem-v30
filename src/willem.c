@@ -205,16 +205,11 @@ struct willem *wl;
     delay_us(wl, 50000);
 }
 
-int wl_write_28c64_byte(wl, address, value)
+static void pulse_28c64_byte(wl, address, value)
 struct willem *wl;
 wl_u16 address;
 int value;
 {
-    wl_u8 actual;
-    int poll;
-
-    /* Datasheet byte write: OE high, address stable, low WE pulse, data is
-       latched on WE's rising edge. One microsecond exceeds all ns minima. */
     wl_oe(wl, 1);
     wl_set_address(wl, (wl_u32)address, WL_ADDR_FIRST_BIT);
     wl_we(wl, 0);
@@ -222,6 +217,15 @@ int value;
     delay_us(wl, 1);
     wl_we(wl, 1);
     delay_us(wl, 1);
+}
+
+static int wait_28c64_byte(wl, address, value)
+struct willem *wl;
+wl_u16 address;
+int value;
+{
+    wl_u8 actual;
+    int poll;
 
     /* During the self-timed cycle D7 reads as the complement of written D7.
        Allow at least 20 ms, twice the AT28C64B's 10 ms maximum tWC. */
@@ -232,6 +236,37 @@ int value;
         delay_us(wl, 100);
     }
     return 0;
+}
+
+int wl_write_28c64_byte(wl, address, value)
+struct willem *wl;
+wl_u16 address;
+int value;
+{
+    /* Datasheet byte write: OE high, address stable, low WE pulse, data is
+       latched on WE's rising edge. One microsecond exceeds all ns minima. */
+    pulse_28c64_byte(wl, address, value);
+    return wait_28c64_byte(wl, address, value);
+}
+
+int wl_write_28c64_sdp_byte(wl, address, value)
+struct willem *wl;
+wl_u16 address;
+int value;
+{
+    /* Microchip AT28C64B section 6.18: SDP protected-write prefix followed
+       immediately by one data byte. No logging or polling may be inserted
+       between these four loads; each interval must remain below tBLC. */
+    pulse_28c64_byte(wl, 0x1555U, 0xaaU);
+    pulse_28c64_byte(wl, 0x0aaaU, 0x55U);
+    pulse_28c64_byte(wl, 0x1555U, 0xa0U);
+    pulse_28c64_byte(wl, address, value);
+
+    /* tWC is 10 ms maximum. Waiting 12 ms avoids mistaking unchanged old D7
+       for completion on a slow host, then the normal poll performs a full
+       byte comparison and retains a further 20 ms failure allowance. */
+    delay_us(wl, 12000);
+    return wait_28c64_byte(wl, address, value);
 }
 
 void wl_end_read(wl)
