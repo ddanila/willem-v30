@@ -33,6 +33,10 @@ _dos_sdp_write:
     push si
     push di
     mov di, [bp+4]
+    ; Preserve the caller's interrupt state. A DOS timer/keyboard ISR between
+    ; SDP loads could exceed the manufacturer's 150 us tBLC limit.
+    pushf
+    cli
 
     mov bx, 01555h
     mov al, 0aah
@@ -46,6 +50,7 @@ _dos_sdp_write:
     mov bx, [bp+6]
     mov ax, [bp+8]
     call .load
+    popf
 
     pop di
     pop si

@@ -8,7 +8,7 @@
 #define LOG_NAME "WILLEM.LOG"
 #define TRACE_NAME "WTRACE.BIN"
 #define WRITE_GATE_NAME "WRITE.OK"
-#define WILLEM_VERSION "0.0.4"
+#define WILLEM_VERSION "0.0.5"
 
 #define ACTION_READ 1
 #define ACTION_BLANK 2
@@ -414,9 +414,10 @@ char **argv;
     FILE *file;
     char *image_name;
     unsigned address, base, crc, mismatch_count, written, unchanged;
+    unsigned retry_bytes, total_retries, late_bytes;
     unsigned char actual, expected;
     int result, action, device, first_option, i, base_seen, powered;
-    int write_failed;
+    int write_failed, attempt;
 
     result = 1;
     powered = 0;
@@ -553,6 +554,9 @@ char **argv;
     written = 0;
     unchanged = 0;
     write_failed = 0;
+    retry_bytes = 0;
+    total_retries = 0;
+    late_bytes = 0;
     if (action == ACTION_WRITE) {
         crc = crc16(rom_buffer, ROM_SIZE);
         logmsg("SDP protected programming begins: bytes=%u image CRC16-CCITT=%04X",
@@ -562,18 +566,38 @@ char **argv;
             if (actual == rom_buffer[address]) {
                 unchanged++;
             } else {
-                /* Direct assembly keeps the four SDP loads within tBLC on
-                   the V30. The datasheet maximum tWC is 10 ms. */
-                dos_sdp_write(base, address, rom_buffer[address]);
-                dos_wait_us(12000U);
-                actual = wl_read_byte(&wl, address);
-                if (actual == rom_buffer[address]) {
-                    written++;
-                } else {
-                    logmsg("ERROR: SDP write verify failed at %04Xh: read=%02X wanted=%02X",
+                for (attempt = 1; attempt <= 3; attempt++) {
+                    /* Direct assembly masks interrupts and keeps the four SDP
+                       loads within tBLC. Datasheet maximum tWC is 10 ms. */
+                    dos_sdp_write(base, address, rom_buffer[address]);
+                    dos_wait_us(12000U);
+                    actual = wl_read_byte(&wl, address);
+                    if (actual == rom_buffer[address]) break;
+
+                    /* One late check distinguishes a slow/marginal cell from
+                       a rejected SDP sequence without adding another cycle. */
+                    dos_wait_us(10000U);
+                    actual = wl_read_byte(&wl, address);
+                    if (actual == rom_buffer[address]) {
+                        late_bytes++;
+                        logmsg("Late completion at %04Xh on attempt %d",
+                               address, attempt);
+                        break;
+                    }
+                    if (attempt < 3) {
+                        total_retries++;
+                        logmsg("RETRY at %04Xh: attempt=%d read=%02X wanted=%02X",
+                               address, attempt, actual, rom_buffer[address]);
+                    }
+                }
+                if (actual != rom_buffer[address]) {
+                    logmsg("ERROR: SDP write failed after 3 attempts at %04Xh: read=%02X wanted=%02X",
                            address, actual, rom_buffer[address]);
                     write_failed = 1;
                     break;
+                } else {
+                    written++;
+                    if (attempt > 1) retry_bytes++;
                 }
             }
             if ((address & 0x00ffU) == 0x00ffU)
@@ -581,8 +605,8 @@ char **argv;
                        address + 1, ROM_SIZE, written, unchanged);
         }
         if (!write_failed) {
-            logmsg("Programming pass complete: written=%u unchanged=%u",
-                   written, unchanged);
+            logmsg("Programming pass complete: written=%u unchanged=%u retry-bytes=%u retries=%u late=%u",
+                   written, unchanged, retry_bytes, total_retries, late_bytes);
             for (address = 0; address < ROM_SIZE; address++) {
                 actual = wl_read_byte(&wl, address);
                 expected = rom_buffer[address];
@@ -630,8 +654,9 @@ char **argv;
                    mismatch_count);
             result = 2;
         } else {
-            logmsg("WRITE PASSED: programmed=%u unchanged=%u verified=%u",
-                   written, unchanged, ROM_SIZE);
+            logmsg("WRITE PASSED: programmed=%u unchanged=%u verified=%u retry-bytes=%u retries=%u late=%u",
+                   written, unchanged, ROM_SIZE, retry_bytes, total_retries,
+                   late_bytes);
             result = 0;
         }
     } else if (action == ACTION_READ) {

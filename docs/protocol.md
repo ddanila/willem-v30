@@ -123,5 +123,8 @@ I/O or tracing between them, keeping below the specified 150 us byte-load
 limit on the V30. `/TRACE` is rejected for writes. The implementation does not
 use an EPROM VPP/PRESTO algorithm. Virtual tests prove that a protected device
 rejects an ordinary write, accepts the exact SDP sequence, and never sees VPP.
+The DOS routine preserves FLAGS and masks hardware interrupts only across the
+four timing-sensitive loads. A byte that still mismatches gets a late read and
+at most three total protected-write attempts; all retries are recorded.
 
 Reference: [Microchip AT28C64B data sheet](https://ww1.microchip.com/downloads/aemDocuments/documents/MPD/ProductDocuments/DataSheets/AT28C64B-64-Kbit-8Kx8-Parallel-EEPROM-with-Page-Write-and-Software-Data-Protection-DS20006432.pdf).

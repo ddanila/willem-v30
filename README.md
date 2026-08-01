@@ -67,6 +67,9 @@ copy it to the DOS disk only after reviewing the reported identities. The
 writer keeps VPP off, skips already matching bytes, uses the manufacturer's
 SDP protected-write sequence, and performs a complete post-write verification.
 `/TRACE` is rejected during writes to preserve the 150 us command timing.
+Interrupts are masked only across each four-load SDP burst. Each byte receives
+at most three total attempts, with retry and late-completion counts logged so
+marginal used EEPROMs remain visible rather than being silently accepted.
 
 ## Build and test
 

@@ -1,7 +1,7 @@
 WILLEM V30 DOS UTILITY
 ======================
 
-VERSION 0.0.4
+VERSION 0.0.5
 
 This is an 8086-compatible .COM program for a classic parallel-port Willem
 programmer.  It targets a PCB5.0E set to PCB3B compatibility mode.  It runs
@@ -47,6 +47,11 @@ enables VPP.  /TRACE is deliberately rejected for writes because trace file
 overhead could violate the sequence's 150 us maximum byte-load interval.
 The DOS build emits each four-load sequence through a compact direct-LPT
 assembly routine specifically to meet that limit on the V30.
+Hardware interrupts are masked only during each four-load command burst and
+the previous interrupt state is restored immediately afterward.  A failed
+byte gets one late read check and at most three total programming attempts.
+The log reports retry bytes, total retries, and late completions; repeated
+retries identify a marginal used EEPROM even when final verification passes.
 
 D28C64 is a non-writing socket diagnostic.  REMOVE THE CHIP before running it.
 It pauses while holding the 28C64 control pins in measurable states.  Follow
