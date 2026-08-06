@@ -7,6 +7,7 @@ GLOBAL _dos_inb
 GLOBAL _dos_wait_us
 GLOBAL _dos_datetime
 GLOBAL _dos_sdp_write
+GLOBAL _dos_bios_ticks
 
 ; void dos_outb(unsigned port, unsigned value)
 _dos_outb:
@@ -117,6 +118,17 @@ _dos_inb:
     in al, dx
     xor ah, ah
     pop bp
+    ret
+
+; unsigned long dos_bios_ticks(void)
+; Read the PIT-channel-0-driven BIOS tick count. bcc returns a 32-bit value
+; in DX:AX. Callers use unsigned subtraction so the midnight wrap is harmless
+; for one programmer operation.
+_dos_bios_ticks:
+    xor ax, ax
+    int 01ah
+    mov ax, dx
+    mov dx, cx
     ret
 
 ; void dos_wait_us(unsigned usec)

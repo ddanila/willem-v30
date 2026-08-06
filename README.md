@@ -1,6 +1,6 @@
 # Willem V30
 
-Current version: `0.0.2`
+Current development version: `0.1.0-dev`
 
 Small, auditable MS-DOS tools for classic LPT-connected Willem EPROM
 programmers, targeting the NEC V20/V30 and 8086 instruction set.
@@ -46,8 +46,8 @@ present but remains locked until the host validator creates `WRITE.OK` from two
 matching known-Juku physical reads.
 
 ```text
-WILLEM R2764  OUT.BIN [378] [/TRACE]
-WILLEM R28C64 OUT.BIN [378] [/TRACE]
+WILLEM R2764  OUT.BIN [378] [/PROFILE:name] [/TRACE]
+WILLEM R28C64 OUT.BIN [378] [/PROFILE:name] [/TRACE]
 WILLEM B2764          [378] [/TRACE]
 WILLEM B28C64         [378] [/TRACE]
 WILLEM V2764  ROM.BIN [378] [/TRACE]
@@ -60,6 +60,15 @@ prints and logs a visual 12-switch DIP diagram. Geepro's mask maps bit 0 to
 physical switch 1; follow the numbering and the `ON` mark printed on the DIP
 bank. Verification images must be exactly 8192 bytes.
 
+Read commands accept audited runtime timing tables through `/PROFILE:name`.
+The ordered experimental sequence is `conservative,address2,oe2,latch2,`
+`balanced,address1,oe1,latch1,fast`; each adjacent table changes exactly one
+dimension. Omitting the option selects `legacy`, which preserves the original
+read delays. Exact parameters, build ID, and the local PIT-driven elapsed time
+are written as `DOSRAVI_PROFILE` and `DOSRAVI_METRIC` records. These profiles
+are experimental until physical ten-read acceptance establishes a guarded
+baseline; see [`docs/timing-profiles.md`](docs/timing-profiles.md).
+
 `W28C64` additionally requires an explicit `/WRITE` and a valid `WRITE.OK` in
 the current DOS directory. The normal distribution intentionally contains no
 token. A successful `validate_read.py --unlock WRITE.OK ...` run creates it;
@@ -70,6 +79,9 @@ SDP protected-write sequence, and performs a complete post-write verification.
 Interrupts are masked only across each four-load SDP burst. Each byte receives
 at most three total attempts, with retry and late-completion counts logged so
 marginal used EEPROMs remain visible rather than being silently accepted.
+The final log also contains a machine-readable `DOSRAVI_WRITE_METRIC` with
+separate PIT-driven programming and full-verification times, byte/retry counts,
+image CRC-32, and build ID.
 
 ## Build and test
 

@@ -203,6 +203,24 @@ int main()
     printf("virtual 28C64 read passed: %u bytes, %lu status reads\n",
            ROM_SIZE, v.status_reads);
 
+    /* Runtime timing tables must drive every named read dimension through the
+       portable core, including the device power-stabilization delay. */
+    v.delay_us = 0;
+    wl_set_read_timing(&wl, 2, 3, 4, 5, 7);
+    wl_begin_2764_read(&wl);
+    actual = wl_read_byte(&wl, 0x0123U);
+    if (actual != pattern(0x0123U) || v.delay_us != 7097UL) {
+        fprintf(stderr, "profile timing mismatch: data=%02x delay=%lu\n",
+                actual, v.delay_us);
+        return 1;
+    }
+    wl_end_read(&wl);
+    printf("virtual runtime read profile passed: exact delay accounting\n");
+
+    /* Restore the legacy defaults before exercising write paths, which do not
+       consume experimental read timing profiles. */
+    wl_set_read_timing(&wl, 0, 1, 1, 1, 0);
+
     memset(v.rom, 0xff, sizeof(v.rom));
     v.byte_writes = 0;
     wl_begin_28c64_write(&wl);

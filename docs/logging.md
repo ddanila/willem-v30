@@ -22,6 +22,19 @@ provides them. Each run records at least:
 - every error and the final safe-shutdown state;
 - exit/result code.
 
+Read runs additionally emit these stable machine-readable lines for DOSRAVI:
+
+```text
+DOSRAVI_PROFILE name=NAME address_setup_us=N oe_settle_us=N input_latch_us=N input_clock_us=N power_on_ms=N build_id=ID
+DOSRAVI_METRIC read_ms=N profile=NAME
+```
+
+Write runs emit one `DOSRAVI_WRITE_METRIC` before safe shutdown, containing
+separate local programming and full-verification milliseconds, changed and
+unchanged byte counts, retry/late counts, image CRC-32, and build ID. These
+elapsed values come from the PIT-channel-0-driven BIOS clock and never include
+serial transfer or DOSRAVI process-launch time.
+
 The program always attempts safe shutdown and logs it before closing the file.
 It flushes the log after errors and before/after every power-state transition,
 so evidence should survive even if the operator must reset a stuck machine.

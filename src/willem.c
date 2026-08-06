@@ -46,8 +46,30 @@ struct wl_io *io;
     wl->io = *io;
     wl->data = 0;
     wl->control = 0;
+    /* Preserve the pre-profile read behavior until a caller selects a table. */
+    wl->address_setup_us = 0;
+    wl->oe_settle_us = 1;
+    wl->input_latch_us = 1;
+    wl->input_clock_us = 1;
+    wl->power_on_ms = 0;
     data_commit(wl);
     control_commit(wl);
+}
+
+void wl_set_read_timing(wl, address_setup_us, oe_settle_us,
+                        input_latch_us, input_clock_us, power_on_ms)
+struct willem *wl;
+wl_u16 address_setup_us;
+wl_u16 oe_settle_us;
+wl_u16 input_latch_us;
+wl_u16 input_clock_us;
+wl_u16 power_on_ms;
+{
+    wl->address_setup_us = address_setup_us;
+    wl->oe_settle_us = oe_settle_us;
+    wl->input_latch_us = input_latch_us;
+    wl->input_clock_us = input_clock_us;
+    wl->power_on_ms = power_on_ms;
 }
 
 void wl_safe(wl)
@@ -109,6 +131,10 @@ wl_u32 first_bit;
         mask >>= 1;
     }
 
+    /* Allow the completed cascaded address to settle before selecting the
+       socket data path. This is one address-setup interval, not one per bit. */
+    delay_us(wl, wl->address_setup_us);
+
     /* Return the multiplexor to the ROM data path. */
     control_bit(wl, WL_CTL_MUX, 0);
 }
@@ -132,21 +158,21 @@ struct willem *wl;
     control_bit(wl, WL_CTL_MUX, 1);
     data_bit(wl, WL_D2, 1);
     data_bit(wl, WL_D1, 0);
-    delay_us(wl, 1);
+    delay_us(wl, wl->input_latch_us);
     data_bit(wl, WL_D1, 1);
-    delay_us(wl, 1);
+    delay_us(wl, wl->input_latch_us);
     data_bit(wl, WL_D2, 0);
-    delay_us(wl, 1);
+    delay_us(wl, wl->input_latch_us);
     data_bit(wl, WL_D2, 1);
     data_bit(wl, WL_D1, 0);
 
     for (bit = 0x80; bit != 0; bit >>= 1) {
-        delay_us(wl, 1);
+        delay_us(wl, wl->input_clock_us);
         /* The Willem input chain and PC ACK input are active-low. */
         if (!(wl->io.status_read(wl->io.ctx) & WL_ST_ACK))
             value |= (wl_u8)bit;
         data_bit(wl, WL_D2, 0);
-        delay_us(wl, 1);
+        delay_us(wl, wl->input_clock_us);
         data_bit(wl, WL_D2, 1);
     }
     return value;
@@ -159,7 +185,7 @@ wl_u16 address;
     wl_u8 value;
     wl_set_address(wl, (wl_u32)address, WL_ADDR_FIRST_BIT);
     wl_oe(wl, 0);
-    delay_us(wl, 1);
+    delay_us(wl, wl->oe_settle_us);
     value = wl_get_data(wl);
     wl_oe(wl, 1);
     return value;
@@ -168,25 +194,34 @@ wl_u16 address;
 void wl_begin_2764_read(wl)
 struct willem *wl;
 {
+    wl_u16 milliseconds;
     wl_vpp(wl, 0);
     wl_vcc(wl, 1);
     wl_oe(wl, 0);
     wl_we(wl, 1); /* DIP routing makes pin 17 the 2764 CE control. */
-    delay_us(wl, 5000);
+    milliseconds = wl->power_on_ms ? wl->power_on_ms : 5;
+    while (milliseconds >= 50) {
+        delay_us(wl, 50000);
+        milliseconds -= 50;
+    }
+    if (milliseconds) delay_us(wl, (int)milliseconds * 1000);
 }
 
 void wl_begin_28c64_read(wl)
 struct willem *wl;
 {
+    wl_u16 milliseconds;
     wl_vpp(wl, 0);
     wl_we(wl, 1);
     wl_oe(wl, 1);
     wl_vcc(wl, 1);
     /* Geepro allows 200 ms after enabling 5 V for the 2864 family. */
-    delay_us(wl, 50000);
-    delay_us(wl, 50000);
-    delay_us(wl, 50000);
-    delay_us(wl, 50000);
+    milliseconds = wl->power_on_ms ? wl->power_on_ms : 200;
+    while (milliseconds >= 50) {
+        delay_us(wl, 50000);
+        milliseconds -= 50;
+    }
+    if (milliseconds) delay_us(wl, (int)milliseconds * 1000);
     wl_oe(wl, 0);
     wl_we(wl, 1);
 }

@@ -29,9 +29,17 @@ struct willem {
     struct wl_io io;
     wl_u8 data;
     wl_u8 control; /* logical connector levels, before WL_CTL_XOR */
+    wl_u16 address_setup_us;
+    wl_u16 oe_settle_us;
+    wl_u16 input_latch_us;
+    wl_u16 input_clock_us;
+    wl_u16 power_on_ms;
 };
 
 void wl_init(struct willem *wl, struct wl_io *io);
+void wl_set_read_timing(struct willem *wl, wl_u16 address_setup_us,
+                        wl_u16 oe_settle_us, wl_u16 input_latch_us,
+                        wl_u16 input_clock_us, wl_u16 power_on_ms);
 void wl_safe(struct willem *wl);
 void wl_vcc(struct willem *wl, int on);
 void wl_vpp(struct willem *wl, int on);

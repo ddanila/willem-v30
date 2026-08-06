@@ -8,7 +8,10 @@
 #define LOG_NAME "WILLEM.LOG"
 #define TRACE_NAME "WTRACE.BIN"
 #define WRITE_GATE_NAME "WRITE.OK"
-#define WILLEM_VERSION "0.0.5"
+#define WILLEM_VERSION "0.1.0-dev"
+#ifndef WILLEM_BUILD_ID
+#define WILLEM_BUILD_ID "dosravi-profiles-v1"
+#endif
 
 #define ACTION_READ 1
 #define ACTION_BLANK 2
@@ -23,6 +26,32 @@ extern unsigned dos_inb(unsigned port);
 extern void dos_wait_us(unsigned usec);
 extern void dos_datetime(unsigned *fields);
 extern void dos_sdp_write(unsigned base, unsigned address, unsigned value);
+extern unsigned long dos_bios_ticks(void);
+
+struct read_profile {
+    char *name;
+    unsigned address_setup_us;
+    unsigned oe_settle_us;
+    unsigned input_latch_us;
+    unsigned input_clock_us;
+    unsigned power_2764_ms;
+    unsigned power_28c64_ms;
+};
+
+/* Adjacent experimental profiles change one timing dimension. The legacy
+   entry exactly preserves the pre-profile read path for comparison. */
+static struct read_profile read_profiles[] = {
+    {"legacy",       0, 1, 1, 1, 5, 200},
+    {"conservative", 4, 4, 4, 4, 5, 200},
+    {"address2",     2, 4, 4, 4, 5, 200},
+    {"oe2",          2, 2, 4, 4, 5, 200},
+    {"latch2",       2, 2, 2, 4, 5, 200},
+    {"balanced",     2, 2, 2, 2, 5, 200},
+    {"address1",     1, 2, 2, 2, 5, 200},
+    {"oe1",          1, 1, 2, 2, 5, 200},
+    {"latch1",       1, 1, 1, 2, 5, 200},
+    {"fast",         1, 1, 1, 1, 5, 200}
+};
 
 struct dos_context {
     unsigned base;
@@ -147,6 +176,21 @@ unsigned size;
     return crc;
 }
 
+static unsigned long crc32(data, size)
+unsigned char *data;
+unsigned size;
+{
+    unsigned long crc;
+    unsigned i, bit;
+    crc = 0xffffffffUL;
+    for (i = 0; i < size; i++) {
+        crc ^= data[i];
+        for (bit = 0; bit < 8; bit++)
+            crc = (crc & 1UL) ? (crc >> 1) ^ 0xedb88320UL : crc >> 1;
+    }
+    return crc ^ 0xffffffffUL;
+}
+
 static unsigned parse_base(text)
 char *text;
 {
@@ -170,6 +214,30 @@ char *right;
         if (a != b) return 0;
     }
     return *left == *right;
+}
+
+static char *profile_value(option)
+char *option;
+{
+    char *prefix;
+    unsigned char a, b;
+    prefix = "/PROFILE:";
+    while (*prefix && *option) {
+        a = (unsigned char)*option++;
+        b = (unsigned char)*prefix++;
+        if (a >= 'a' && a <= 'z') a -= 'a' - 'A';
+        if (a != b) return 0;
+    }
+    return *prefix ? 0 : option;
+}
+
+static struct read_profile *find_profile(name)
+char *name;
+{
+    unsigned i;
+    for (i = 0; i < sizeof(read_profiles) / sizeof(read_profiles[0]); i++)
+        if (same_command(name, read_profiles[i].name)) return &read_profiles[i];
+    return 0;
 }
 
 static int wants_trace(argc, argv)
@@ -249,8 +317,8 @@ struct dos_context *ctx;
 static void usage()
 {
     puts("WILLEM V30 read/check/gated-write utility");
-    puts("Usage: WILLEM R2764 output.bin [base] [/TRACE]");
-    puts("       WILLEM R28C64 output.bin [base] [/TRACE]");
+    puts("Usage: WILLEM R2764 output.bin [base] [/PROFILE:name] [/TRACE]");
+    puts("       WILLEM R28C64 output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM B2764 [base] [/TRACE]");
     puts("       WILLEM B28C64 [base] [/TRACE]");
     puts("       WILLEM V2764 image.bin [base] [/TRACE]");
@@ -415,9 +483,14 @@ char **argv;
     char *image_name;
     unsigned address, base, crc, mismatch_count, written, unchanged;
     unsigned retry_bytes, total_retries, late_bytes;
+    unsigned power_on_ms;
+    unsigned long read_started, read_ms, program_started, program_ms;
+    unsigned long verify_started, verify_ms, image_crc32;
     unsigned char actual, expected;
-    int result, action, device, first_option, i, base_seen, powered;
+    int result, action, device, first_option, i, base_seen, powered, profile_seen;
     int write_failed, attempt;
+    char *profile_name;
+    struct read_profile *profile;
 
     result = 1;
     powered = 0;
@@ -425,6 +498,16 @@ char **argv;
     image_name = 0;
     context.trace = 0;
     context.sequence = 0;
+    profile_name = "legacy";
+    profile_seen = 0;
+    profile = 0;
+    read_started = 0;
+    read_ms = 0;
+    program_started = 0;
+    program_ms = 0;
+    verify_started = 0;
+    verify_ms = 0;
+    image_crc32 = 0;
     log_file = open_append(LOG_NAME, 0);
     logmsg("================ BEGIN RUN ================");
     logmsg("Willem V30 version %s; 8086-compatible; 24-bit address build",
@@ -455,17 +538,35 @@ char **argv;
     base = 0x378;
     base_seen = 0;
     for (i = first_option; i < argc; i++) {
+        char *selected;
         if (same_command(argv[i], "/TRACE") ||
             same_command(argv[i], "-TRACE")) continue;
         if (action == ACTION_WRITE &&
             (same_command(argv[i], "/WRITE") ||
              same_command(argv[i], "-WRITE"))) continue;
+        selected = profile_value(argv[i]);
+        if (selected) {
+            if (action != ACTION_READ || !*selected || profile_seen) {
+                usage();
+                logmsg("ERROR: /PROFILE is read-only and may appear once");
+                goto done;
+            }
+            profile_name = selected;
+            profile_seen = 1;
+            continue;
+        }
         if (base_seen || !(base = parse_base(argv[i]))) {
             usage();
             logmsg("ERROR: invalid or duplicate option <%s>", argv[i]);
             goto done;
         }
         base_seen = 1;
+    }
+    profile = find_profile(profile_name);
+    if (action == ACTION_READ && !profile) {
+        usage();
+        logmsg("ERROR: unknown read profile <%s>", profile_name);
+        goto done;
     }
 
     context.base = base;
@@ -524,6 +625,18 @@ char **argv;
     io.delay_us = port_delay;
     wl_init(&wl, &io);
 
+    power_on_ms = device == DEVICE_2764 ? 5U : 200U;
+    if (action == ACTION_READ) {
+        wl_set_read_timing(&wl, profile->address_setup_us,
+                           profile->oe_settle_us,
+                           profile->input_latch_us,
+                           profile->input_clock_us, power_on_ms);
+        logmsg("DOSRAVI_PROFILE name=%s address_setup_us=%u oe_settle_us=%u input_latch_us=%u input_clock_us=%u power_on_ms=%u build_id=%s",
+               profile->name, profile->address_setup_us,
+               profile->oe_settle_us, profile->input_latch_us,
+               profile->input_clock_us, power_on_ms, WILLEM_BUILD_ID);
+    }
+
     logmsg("Operation=%s device=%s image=%s LPT=%03Xh trace=%s",
            action_name(action), device_name(device),
            image_name ? image_name : "(none)", base,
@@ -545,6 +658,7 @@ char **argv;
     }
 
     logmsg("Power transition: enabling VCC, VPP off");
+    if (action == ACTION_READ) read_started = dos_bios_ticks();
     if (action == ACTION_WRITE) wl_begin_28c64_write(&wl);
     else if (device == DEVICE_2764) wl_begin_2764_read(&wl);
     else wl_begin_28c64_read(&wl);
@@ -559,8 +673,10 @@ char **argv;
     late_bytes = 0;
     if (action == ACTION_WRITE) {
         crc = crc16(rom_buffer, ROM_SIZE);
+        image_crc32 = crc32(rom_buffer, ROM_SIZE);
         logmsg("SDP protected programming begins: bytes=%u image CRC16-CCITT=%04X",
                ROM_SIZE, crc);
+        program_started = dos_bios_ticks();
         for (address = 0; address < ROM_SIZE; address++) {
             actual = wl_read_byte(&wl, address);
             if (actual == rom_buffer[address]) {
@@ -604,9 +720,11 @@ char **argv;
                 logmsg("Write progress: %u/%u bytes, written=%u unchanged=%u",
                        address + 1, ROM_SIZE, written, unchanged);
         }
+        program_ms = (dos_bios_ticks() - program_started) * 55UL;
         if (!write_failed) {
             logmsg("Programming pass complete: written=%u unchanged=%u retry-bytes=%u retries=%u late=%u",
                    written, unchanged, retry_bytes, total_retries, late_bytes);
+            verify_started = dos_bios_ticks();
             for (address = 0; address < ROM_SIZE; address++) {
                 actual = wl_read_byte(&wl, address);
                 expected = rom_buffer[address];
@@ -620,6 +738,7 @@ char **argv;
                     logmsg("Post-write verify: %u/%u bytes", address + 1,
                            ROM_SIZE);
             }
+            verify_ms = (dos_bios_ticks() - verify_started) * 55UL;
         }
     } else {
         for (address = 0; address < ROM_SIZE; address++) {
@@ -638,6 +757,16 @@ char **argv;
             if ((address & 0x01ffU) == 0x01ffU)
                 logmsg("Scan progress: %u/%u bytes", address + 1, ROM_SIZE);
         }
+    }
+
+    if (action == ACTION_READ) {
+        read_ms = (dos_bios_ticks() - read_started) * 55UL;
+        logmsg("DOSRAVI_METRIC read_ms=%lu profile=%s", read_ms,
+               profile->name);
+    } else if (action == ACTION_WRITE) {
+        logmsg("DOSRAVI_WRITE_METRIC program_ms=%lu verify_ms=%lu changed=%u unchanged=%u retry_bytes=%u retries=%u late=%u image_crc32=%08lX build_id=%s",
+               program_ms, verify_ms, written, unchanged, retry_bytes,
+               total_retries, late_bytes, image_crc32, WILLEM_BUILD_ID);
     }
 
     logmsg("Power transition: safe shutdown begins");
