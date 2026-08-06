@@ -10,7 +10,7 @@
 #define WRITE_GATE_NAME "WRITE.OK"
 #define WILLEM_VERSION "0.1.0-dev"
 #ifndef WILLEM_BUILD_ID
-#define WILLEM_BUILD_ID "dosravi-profiles-v1"
+#define WILLEM_BUILD_ID "dosravi-profiles-v2"
 #endif
 
 #define ACTION_READ 1
@@ -50,7 +50,8 @@ static struct read_profile read_profiles[] = {
     {"address1",     1, 2, 2, 2, 5, 200},
     {"oe1",          1, 1, 2, 2, 5, 200},
     {"latch1",       1, 1, 1, 2, 5, 200},
-    {"fast",         1, 1, 1, 1, 5, 200}
+    {"fast",         1, 1, 1, 1, 5, 200},
+    {"powerfast",    1, 1, 1, 1, 4, 150}
 };
 
 struct dos_context {
@@ -627,6 +628,8 @@ char **argv;
 
     power_on_ms = device == DEVICE_2764 ? 5U : 200U;
     if (action == ACTION_READ) {
+        power_on_ms = device == DEVICE_2764 ? profile->power_2764_ms
+                                            : profile->power_28c64_ms;
         wl_set_read_timing(&wl, profile->address_setup_us,
                            profile->oe_settle_us,
                            profile->input_latch_us,

@@ -62,8 +62,8 @@ bank. Verification images must be exactly 8192 bytes.
 
 Read commands accept audited runtime timing tables through `/PROFILE:name`.
 The ordered experimental sequence is `conservative,address2,oe2,latch2,`
-`balanced,address1,oe1,latch1,fast`; each adjacent table changes exactly one
-dimension. Omitting the option selects `legacy`, which preserves the original
+`balanced,address1,oe1,latch1,fast,powerfast`; each adjacent table changes
+exactly one dimension. Omitting the option selects `legacy`, which preserves the original
 read delays. Exact parameters, build ID, and the local PIT-driven elapsed time
 are written as `DOSRAVI_PROFILE` and `DOSRAVI_METRIC` records. These profiles
 are experimental until physical ten-read acceptance establishes a guarded

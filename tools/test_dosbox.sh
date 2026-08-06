@@ -41,7 +41,7 @@ run_dosbox() {
         -c "c:"
         -c "WILLEM R2764 R2764.BIN 378"
         -c "WILLEM R2764 PROFILE.BIN 378 /PROFILE:conservative"
-        -c "WILLEM R28C64 R28C64.BIN 378"
+        -c "WILLEM R28C64 R28C64.BIN 378 /PROFILE:powerfast"
         -c "WILLEM V2764 ZERO.BIN 378"
         -c "WILLEM V28C64 ZERO.BIN 378"
         -c "WILLEM B2764 378"
@@ -81,15 +81,17 @@ run_dosbox() {
     cmp "$drive/ZERO.BIN" "$drive/PROFILE.BIN"
     cmp "$drive/ZERO.BIN" "$drive/R28C64.BIN"
     [[ $(grep -c 'Read complete: bytes=8192' "$drive/WILLEM.LOG") == 3 ]]
-    [[ $(grep -c 'DOSRAVI_PROFILE name=conservative address_setup_us=4 oe_settle_us=4 input_latch_us=4 input_clock_us=4 power_on_ms=5 build_id=dosravi-profiles-v1' "$drive/WILLEM.LOG") == 1 ]]
+    [[ $(grep -c 'DOSRAVI_PROFILE name=conservative address_setup_us=4 oe_settle_us=4 input_latch_us=4 input_clock_us=4 power_on_ms=5 build_id=dosravi-profiles-v2' "$drive/WILLEM.LOG") == 1 ]]
     [[ $(grep -Ec 'DOSRAVI_METRIC read_ms=[1-9][0-9]* profile=conservative' "$drive/WILLEM.LOG") == 1 ]]
+    [[ $(grep -c 'DOSRAVI_PROFILE name=powerfast address_setup_us=1 oe_settle_us=1 input_latch_us=1 input_clock_us=1 power_on_ms=150 build_id=dosravi-profiles-v2' "$drive/WILLEM.LOG") == 1 ]]
+    [[ $(grep -Ec 'DOSRAVI_METRIC read_ms=[1-9][0-9]* profile=powerfast' "$drive/WILLEM.LOG") == 1 ]]
     [[ $(grep -c 'ERROR: unknown read profile <unknown>' "$drive/WILLEM.LOG") == 1 ]]
     [[ $(grep -c 'VERIFY PASSED: all 8192 bytes match ZERO.BIN' "$drive/WILLEM.LOG") == 2 ]]
     [[ $(grep -c 'BLANK FAILED: mismatches=8192' "$drive/WILLEM.LOG") == 2 ]]
     [[ $(grep -c 'Safe shutdown complete: VCC off, VPP off' "$drive/WILLEM.LOG") == 9 ]]
     [[ $(grep -c 'physical read gate is locked' "$drive/WILLEM.LOG") == 1 ]]
     [[ $(grep -c 'WRITE PASSED: programmed=0 unchanged=8192 verified=8192' "$drive/WILLEM.LOG") == 1 ]]
-    [[ $(grep -Ec 'DOSRAVI_WRITE_METRIC program_ms=[0-9]+ verify_ms=[0-9]+ changed=0 unchanged=8192 retry_bytes=0 retries=0 late=0 image_crc32=[0-9A-Fa-f]{8} build_id=dosravi-profiles-v1' "$drive/WILLEM.LOG") == 1 ]]
+    [[ $(grep -Ec 'DOSRAVI_WRITE_METRIC program_ms=[0-9]+ verify_ms=[0-9]+ changed=0 unchanged=8192 retry_bytes=0 retries=0 late=0 image_crc32=[0-9A-Fa-f]{8} build_id=dosravi-profiles-v2' "$drive/WILLEM.LOG") == 1 ]]
     [[ $(grep -c 'DIP ON.*\[X\]\[X\]\[ \]\[X\]\[ \]\[X\]\[ \]\[ \]\[X\]' "$drive/WILLEM.LOG") == 9 ]]
     [[ $(grep -c 'Leave TWO complete rows empty at lever end' "$drive/WILLEM.LOG") == 9 ]]
     [[ $(grep -c 'Diagnostic complete; power transition: safe shutdown begins' "$drive/WILLEM.LOG") == 1 ]]

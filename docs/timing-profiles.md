@@ -4,22 +4,23 @@
 arbitrary delay values and do not alter write pulses, SDP loads, completion
 polling, VPP policy, or write authorization gates.
 
-| Profile | Address settle (us) | OE settle (us) | Input latch (us) | Input clock (us) |
-|---|---:|---:|---:|---:|
-| `legacy` | 0 | 1 | 1 | 1 |
-| `conservative` | 4 | 4 | 4 | 4 |
-| `address2` | 2 | 4 | 4 | 4 |
-| `oe2` | 2 | 2 | 4 | 4 |
-| `latch2` | 2 | 2 | 2 | 4 |
-| `balanced` | 2 | 2 | 2 | 2 |
-| `address1` | 1 | 2 | 2 | 2 |
-| `oe1` | 1 | 1 | 2 | 2 |
-| `latch1` | 1 | 1 | 1 | 2 |
-| `fast` | 1 | 1 | 1 | 1 |
+| Profile | Address settle (us) | OE settle (us) | Input latch (us) | Input clock (us) | 2764 power (ms) | 28C64 power (ms) |
+|---|---:|---:|---:|---:|---:|---:|
+| `legacy` | 0 | 1 | 1 | 1 | 5 | 200 |
+| `conservative` | 4 | 4 | 4 | 4 | 5 | 200 |
+| `address2` | 2 | 4 | 4 | 4 | 5 | 200 |
+| `oe2` | 2 | 2 | 4 | 4 | 5 | 200 |
+| `latch2` | 2 | 2 | 2 | 4 | 5 | 200 |
+| `balanced` | 2 | 2 | 2 | 2 | 5 | 200 |
+| `address1` | 1 | 2 | 2 | 2 | 5 | 200 |
+| `oe1` | 1 | 1 | 2 | 2 | 5 | 200 |
+| `latch1` | 1 | 1 | 1 | 2 | 5 | 200 |
+| `fast` | 1 | 1 | 1 | 1 | 5 | 200 |
+| `powerfast` | 1 | 1 | 1 | 1 | 4 | 150 |
 
-Power-on stabilization remains fixed across the sweep: 5 ms for 2764/27C64
-and 200 ms for AT28C64. Adjacent experimental rows change one dimension only.
-The `legacy` row is a compatibility reference and is not part of that adjacent
+Adjacent experimental rows change one dimension only. The final `powerfast`
+row is the sole power-stabilization reduction and remains read-only. The
+`legacy` row is a compatibility reference and is not part of the adjacent
 one-variable sweep.
 
 Address settling is applied once after all 24 cascaded address bits have been
