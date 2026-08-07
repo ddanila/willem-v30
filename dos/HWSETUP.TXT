@@ -50,6 +50,33 @@ AT28C64 CONTROL DIAGNOSTIC DIP MASK 12BH
   ON : 1 2 4 6 9
   OFF: 3 5 7 8 10 11 12
 
+K573RF5 / 2716 READ-ONLY SETUP
+-------------------------------
+
+POWER OFF before changing anything.  Leave J9+J10 in the proven PCB3B
+position above.  Set the separate address-routing headers J1 and J2 beside
+the ZIF to the manual's 2716 pattern: both shunts on the ZIF-side pair.  Do
+not use the Normal 28-pin route.
+
+K573RF5/2716 DIP MASK 1A3H
+  ON : 1 2 6 8 9
+  OFF: 3 4 5 7 10 11 12
+
+Place the 24-pin chip against the ZIF end opposite the lever.  Leave FOUR
+complete contact rows empty at the lever end, not two and not centered:
+
+ZIF PAIR:    1/32  2/31  3/30  4/29  5/28 ... 16/17
+CHIP PAIR:    -/-   -/-   -/-   -/-  1/24 ... 12/13
+
+Point the chip notch toward the four empty rows and lever.  Retain 5 V VCC,
+the working barrel-power setup, and USB disconnected.  The only RF5 command
+is read-only and creates exactly 2048 bytes:
+
+  WILLEM RRF5 RF5A.BIN 378 /PROFILE:conservative
+
+There is deliberately no RF5 write command.  The utility keeps software VPP
+off throughout the read and safely turns VCC off before saving the file.
+
 Run WILLEM D28C64 /TRACE only with the chip removed.  It holds control signals
 long enough to measure them and never issues an EEPROM write cycle.
 

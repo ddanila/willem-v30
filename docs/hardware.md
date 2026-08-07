@@ -19,9 +19,9 @@ the existing software to access the inserted 2764, whereas the unpowered board
 does not. The adapter's current rating and polarity remain to be recorded from
 its label.
 
-## Confirmed common settings
+## Confirmed 28-pin settings
 
-Both supported devices are 28-pin JEDEC parts placed at the end of the 32-pin
+The 2764 and AT28C64 are 28-pin JEDEC parts placed at the end of the 32-pin
 ZIF opposite its lever/pivot. They are not centered. Leave the first two
 physical contact pairs at the lever/notch end empty:
 
@@ -53,6 +53,34 @@ For both read-only device families:
 The 2764/27C64 and AT28C64 DIP mask is `12Bh` (ON: 1, 2, 4, 6, 9).
 AT28C64 control-pin measurements confirmed the required idle, read, and write
 levels with this setting. Mask bit 0 maps to numbered switch 1 in Geepro.
+
+## К573РФ5 / 2716 read-only settings
+
+К573РФ5 is a 24-pin, 2K x 8 2716-class EPROM. It must not use the normal
+28-pin route above. With all power removed:
+
+- keep J9+J10 in the already proven PCB3B position, both shunts toward DB25;
+- set the address-routing headers J1 and J2 beside the ZIF to the manual's
+  special `2716` pattern (both shunts on the ZIF-side pair), not `Normal`;
+- set DIP mask `1A3h`: ON 1, 2, 6, 8, 9; OFF 3, 4, 5, 7, 10, 11, 12;
+- retain 5 V VCC, the known barrel-power selection, USB disconnected, and the
+  existing safe VPP-selector setting;
+- place the 24-pin chip against the ZIF end opposite the lever, leaving four
+  complete contact pairs empty at the lever/notch end; the chip notch faces
+  those empty rows and the lever.
+
+```text
+lever/notch end
+ZIF contact pair:    1/32  2/31  3/30  4/29  5/28 ... 16/17
+24-pin chip pair:     -/-   -/-   -/-   -/-  1/24 ... 12/13
+                                                       far end
+```
+
+Do not confuse J1/J2 beside the ZIF with the DB25-side J9/J10 compatibility
+selector. Never move either pair while powered. `RRF5` is the only RF5 command:
+it reads addresses `0000h` through `07FFh`, never enables software VPP, writes
+exactly 2048 bytes to the output file, and performs a safe VCC/VPP shutdown
+before saving the result.
 
 ## PCB3B compatibility selector (`J9` + `J10` on this board)
 
@@ -162,3 +190,6 @@ or D16 before comparing it.
 - [PCB5.0E setup manual with J9/J10 and ADAPT/USB diagrams](https://supereyes.ru/img/instructions/WILLEM_PCB50E_models.pdf)
 - [PCB5.0E J4 field report](https://www.retrobrewcomputers.org/n8vem-gg-archive/html-2011/Apr/msg00267.html)
 - [Report of a clone with reversed selector behavior](https://modelrail.otenko.com/2020/07)
+- [Pinned Geepro 2716 device entry](https://github.com/danielg4/geepro/blob/a08efcaf6479730d552c5f96bad0a2a01bf0635f/drivers/willem.xml)
+- [Pinned Geepro 2716 read implementation](https://github.com/danielg4/geepro/blob/a08efcaf6479730d552c5f96bad0a2a01bf0635f/chips/27xx.cpp)
+- [Intel 2716 data sheet](https://www.theoddys.com/acorn/semiconductor_datasheets/2716%20Intel.pdf)

@@ -10,6 +10,7 @@ code, data, heap, and stack within one 64 KiB segment.
 The initial hardware target is a Willem PCB5.0E operating in its PCB3B
 compatibility mode. The initial device targets are:
 
+- К573РФ5/2716: dedicated 2 KiB read-only path
 - 2764/27C64: read, blank-check, and verify first
 - AT28C64: read, blank-check, program, and verify
 
@@ -46,6 +47,7 @@ present but remains locked until the host validator creates `WRITE.OK` from two
 matching known-Juku physical reads.
 
 ```text
+WILLEM RRF5   OUT.BIN [378] [/PROFILE:name] [/TRACE]
 WILLEM R2764  OUT.BIN [378] [/PROFILE:name] [/TRACE]
 WILLEM R28C64 OUT.BIN [378] [/PROFILE:name] [/TRACE]
 WILLEM B2764          [378] [/TRACE]
@@ -58,7 +60,9 @@ WILLEM W28C64 ROM.BIN [378] /WRITE
 The optional LPT base is hexadecimal and defaults to `378`. Every operation
 prints and logs a visual 12-switch DIP diagram. Geepro's mask maps bit 0 to
 physical switch 1; follow the numbering and the `ON` mark printed on the DIP
-bank. Verification images must be exactly 8192 bytes.
+bank. `RRF5` always creates exactly 2048 bytes and has no corresponding
+blank, verify, or write command. Verification images for the other devices
+must be exactly 8192 bytes.
 
 Read commands accept audited runtime timing tables through `/PROFILE:name`.
 The ordered experimental sequence is `conservative,address2,oe2,latch2,`

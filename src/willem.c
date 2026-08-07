@@ -191,6 +191,24 @@ wl_u16 address;
     return value;
 }
 
+void wl_begin_2716_read(wl)
+struct willem *wl;
+{
+    wl_u16 milliseconds;
+    /* Geepro's 2716 route holds the DB-25 pin 17 CE/PGM path low while
+       reading. VPP remains disconnected for the entire operation. */
+    wl_vpp(wl, 0);
+    wl_vcc(wl, 1);
+    wl_oe(wl, 0);
+    wl_we(wl, 0);
+    milliseconds = wl->power_on_ms ? wl->power_on_ms : 5;
+    while (milliseconds >= 50) {
+        delay_us(wl, 50000);
+        milliseconds -= 50;
+    }
+    if (milliseconds) delay_us(wl, (int)milliseconds * 1000);
+}
+
 void wl_begin_2764_read(wl)
 struct willem *wl;
 {

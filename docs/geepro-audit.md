@@ -40,6 +40,21 @@ OE. `wl_begin_2764_read` and `wl_read_byte` reproduce those transitions. Both
 finish with VPP off, VCC off, address zero, and data zero. The DOS port adds
 hardware-clocked minimum delays but does not change the signal order.
 
+## К573РФ5 / 2716 read sequence
+
+The pinned Geepro tree registers 2716 as a 2 KiB, 24-pin EPROM and uses DIP
+mask `1A3h` (ON: 1, 2, 6, 8, 9). Its read operation calls
+`start_action(0, 0)`: software VPP off, VCC on, OE in the initial low state,
+and the DB25 pin-17 CE/PGM route low. It then uses the same per-byte address,
+OE, and input-register sequence as 2764. `wl_begin_2716_read` reproduces that
+distinct CE state; the DOS front end exposes it only as the 2048-byte `RRF5`
+read command.
+
+The PCB5.0E manual's 2716 column and Geepro's `willem_2716.png` agree on the
+special J1/J2 address route and bottom-aligned 24-pin placement. К573РФ5 is
+documented as a 2716 analogue; the Intel 2716 is a 2K x 8 device using one
++5 V supply for reading.
+
 ## AT28C64 read and write
 
 Geepro's

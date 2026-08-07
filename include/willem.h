@@ -48,6 +48,7 @@ void wl_we(struct willem *wl, int asserted);
 void wl_set_address(struct willem *wl, wl_u32 address, wl_u32 first_bit);
 void wl_set_data(struct willem *wl, int value);
 wl_u8 wl_get_data(struct willem *wl);
+void wl_begin_2716_read(struct willem *wl);
 void wl_begin_2764_read(struct willem *wl);
 void wl_begin_28c64_read(struct willem *wl);
 void wl_begin_28c64_write(struct willem *wl);

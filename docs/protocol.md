@@ -74,6 +74,7 @@ Geepro's checked-in runtime `willem.xml` contains these 12-switch masks:
 
 | Device family | DIP mask |
 |---|---:|
+| 2716 / К573РФ5 | `1A3h` |
 | 2764/27128 | `12Bh` |
 | M28C64/2864 | `12Bh` (physically validated; template value) |
 
@@ -85,6 +86,7 @@ Consequently the settings displayed by the DOS utility are:
 
 | Device family | Switches ON | Switches OFF |
 |---|---|---|
+| К573РФ5 / 2716 | 1, 2, 6, 8, 9 | 3, 4, 5, 7, 10, 11, 12 |
 | 2764/27C64 | 1, 2, 4, 6, 9 | 3, 5, 7, 8, 10, 11, 12 |
 | AT28C64 | 1, 2, 4, 6, 9 | 3, 5, 7, 8, 10, 11, 12 |
 

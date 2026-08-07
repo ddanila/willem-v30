@@ -5,12 +5,13 @@
 #include "willem.h"
 
 #define ROM_SIZE 8192
+#define RF5_SIZE 2048
 #define LOG_NAME "WILLEM.LOG"
 #define TRACE_NAME "WTRACE.BIN"
 #define WRITE_GATE_NAME "WRITE.OK"
 #define WILLEM_VERSION "0.1.0-dev"
 #ifndef WILLEM_BUILD_ID
-#define WILLEM_BUILD_ID "dosravi-profiles-v2"
+#define WILLEM_BUILD_ID "dosravi-rf5-read-v1"
 #endif
 
 #define ACTION_READ 1
@@ -20,6 +21,7 @@
 #define ACTION_DIAG 5
 #define DEVICE_2764 1
 #define DEVICE_28C64 2
+#define DEVICE_RF5 3
 
 extern void dos_outb(unsigned port, unsigned value);
 extern unsigned dos_inb(unsigned port);
@@ -318,7 +320,8 @@ struct dos_context *ctx;
 static void usage()
 {
     puts("WILLEM V30 read/check/gated-write utility");
-    puts("Usage: WILLEM R2764 output.bin [base] [/PROFILE:name] [/TRACE]");
+    puts("Usage: WILLEM RRF5  output.bin [base] [/PROFILE:name] [/TRACE]");
+    puts("       WILLEM R2764 output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM R28C64 output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM B2764 [base] [/TRACE]");
     puts("       WILLEM B28C64 [base] [/TRACE]");
@@ -333,7 +336,9 @@ char *text;
 int *action;
 int *device;
 {
-    if (same_command(text, "R2764")) {
+    if (same_command(text, "RRF5") || same_command(text, "R2716")) {
+        *action = ACTION_READ; *device = DEVICE_RF5;
+    } else if (same_command(text, "R2764")) {
         *action = ACTION_READ; *device = DEVICE_2764;
     } else if (same_command(text, "R28C64")) {
         *action = ACTION_READ; *device = DEVICE_28C64;
@@ -368,7 +373,20 @@ int action;
 static char *device_name(device)
 int device;
 {
+    if (device == DEVICE_RF5) return "K573RF5/2716";
     return device == DEVICE_2764 ? "2764/27C64" : "AT28C64";
+}
+
+static unsigned device_size(device)
+int device;
+{
+    return device == DEVICE_RF5 ? RF5_SIZE : ROM_SIZE;
+}
+
+static unsigned device_dip_mask(device)
+int device;
+{
+    return device == DEVICE_RF5 ? 0x1a3U : 0x12bU;
 }
 
 static void display_dips(mask)
@@ -396,11 +414,18 @@ unsigned mask;
     logmsg("Set each numbered lever toward the row containing X");
 }
 
-static void display_zif()
+static void display_zif(device)
+int device;
 {
-    logmsg("ZIF pair: lever/notch -> [--][--][1/28] ... [14/15] <- far end");
-    logmsg("Leave TWO complete rows empty at lever end; do NOT center chip");
-    logmsg("Place chip against far end; notch faces empty rows and lever");
+    if (device == DEVICE_RF5) {
+        logmsg("ZIF pair: lever/notch -> [--][--][--][--][1/24] ... [12/13]");
+        logmsg("Leave FOUR rows empty at lever end; place chip at far end");
+        logmsg("Use SPECIAL 2716 route; notch faces empty rows and lever");
+    } else {
+        logmsg("ZIF pair: lever/notch -> [--][--][1/28] ... [14/15] <- far end");
+        logmsg("Leave TWO complete rows empty at lever end; do NOT center chip");
+        logmsg("Place chip against far end; notch faces empty rows and lever");
+    }
 }
 
 static void wait_enter(message)
@@ -484,7 +509,7 @@ char **argv;
     char *image_name;
     unsigned address, base, crc, mismatch_count, written, unchanged;
     unsigned retry_bytes, total_retries, late_bytes;
-    unsigned power_on_ms;
+    unsigned power_on_ms, image_size, dip_mask;
     unsigned long read_started, read_ms, program_started, program_ms;
     unsigned long verify_started, verify_ms, image_crc32;
     unsigned char actual, expected;
@@ -522,6 +547,8 @@ char **argv;
         logmsg("ERROR: invalid command line");
         goto done;
     }
+    image_size = device_size(device);
+    dip_mask = device_dip_mask(device);
 
     if (action == ACTION_READ || action == ACTION_VERIFY ||
         action == ACTION_WRITE) {
@@ -608,9 +635,9 @@ char **argv;
             logmsg("ERROR: cannot open reference image %s", image_name);
             goto close_trace;
         }
-        if (fread(rom_buffer, 1, ROM_SIZE, file) != ROM_SIZE ||
+        if (fread(rom_buffer, 1, image_size, file) != image_size ||
             fgetc(file) != EOF) {
-            logmsg("ERROR: reference image must be exactly %u bytes", ROM_SIZE);
+            logmsg("ERROR: reference image must be exactly %u bytes", image_size);
             fclose(file);
             file = 0;
             goto close_trace;
@@ -626,10 +653,10 @@ char **argv;
     io.delay_us = port_delay;
     wl_init(&wl, &io);
 
-    power_on_ms = device == DEVICE_2764 ? 5U : 200U;
+    power_on_ms = device == DEVICE_28C64 ? 200U : 5U;
     if (action == ACTION_READ) {
-        power_on_ms = device == DEVICE_2764 ? profile->power_2764_ms
-                                            : profile->power_28c64_ms;
+        power_on_ms = device == DEVICE_28C64 ? profile->power_28c64_ms
+                                             : profile->power_2764_ms;
         wl_set_read_timing(&wl, profile->address_setup_us,
                            profile->oe_settle_us,
                            profile->input_latch_us,
@@ -644,9 +671,9 @@ char **argv;
            action_name(action), device_name(device),
            image_name ? image_name : "(none)", base,
            context.trace ? "on" : "off");
-    logmsg("Required DIP mask=12Bh; VPP MUST remain off");
-    display_dips(0x12bU);
-    display_zif();
+    logmsg("Required DIP mask=%03Xh; VPP MUST remain off", dip_mask);
+    display_dips(dip_mask);
+    display_zif(device);
     logmsg("Initial raw DATA=%02X STATUS=%02X CONTROL=%02X",
            dos_inb(base), dos_inb(base + 1), dos_inb(base + 2));
     if (action == ACTION_DIAG) {
@@ -663,6 +690,7 @@ char **argv;
     logmsg("Power transition: enabling VCC, VPP off");
     if (action == ACTION_READ) read_started = dos_bios_ticks();
     if (action == ACTION_WRITE) wl_begin_28c64_write(&wl);
+    else if (device == DEVICE_RF5) wl_begin_2716_read(&wl);
     else if (device == DEVICE_2764) wl_begin_2764_read(&wl);
     else wl_begin_28c64_read(&wl);
     powered = 1;
@@ -675,12 +703,12 @@ char **argv;
     total_retries = 0;
     late_bytes = 0;
     if (action == ACTION_WRITE) {
-        crc = crc16(rom_buffer, ROM_SIZE);
-        image_crc32 = crc32(rom_buffer, ROM_SIZE);
+        crc = crc16(rom_buffer, image_size);
+        image_crc32 = crc32(rom_buffer, image_size);
         logmsg("SDP protected programming begins: bytes=%u image CRC16-CCITT=%04X",
-               ROM_SIZE, crc);
+               image_size, crc);
         program_started = dos_bios_ticks();
-        for (address = 0; address < ROM_SIZE; address++) {
+        for (address = 0; address < image_size; address++) {
             actual = wl_read_byte(&wl, address);
             if (actual == rom_buffer[address]) {
                 unchanged++;
@@ -721,14 +749,14 @@ char **argv;
             }
             if ((address & 0x00ffU) == 0x00ffU)
                 logmsg("Write progress: %u/%u bytes, written=%u unchanged=%u",
-                       address + 1, ROM_SIZE, written, unchanged);
+                       address + 1, image_size, written, unchanged);
         }
         program_ms = (dos_bios_ticks() - program_started) * 55UL;
         if (!write_failed) {
             logmsg("Programming pass complete: written=%u unchanged=%u retry-bytes=%u retries=%u late=%u",
                    written, unchanged, retry_bytes, total_retries, late_bytes);
             verify_started = dos_bios_ticks();
-            for (address = 0; address < ROM_SIZE; address++) {
+            for (address = 0; address < image_size; address++) {
                 actual = wl_read_byte(&wl, address);
                 expected = rom_buffer[address];
                 if (actual != expected) {
@@ -739,12 +767,12 @@ char **argv;
                 }
                 if ((address & 0x01ffU) == 0x01ffU)
                     logmsg("Post-write verify: %u/%u bytes", address + 1,
-                           ROM_SIZE);
+                           image_size);
             }
             verify_ms = (dos_bios_ticks() - verify_started) * 55UL;
         }
     } else {
-        for (address = 0; address < ROM_SIZE; address++) {
+        for (address = 0; address < image_size; address++) {
             actual = wl_read_byte(&wl, address);
             if (action == ACTION_READ) {
                 rom_buffer[address] = actual;
@@ -758,7 +786,7 @@ char **argv;
                 }
             }
             if ((address & 0x01ffU) == 0x01ffU)
-                logmsg("Scan progress: %u/%u bytes", address + 1, ROM_SIZE);
+                logmsg("Scan progress: %u/%u bytes", address + 1, image_size);
         }
     }
 
@@ -787,12 +815,12 @@ char **argv;
             result = 2;
         } else {
             logmsg("WRITE PASSED: programmed=%u unchanged=%u verified=%u retry-bytes=%u retries=%u late=%u",
-                   written, unchanged, ROM_SIZE, retry_bytes, total_retries,
+                   written, unchanged, image_size, retry_bytes, total_retries,
                    late_bytes);
             result = 0;
         }
     } else if (action == ACTION_READ) {
-        if (fwrite(rom_buffer, 1, ROM_SIZE, file) != ROM_SIZE) {
+        if (fwrite(rom_buffer, 1, image_size, file) != image_size) {
             logmsg("ERROR: failed writing output image");
             fclose(file);
             file = 0;
@@ -800,8 +828,8 @@ char **argv;
         }
         fclose(file);
         file = 0;
-        crc = crc16(rom_buffer, ROM_SIZE);
-        logmsg("Read complete: bytes=%u CRC16-CCITT=%04X", ROM_SIZE, crc);
+        crc = crc16(rom_buffer, image_size);
+        logmsg("Read complete: bytes=%u CRC16-CCITT=%04X", image_size, crc);
         result = 0;
     } else if (mismatch_count) {
         logmsg("%s FAILED: mismatches=%u (first 8 shown)",
@@ -809,7 +837,7 @@ char **argv;
         result = 2;
     } else {
         logmsg("%s PASSED: all %u bytes match %s", action_name(action),
-               ROM_SIZE, action == ACTION_BLANK ? "FFh" : image_name);
+               image_size, action == ACTION_BLANK ? "FFh" : image_name);
         result = 0;
     }
 

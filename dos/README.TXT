@@ -1,7 +1,7 @@
 WILLEM V30 DOS UTILITY
 ======================
 
-VERSION 0.0.5
+VERSION 0.1.0-dev
 
 This is an 8086-compatible .COM program for a classic parallel-port Willem
 programmer.  It targets a PCB5.0E set to PCB3B compatibility mode.  It runs
@@ -13,13 +13,15 @@ when reading an 8 KiB 2764 or 28C64.
 CURRENT SAFETY STAGE
 --------------------
 
-This build can read, blank-check, and verify 2764/27C64 and AT28C64 devices.
+This build has a dedicated read-only K573RF5/2716 path.  It can also read,
+blank-check, and verify 2764/27C64 and AT28C64 devices.
 AT28C64 writing is locked until a known Juku 2764 has been read correctly on
 the real programmer and the host validator has created WRITE.OK.
 
 COMMANDS
 --------
 
+WILLEM RRF5   OUT.BIN [378] [/PROFILE:name] [/TRACE]
 WILLEM R2764  OUT.BIN [378] [/TRACE]
 WILLEM R28C64 OUT.BIN [378] [/TRACE]
 WILLEM B2764          [378] [/TRACE]
@@ -29,9 +31,10 @@ WILLEM V28C64 ROM.BIN [378] [/TRACE]
 WILLEM W28C64 ROM.BIN [378] /WRITE [/TRACE]
 WILLEM D28C64         [378] [/TRACE]
 
-The LPT address is hexadecimal and defaults to 378.  A verify image must be
-exactly 8192 bytes.  Result 0 means success, 1 means an error, and 2 means a
-blank-check or verify mismatch.
+The LPT address is hexadecimal and defaults to 378.  RRF5 reads exactly 2048
+bytes and has no blank, verify, or write command.  A verify image for the other
+devices must be exactly 8192 bytes.  Result 0 means success, 1 means an error,
+and 2 means a blank-check or verify mismatch.
 
 The write command requires both /WRITE and WRITE.OK in the current directory.
 The normal kit deliberately has no WRITE.OK.  On the modern host, create it

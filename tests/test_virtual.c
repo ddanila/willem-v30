@@ -4,6 +4,7 @@
 #include "willem.h"
 
 #define ROM_SIZE 8192
+#define RF5_SIZE 2048
 
 struct virtual_willem {
     wl_u8 rom[ROM_SIZE];
@@ -165,6 +166,30 @@ int main()
     io.delay_us = virtual_delay;
 
     wl_init(&wl, &io);
+    wl_begin_2716_read(&wl);
+    if (!(v.control & WL_CTL_VCC) || (v.control & WL_CTL_WE) ||
+        (v.control & WL_CTL_VPP)) {
+        fprintf(stderr, "unsafe 2716 read controls: %02x\n", v.control);
+        return 1;
+    }
+    for (address = 0; address < RF5_SIZE; address++) {
+        actual = wl_read_byte(&wl, address);
+        if (actual != pattern(address)) {
+            fprintf(stderr, "2716 mismatch at %04x: got %02x expected %02x\n",
+                    address, actual, pattern(address));
+            return 1;
+        }
+    }
+    wl_end_read(&wl);
+    if (v.status_reads != RF5_SIZE * 8UL || v.vpp_seen ||
+        (v.control & (WL_CTL_VPP | WL_CTL_VCC))) {
+        fprintf(stderr, "unsafe or incomplete 2716 read\n");
+        return 1;
+    }
+    printf("virtual K573RF5/2716 read passed: %u bytes, VPP never requested\n",
+           RF5_SIZE);
+
+    v.status_reads = 0;
     wl_begin_2764_read(&wl);
     for (address = 0; address < ROM_SIZE; address++) {
         actual = wl_read_byte(&wl, address);
