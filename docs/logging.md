@@ -5,8 +5,11 @@ required nor relied upon.
 
 ## Human-readable session log
 
-`WILLEM.LOG` is opened in append mode and is never truncated automatically.
-It receives the same operational messages printed on screen. Every invocation
+`WILLEM.LOG` is opened in append mode. Before a run, a log at or above 24 KiB
+is preserved under the first free `WILL0001.LOG` through `WILL9999.LOG` name
+and a fresh `WILLEM.LOG` is started. This avoids the 16-bit DOS stream-position
+boundary observed on the Pocket8086 while retaining every prior record. It
+receives the same operational messages printed on screen. Every invocation
 is enclosed in timestamped `BEGIN RUN` and `END RUN` markers, and every log
 line carries the DOS date and time, including hundredths of a second when DOS
 provides them. Each run records at least:
@@ -38,6 +41,9 @@ serial transfer or DOSRAVI process-launch time.
 The program always attempts safe shutdown and logs it before closing the file.
 It flushes the log after errors and before/after every power-state transition,
 so evidence should survive even if the operator must reset a stuck machine.
+If the log cannot be opened or archived, a warning is printed and stdout
+remains active; DOSRAVI's per-execution `STDOUT.TXT` therefore remains a
+complete current-run evidence source.
 
 ## Full port trace
 

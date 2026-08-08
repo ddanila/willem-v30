@@ -36,6 +36,8 @@ Every real-hardware run writes a human-readable `WILLEM.LOG` while also showing
 the same operational messages on screen. A compact full LPT trace can be
 enabled for hardware diagnosis and emulator comparison; see
 [`docs/logging.md`](docs/logging.md).
+Logs at or above 24 KiB are archived under numbered DOS 8.3 names before the
+next run, preventing the 16-bit append failure observed on the Pocket8086.
 The exact Geepro revision, function mapping, read sequence, and an upstream
 DIP-table discrepancy are recorded in
 [`docs/geepro-audit.md`](docs/geepro-audit.md).

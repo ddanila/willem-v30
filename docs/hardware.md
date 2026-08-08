@@ -148,6 +148,13 @@ Safe connection sequence for the first test:
 6. Run the read command; after it returns and reports safe shutdown, shut down
    before moving the chip, jumpers, or cables.
 
+On 2026-08-09, a misplaced J2 produced a repeatable-looking but invalid
+AT28C64 dump with address/page aliasing. After programmer power was removed and
+J2 corrected, two independent reads matched the pinned source image exactly.
+Treat an unexpected aliased dump as setup failure: do not validate or write
+from it, remove power, and recheck J2 against the board markings before reading
+again. The observation does not establish a universal J2 position for clones.
+
 ## First real-hardware gate
 
 Read the known original Juku 2764 without any write-capable command:

@@ -8,6 +8,29 @@ GLOBAL _dos_wait_us
 GLOBAL _dos_datetime
 GLOBAL _dos_sdp_write
 GLOBAL _dos_bios_ticks
+GLOBAL _dos_rename
+
+; unsigned dos_rename(char *old_name, char *new_name)
+; DOS function 56h is used because dev86's tiny libc does not export rename().
+; Return zero on success or the DOS error code on failure.
+_dos_rename:
+    push bp
+    mov bp, sp
+    push di
+    push es
+    mov dx, [bp+4]
+    mov di, [bp+6]
+    push ds
+    pop es
+    mov ah, 056h
+    int 021h
+    jc .error
+    xor ax, ax
+.error:
+    pop es
+    pop di
+    pop bp
+    ret
 
 ; void dos_outb(unsigned port, unsigned value)
 _dos_outb:

@@ -66,8 +66,10 @@ ON 1,2,4,6,9.
 LOG FILES
 ---------
 
-Every run prints messages and appends them to WILLEM.LOG.  Existing logs are
-never erased.  /TRACE additionally appends every port operation to WTRACE.BIN.
+Every run prints messages and appends them to WILLEM.LOG.  At 24 KiB the old
+log is preserved as the first free WILL0001.LOG..WILL9999.LOG and a fresh log
+is started, avoiding the DOS stream-position limit.  /TRACE additionally
+appends every port operation to WTRACE.BIN.
 One 8 KiB trace is several megabytes, so use /TRACE for diagnosis and first
 hardware validation, not every routine read.
 

@@ -8,6 +8,7 @@
 #define RF5_SIZE 2048
 #define LOG_NAME "WILLEM.LOG"
 #define TRACE_NAME "WTRACE.BIN"
+#define LOG_ROTATE_SIZE 24576UL
 #define WRITE_GATE_NAME "WRITE.OK"
 #define WILLEM_VERSION "0.1.0-dev"
 #ifndef WILLEM_BUILD_ID
@@ -29,6 +30,7 @@ extern void dos_wait_us(unsigned usec);
 extern void dos_datetime(unsigned *fields);
 extern void dos_sdp_write(unsigned base, unsigned address, unsigned value);
 extern unsigned long dos_bios_ticks(void);
+extern unsigned dos_rename(char *old_name, char *new_name);
 
 struct read_profile {
     char *name;
@@ -65,6 +67,47 @@ struct dos_context {
 static FILE *log_file;
 static unsigned char rom_buffer[ROM_SIZE];
 
+static int archive_append_file(name, binary)
+char *name;
+int binary;
+{
+    FILE *probe;
+    char archive[13];
+    char *prefix;
+    char *extension;
+    unsigned number;
+
+    prefix = binary ? "WTRC" : "WILL";
+    extension = binary ? "BIN" : "LOG";
+    for (number = 1; number <= 9999; number++) {
+        sprintf(archive, "%s%04u.%s", prefix, number, extension);
+        probe = fopen(archive, "rb");
+        if (probe) {
+            fclose(probe);
+            continue;
+        }
+        if (dos_rename(name, archive)) return 0;
+        printf("Archived full %s as %s\n", name, archive);
+        return 1;
+    }
+    return 0;
+}
+
+static int text_log_needs_rotation(file)
+FILE *file;
+{
+    unsigned char buffer[512];
+    unsigned long total;
+    size_t count;
+
+    total = 0;
+    while ((count = fread(buffer, 1, sizeof(buffer), file)) != 0) {
+        total += (unsigned long)count;
+        if (total >= LOG_ROTATE_SIZE) return 1;
+    }
+    return 0;
+}
+
 static FILE *open_append(name, binary)
 char *name;
 int binary;
@@ -72,9 +115,11 @@ int binary;
     FILE *file;
     file = fopen(name, binary ? "r+b" : "r+");
     if (file) {
-        if (fseek(file, 0L, SEEK_END)) {
+        if ((!binary && text_log_needs_rotation(file)) ||
+            fseek(file, 0L, SEEK_END)) {
             fclose(file);
-            return 0;
+            if (!archive_append_file(name, binary)) return 0;
+            return fopen(name, binary ? "w+b" : "w+");
         }
         return file;
     }
@@ -535,6 +580,9 @@ char **argv;
     verify_ms = 0;
     image_crc32 = 0;
     log_file = open_append(LOG_NAME, 0);
+    if (!log_file)
+        printf("WARNING: cannot create or append %s; stdout remains active\n",
+               LOG_NAME);
     logmsg("================ BEGIN RUN ================");
     logmsg("Willem V30 version %s; 8086-compatible; 24-bit address build",
            WILLEM_VERSION);
