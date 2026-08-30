@@ -34,7 +34,9 @@ occupy the last socket row at the opposite end.  Use normal 28-pin routing,
 normal parked large-device jumpers, and 5 V VCC.  Do not select a special
 2716, 2732, 2816, 28F, 29C, or large-chip mode.
 
-The utility always keeps VPP disabled, including during AT28C64 writes.
+Read/check/verify and AT28C64 operations always keep the 12.5 V VPP switch
+disabled.  Only the explicitly gated DM2764A and WM2764A commands can enable
+it.
 Before applying chip power it prints the ZIF placement reminder and a numbered
 DIP diagram.  Follow the numbers and the ON mark on the physical switch bank.
 
@@ -79,6 +81,33 @@ off throughout the read and safely turns VCC off before saving the file.
 
 Run WILLEM D28C64 /TRACE only with the chip removed.  It holds control signals
 long enough to measure them and never issues an EEPROM write cycle.
+
+M2764AF1 PROGRAMMING HOLD POINT
+-------------------------------
+
+Virtual tests do not authorize a physical write.  First remove the chip,
+positively identify the VCC/VPP selectors, set 6.0 V VCC and 12.5 V VPP, and
+run:
+
+  WILLEM DM2764A 378 /VPP
+
+At its pauses, measure pin 28/ZIF30 as 5.75..6.25 V and pin 1/ZIF3 as
+12.2..12.8 V relative to pin 14/ZIF16.  Never run this with a chip installed.
+Keep ambient temperature within 20..30 C.  Remove all power before changing
+selectors or inserting the chip.
+
+WM2764A is only for exact ST M2764A parts.  It requires /WRITE and the separate
+reviewed M2764A.OK token.  It refuses a nonblank chip before enabling VPP and
+powers down after ST Fast Programming.  That success is not final: remove
+power, return to normal 5 V VCC and VPP=VCC/read setup, repower, and run V2764
+against the same 8192-byte image.  Do not call the write successful until that
+separate 5 V verify passes.
+
+REFERENCE RESULT: On 2026-08-26 the recorded PCB5.0E measured 5.74 V VCC and
+12.66 V VPP with an empty socket.  Four M2764AF1 devices were programmed with
+the explicit marginal-VCC gate and all four passed separate trusted reads at
+the measured 5.07 V normal setting.  This proves that recorded board only; use
+the measurement gate again for another clone or rail setting.
 
 FIRST PHYSICAL TEST
 -------------------

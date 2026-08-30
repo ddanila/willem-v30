@@ -23,6 +23,9 @@ struct wl_io {
     void (*control_write)(void *ctx, int raw_value);
     wl_u8 (*status_read)(void *ctx);
     void (*delay_us)(void *ctx, int usec);
+    /* Optional hardware-timed active-low P/PGM pulse.  The DOS backend uses
+       this to keep the M2764A's 1 ms initial pulse inside its tight limits. */
+    void (*program_pulse_ms)(void *ctx, unsigned milliseconds);
 };
 
 struct willem {
@@ -52,9 +55,12 @@ void wl_begin_2716_read(struct willem *wl);
 void wl_begin_2764_read(struct willem *wl);
 void wl_begin_28c64_read(struct willem *wl);
 void wl_begin_28c64_write(struct willem *wl);
+void wl_begin_m2764a_program(struct willem *wl);
 void wl_end_read(struct willem *wl);
 wl_u8 wl_read_byte(struct willem *wl, wl_u16 address);
 int wl_write_28c64_byte(struct willem *wl, wl_u16 address, int value);
 int wl_write_28c64_sdp_byte(struct willem *wl, wl_u16 address, int value);
+int wl_program_m2764a_byte(struct willem *wl, wl_u16 address, int value,
+                           unsigned *initial_pulses, wl_u8 *verified);
 
 #endif

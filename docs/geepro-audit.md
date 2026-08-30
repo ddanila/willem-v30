@@ -40,6 +40,17 @@ OE. `wl_begin_2764_read` and `wl_read_byte` reproduce those transitions. Both
 finish with VPP off, VCC off, address zero, and data zero. The DOS port adds
 hardware-clocked minimum delays but does not change the signal order.
 
+## 2764 program routing
+
+The same pinned `chips/27xx.cpp` registers 2764 programming as
+`prog_eprom(..., ce_pgm=0, oe_vpp=0)`. Geepro sets its `CE_EQ_PGM` pragma so
+the fixed socket route supplies active `E` while `pgm()` drives DB25 pin 17.
+Its fast branch uses up to 25 1 ms pulses, verifies through `G`, and applies a
+`3*n` ms overprogram pulse. The new M2764A path reproduces that board routing,
+but is deliberately limited to ST's 12.5 V M2764A algorithm and adds a strict
+pre-VPP blank scan, separate gate, rail-order checks, and a mandatory later
+5 V full verify.
+
 ## К573РФ5 / 2716 read sequence
 
 The pinned Geepro tree registers 2716 as a 2 KiB, 24-pin EPROM and uses DIP

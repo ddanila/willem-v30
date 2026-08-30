@@ -10,9 +10,10 @@
 #define TRACE_NAME "WTRACE.BIN"
 #define LOG_ROTATE_SIZE 24576UL
 #define WRITE_GATE_NAME "WRITE.OK"
-#define WILLEM_VERSION "0.1.0-dev"
+#define M2764A_GATE_NAME "M2764A.OK"
+#define WILLEM_VERSION "0.2.0-dev"
 #ifndef WILLEM_BUILD_ID
-#define WILLEM_BUILD_ID "dosravi-rf5-read-v1"
+#define WILLEM_BUILD_ID "dosravi-m2764a-write-v1"
 #endif
 
 #define ACTION_READ 1
@@ -23,12 +24,14 @@
 #define DEVICE_2764 1
 #define DEVICE_28C64 2
 #define DEVICE_RF5 3
+#define DEVICE_M2764A 4
 
 extern void dos_outb(unsigned port, unsigned value);
 extern unsigned dos_inb(unsigned port);
 extern void dos_wait_us(unsigned usec);
 extern void dos_datetime(unsigned *fields);
 extern void dos_sdp_write(unsigned base, unsigned address, unsigned value);
+extern void dos_m2764a_pulse(unsigned base, unsigned milliseconds);
 extern unsigned long dos_bios_ticks(void);
 extern unsigned dos_rename(char *old_name, char *new_name);
 
@@ -139,7 +142,7 @@ static void logmsg(char *format, ...)
 {
     va_list args;
     char stamp[32];
-    char message[256];
+    char message[512];
 
     va_start(args, format);
     vsprintf(message, format, args);
@@ -208,6 +211,16 @@ int usec;
     struct dos_context *ctx = (struct dos_context *)vctx;
     dos_wait_us((unsigned)usec);
     trace_record(ctx, 'D', 0, (unsigned)usec);
+}
+
+static void port_program_pulse(vctx, milliseconds)
+void *vctx;
+unsigned milliseconds;
+{
+    struct dos_context *ctx = (struct dos_context *)vctx;
+    /* Writes forbid tracing, so this direct PIT-timed operation cannot create
+       a misleading partial trace. */
+    dos_m2764a_pulse(ctx->base, milliseconds);
 }
 
 static unsigned crc16(data, size)
@@ -309,17 +322,31 @@ char **argv;
     return 0;
 }
 
-static int write_gate_valid()
+static int wants_vpp_confirm(argc, argv)
+int argc;
+char **argv;
+{
+    int i;
+    for (i = 1; i < argc; i++)
+        if (same_command(argv[i], "/VPP") ||
+            same_command(argv[i], "-VPP")) return 1;
+    return 0;
+}
+
+static int write_gate_valid(name, magic)
+char *name;
+char *magic;
 {
     FILE *file;
-    char line[32];
+    char line[48];
     int valid;
+    unsigned length;
 
-    file = fopen(WRITE_GATE_NAME, "rb");
+    file = fopen(name, "rb");
     if (!file) return 0;
-    valid = fgets(line, sizeof(line), file) != 0 &&
-            !strncmp(line, "WILLEM-WRITE-GATE-1", 19) &&
-            (line[19] == '\r' || line[19] == '\n' || line[19] == 0);
+    length = strlen(magic);
+    valid = fgets(line, sizeof(line), file) != 0 && !strncmp(line, magic, length) &&
+            (line[length] == '\r' || line[length] == '\n' || line[length] == 0);
     fclose(file);
     return valid;
 }
@@ -372,8 +399,10 @@ static void usage()
     puts("       WILLEM B28C64 [base] [/TRACE]");
     puts("       WILLEM V2764 image.bin [base] [/TRACE]");
     puts("       WILLEM V28C64 image.bin [base] [/TRACE]");
+    puts("       WILLEM WM2764A image.bin [base] /WRITE");
     puts("       WILLEM W28C64 image.bin [base] /WRITE [/TRACE]");
     puts("       WILLEM D28C64 [base] [/TRACE]  (chip removed)");
+    puts("       WILLEM DM2764A [base] /VPP  (chip removed; meter test)");
 }
 
 static int decode_command(text, action, device)
@@ -397,8 +426,12 @@ int *device;
         *action = ACTION_VERIFY; *device = DEVICE_28C64;
     } else if (same_command(text, "W28C64")) {
         *action = ACTION_WRITE; *device = DEVICE_28C64;
+    } else if (same_command(text, "WM2764A")) {
+        *action = ACTION_WRITE; *device = DEVICE_M2764A;
     } else if (same_command(text, "D28C64")) {
         *action = ACTION_DIAG; *device = DEVICE_28C64;
+    } else if (same_command(text, "DM2764A")) {
+        *action = ACTION_DIAG; *device = DEVICE_M2764A;
     } else {
         return 0;
     }
@@ -419,6 +452,7 @@ static char *device_name(device)
 int device;
 {
     if (device == DEVICE_RF5) return "K573RF5/2716";
+    if (device == DEVICE_M2764A) return "ST-M2764A";
     return device == DEVICE_2764 ? "2764/27C64" : "AT28C64";
 }
 
@@ -543,6 +577,33 @@ struct dos_context *context;
     log_ports(context, "Controls returned inactive before shutdown");
 }
 
+static void run_m2764a_diagnostic(wl, context)
+struct willem *wl;
+struct dos_context *context;
+{
+    logmsg("12.5V DIAGNOSTIC MUST BE RUN WITH THE ZIF SOCKET EMPTY");
+    logmsg("Use DIP 12Bh: ON 1,2,4,6,9; set board selectors to 6.0V VCC and 12.5V VPP");
+    wait_enter("Confirm chip REMOVED and meter ground connected to M2764A pin 14 (ZIF contact 16)");
+
+    wl_vpp(wl, 0);
+    wl_oe(wl, 1);
+    wl_we(wl, 1);
+    wl_vcc(wl, 1);
+    port_delay(context, 5000);
+    log_ports(context, "Programming VCC on; VPP off; G/P inactive");
+    wait_enter("Measure M2764A pin 28 (ZIF30): require 5.75..6.25V before continuing");
+
+    wl_vpp(wl, 1);
+    port_delay(context, 5000);
+    log_ports(context, "Programming VCC on; VPP on; G/P inactive");
+    wait_enter("Measure pin 1 (ZIF3): require 12.2..12.8V; recheck pin 28 is 5.75..6.25V");
+
+    wl_vpp(wl, 0);
+    port_delay(context, 5000);
+    log_ports(context, "VPP removed before VCC shutdown");
+    wait_enter("Confirm pin 1 no longer has 12.5V");
+}
+
 int main(argc, argv)
 int argc;
 char **argv;
@@ -554,10 +615,12 @@ char **argv;
     char *image_name;
     unsigned address, base, crc, mismatch_count, written, unchanged;
     unsigned retry_bytes, total_retries, late_bytes;
+    unsigned pulse_count, total_initial_pulses, max_initial_pulses;
+    unsigned overprogram_pulses, blank_mismatches;
     unsigned power_on_ms, image_size, dip_mask;
     unsigned long read_started, read_ms, program_started, program_ms;
     unsigned long verify_started, verify_ms, image_crc32;
-    unsigned char actual, expected;
+    unsigned char actual, expected, verified;
     int result, action, device, first_option, i, base_seen, powered, profile_seen;
     int write_failed, attempt;
     char *profile_name;
@@ -620,6 +683,9 @@ char **argv;
         if (action == ACTION_WRITE &&
             (same_command(argv[i], "/WRITE") ||
              same_command(argv[i], "-WRITE"))) continue;
+        if (action == ACTION_DIAG && device == DEVICE_M2764A &&
+            (same_command(argv[i], "/VPP") ||
+             same_command(argv[i], "-VPP"))) continue;
         selected = profile_value(argv[i]);
         if (selected) {
             if (action != ACTION_READ || !*selected || profile_seen) {
@@ -646,19 +712,35 @@ char **argv;
     }
 
     context.base = base;
+    if (action == ACTION_DIAG && device == DEVICE_M2764A &&
+        !wants_vpp_confirm(argc, argv)) {
+        logmsg("ERROR: DM2764A requires explicit /VPP confirmation and an empty socket");
+        goto done;
+    }
     if (action == ACTION_WRITE) {
         if (!wants_write_confirm(argc, argv)) {
-            logmsg("ERROR: W28C64 requires explicit /WRITE confirmation");
+            logmsg("ERROR: write commands require explicit /WRITE confirmation");
             goto done;
         }
-        if (!write_gate_valid()) {
+        if (device == DEVICE_M2764A) {
+            if (!write_gate_valid(M2764A_GATE_NAME,
+                                  "WILLEM-M2764A-WRITE-GATE-1")) {
+                logmsg("ERROR: valid %s is required; 12.5V write gate is locked",
+                       M2764A_GATE_NAME);
+                goto done;
+            }
+            logmsg("M2764A 12.5V write gate accepted from %s",
+                   M2764A_GATE_NAME);
+        } else if (!write_gate_valid(WRITE_GATE_NAME,
+                                     "WILLEM-WRITE-GATE-1")) {
             logmsg("ERROR: valid %s is required; physical read gate is locked",
                    WRITE_GATE_NAME);
             goto done;
+        } else {
+            logmsg("Write gate accepted from %s", WRITE_GATE_NAME);
         }
-        logmsg("Write gate accepted from %s", WRITE_GATE_NAME);
         if (wants_trace(argc, argv)) {
-            logmsg("ERROR: /TRACE is forbidden during SDP writes; it can violate tBLC=150us");
+            logmsg("ERROR: /TRACE is forbidden during writes; it can violate programming timing");
             goto done;
         }
     }
@@ -699,6 +781,7 @@ char **argv;
     io.control_write = port_control_write;
     io.status_read = port_status_read;
     io.delay_us = port_delay;
+    io.program_pulse_ms = port_program_pulse;
     wl_init(&wl, &io);
 
     power_on_ms = device == DEVICE_28C64 ? 200U : 5U;
@@ -719,13 +802,20 @@ char **argv;
            action_name(action), device_name(device),
            image_name ? image_name : "(none)", base,
            context.trace ? "on" : "off");
-    logmsg("Required DIP mask=%03Xh; VPP MUST remain off", dip_mask);
+    if (device == DEVICE_M2764A)
+        logmsg("Required DIP mask=%03Xh; PROGRAM MODE REQUIRES measured VCC=6.0V and VPP=12.5V",
+               dip_mask);
+    else
+        logmsg("Required DIP mask=%03Xh; VPP MUST remain off", dip_mask);
     display_dips(dip_mask);
     display_zif(device);
     logmsg("Initial raw DATA=%02X STATUS=%02X CONTROL=%02X",
            dos_inb(base), dos_inb(base + 1), dos_inb(base + 2));
     if (action == ACTION_DIAG) {
-        run_28c64_diagnostic(&wl, &context);
+        if (device == DEVICE_M2764A)
+            run_m2764a_diagnostic(&wl, &context);
+        else
+            run_28c64_diagnostic(&wl, &context);
         powered = 1;
         logmsg("Diagnostic complete; power transition: safe shutdown begins");
         wl_end_read(&wl);
@@ -735,14 +825,6 @@ char **argv;
         goto close_trace;
     }
 
-    logmsg("Power transition: enabling VCC, VPP off");
-    if (action == ACTION_READ) read_started = dos_bios_ticks();
-    if (action == ACTION_WRITE) wl_begin_28c64_write(&wl);
-    else if (device == DEVICE_RF5) wl_begin_2716_read(&wl);
-    else if (device == DEVICE_2764) wl_begin_2764_read(&wl);
-    else wl_begin_28c64_read(&wl);
-    powered = 1;
-
     mismatch_count = 0;
     written = 0;
     unchanged = 0;
@@ -750,56 +832,133 @@ char **argv;
     retry_bytes = 0;
     total_retries = 0;
     late_bytes = 0;
+    total_initial_pulses = 0;
+    max_initial_pulses = 0;
+    overprogram_pulses = 0;
+    blank_mismatches = 0;
+
+    logmsg("Power transition: enabling VCC, VPP off");
+    if (action == ACTION_READ) read_started = dos_bios_ticks();
+    if (action == ACTION_WRITE && device == DEVICE_M2764A) {
+        /* Refuse a mixed-up or incompletely erased UV EPROM before VPP can
+           possibly be enabled.  This is intentionally stricter than merely
+           checking whether the requested zero bits are compatible. */
+        wl_begin_2764_read(&wl);
+        powered = 1;
+        logmsg("Pre-program blank check begins with VPP off");
+        for (address = 0; address < image_size; address++) {
+            actual = wl_read_byte(&wl, address);
+            if (actual != 0xffU) {
+                blank_mismatches++;
+                if (blank_mismatches <= 8U)
+                    logmsg("Not blank at %04Xh: read=%02X expected=FF",
+                           address, actual);
+            }
+        }
+        logmsg("Pre-program blank check complete: nonblank=%u",
+               blank_mismatches);
+        wl_end_read(&wl);
+        powered = 0;
+        logmsg("Safe shutdown complete after blank check: VCC off, VPP off");
+        if (blank_mismatches) {
+            write_failed = 1;
+        } else {
+            logmsg("Power transition: enabling measured 6.0V VCC before 12.5V VPP");
+            wl_begin_m2764a_program(&wl);
+            powered = 1;
+            logmsg("M2764A programming rails enabled: VCC then VPP; E active, G inactive, P high");
+        }
+    } else {
+        if (action == ACTION_WRITE) wl_begin_28c64_write(&wl);
+        else if (device == DEVICE_RF5) wl_begin_2716_read(&wl);
+        else if (device == DEVICE_2764) wl_begin_2764_read(&wl);
+        else wl_begin_28c64_read(&wl);
+        powered = 1;
+    }
+
     if (action == ACTION_WRITE) {
         crc = crc16(rom_buffer, image_size);
         image_crc32 = crc32(rom_buffer, image_size);
-        logmsg("SDP protected programming begins: bytes=%u image CRC16-CCITT=%04X",
-               image_size, crc);
-        program_started = dos_bios_ticks();
-        for (address = 0; address < image_size; address++) {
-            actual = wl_read_byte(&wl, address);
-            if (actual == rom_buffer[address]) {
-                unchanged++;
-            } else {
-                for (attempt = 1; attempt <= 3; attempt++) {
-                    /* Direct assembly masks interrupts and keeps the four SDP
-                       loads within tBLC. Datasheet maximum tWC is 10 ms. */
-                    dos_sdp_write(base, address, rom_buffer[address]);
-                    dos_wait_us(12000U);
-                    actual = wl_read_byte(&wl, address);
-                    if (actual == rom_buffer[address]) break;
-
-                    /* One late check distinguishes a slow/marginal cell from
-                       a rejected SDP sequence without adding another cycle. */
-                    dos_wait_us(10000U);
-                    actual = wl_read_byte(&wl, address);
-                    if (actual == rom_buffer[address]) {
-                        late_bytes++;
-                        logmsg("Late completion at %04Xh on attempt %d",
-                               address, attempt);
-                        break;
+        if (device == DEVICE_M2764A) {
+            if (!write_failed) {
+                logmsg("M2764A Fast Programming begins: bytes=%u image CRC16-CCITT=%04X",
+                       image_size, crc);
+                program_started = dos_bios_ticks();
+                for (address = 0; address < image_size; address++) {
+                    expected = rom_buffer[address];
+                    if (expected == 0xffU) {
+                        unchanged++;
+                    } else {
+                        if (!wl_program_m2764a_byte(&wl, address, expected,
+                                                    &pulse_count, &verified)) {
+                            logmsg("ERROR: M2764A byte failed after 25 initial pulses at %04Xh: read=%02X wanted=%02X",
+                                   address, verified, expected);
+                            write_failed = 1;
+                            break;
+                        }
+                        written++;
+                        total_initial_pulses += pulse_count;
+                        overprogram_pulses++;
+                        if (pulse_count > max_initial_pulses)
+                            max_initial_pulses = pulse_count;
+                        if (pulse_count > 1U) {
+                            retry_bytes++;
+                            total_retries += pulse_count - 1U;
+                        }
                     }
-                    if (attempt < 3) {
-                        total_retries++;
-                        logmsg("RETRY at %04Xh: attempt=%d read=%02X wanted=%02X",
-                               address, attempt, actual, rom_buffer[address]);
-                    }
+                    if ((address & 0x00ffU) == 0x00ffU)
+                        logmsg("Write progress: %u/%u bytes, programmed=%u FF-skipped=%u pulses=%u",
+                               address + 1, image_size, written, unchanged,
+                               total_initial_pulses);
                 }
-                if (actual != rom_buffer[address]) {
-                    logmsg("ERROR: SDP write failed after 3 attempts at %04Xh: read=%02X wanted=%02X",
-                           address, actual, rom_buffer[address]);
-                    write_failed = 1;
-                    break;
-                } else {
-                    written++;
-                    if (attempt > 1) retry_bytes++;
-                }
+                program_ms = (dos_bios_ticks() - program_started) * 55UL;
             }
-            if ((address & 0x00ffU) == 0x00ffU)
-                logmsg("Write progress: %u/%u bytes, written=%u unchanged=%u",
-                       address + 1, image_size, written, unchanged);
+        } else {
+            logmsg("SDP protected programming begins: bytes=%u image CRC16-CCITT=%04X",
+                   image_size, crc);
+            program_started = dos_bios_ticks();
+            for (address = 0; address < image_size; address++) {
+                actual = wl_read_byte(&wl, address);
+                if (actual == rom_buffer[address]) {
+                    unchanged++;
+                } else {
+                    for (attempt = 1; attempt <= 3; attempt++) {
+                        /* Direct assembly masks interrupts and keeps the four SDP
+                           loads within tBLC. Datasheet maximum tWC is 10 ms. */
+                        dos_sdp_write(base, address, rom_buffer[address]);
+                        dos_wait_us(12000U);
+                        actual = wl_read_byte(&wl, address);
+                        if (actual == rom_buffer[address]) break;
+                        dos_wait_us(10000U);
+                        actual = wl_read_byte(&wl, address);
+                        if (actual == rom_buffer[address]) {
+                            late_bytes++;
+                            logmsg("Late completion at %04Xh on attempt %d",
+                                   address, attempt);
+                            break;
+                        }
+                        if (attempt < 3) {
+                            total_retries++;
+                            logmsg("RETRY at %04Xh: attempt=%d read=%02X wanted=%02X",
+                                   address, attempt, actual, rom_buffer[address]);
+                        }
+                    }
+                    if (actual != rom_buffer[address]) {
+                        logmsg("ERROR: SDP write failed after 3 attempts at %04Xh: read=%02X wanted=%02X",
+                               address, actual, rom_buffer[address]);
+                        write_failed = 1;
+                        break;
+                    } else {
+                        written++;
+                        if (attempt > 1) retry_bytes++;
+                    }
+                }
+                if ((address & 0x00ffU) == 0x00ffU)
+                    logmsg("Write progress: %u/%u bytes, written=%u unchanged=%u",
+                           address + 1, image_size, written, unchanged);
+            }
+            program_ms = (dos_bios_ticks() - program_started) * 55UL;
         }
-        program_ms = (dos_bios_ticks() - program_started) * 55UL;
         if (!write_failed) {
             logmsg("Programming pass complete: written=%u unchanged=%u retry-bytes=%u retries=%u late=%u",
                    written, unchanged, retry_bytes, total_retries, late_bytes);
@@ -843,9 +1002,16 @@ char **argv;
         logmsg("DOSRAVI_METRIC read_ms=%lu profile=%s", read_ms,
                profile->name);
     } else if (action == ACTION_WRITE) {
-        logmsg("DOSRAVI_WRITE_METRIC program_ms=%lu verify_ms=%lu changed=%u unchanged=%u retry_bytes=%u retries=%u late=%u image_crc32=%08lX build_id=%s",
-               program_ms, verify_ms, written, unchanged, retry_bytes,
-               total_retries, late_bytes, image_crc32, WILLEM_BUILD_ID);
+        if (device == DEVICE_M2764A)
+            logmsg("DOSRAVI_M2764A_METRIC program_ms=%lu high_voltage_verify_ms=%lu programmed=%u ff_skipped=%u initial_pulses=%u retry_bytes=%u retries=%u overprogram_pulses=%u max_initial=%u blank_mismatches=%u image_crc32=%08lX final_5v_verify_required=1 build_id=%s",
+                   program_ms, verify_ms, written, unchanged,
+                   total_initial_pulses, retry_bytes, total_retries,
+                   overprogram_pulses, max_initial_pulses, blank_mismatches,
+                   image_crc32, WILLEM_BUILD_ID);
+        else
+            logmsg("DOSRAVI_WRITE_METRIC program_ms=%lu verify_ms=%lu changed=%u unchanged=%u retry_bytes=%u retries=%u late=%u image_crc32=%08lX build_id=%s",
+                   program_ms, verify_ms, written, unchanged, retry_bytes,
+                   total_retries, late_bytes, image_crc32, WILLEM_BUILD_ID);
     }
 
     logmsg("Power transition: safe shutdown begins");
@@ -862,9 +1028,13 @@ char **argv;
                    mismatch_count);
             result = 2;
         } else {
-            logmsg("WRITE PASSED: programmed=%u unchanged=%u verified=%u retry-bytes=%u retries=%u late=%u",
-                   written, unchanged, image_size, retry_bytes, total_retries,
-                   late_bytes);
+            if (device == DEVICE_M2764A)
+                logmsg("M2764A PROGRAM PHASE PASSED: programmed=%u FF-skipped=%u high-voltage-verified=%u; FINAL 5V/VPP=5V VERIFY IS REQUIRED",
+                       written, unchanged, image_size);
+            else
+                logmsg("WRITE PASSED: programmed=%u unchanged=%u verified=%u retry-bytes=%u retries=%u late=%u",
+                       written, unchanged, image_size, retry_bytes,
+                       total_retries, late_bytes);
             result = 0;
         }
     } else if (action == ACTION_READ) {

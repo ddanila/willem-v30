@@ -1,7 +1,7 @@
 WILLEM V30 DOS UTILITY
 ======================
 
-VERSION 0.1.0-dev
+VERSION 0.2.0-dev
 
 This is an 8086-compatible .COM program for a classic parallel-port Willem
 programmer.  It targets a PCB5.0E set to PCB3B compatibility mode.  It runs
@@ -30,6 +30,8 @@ WILLEM V2764  ROM.BIN [378] [/TRACE]
 WILLEM V28C64 ROM.BIN [378] [/TRACE]
 WILLEM W28C64 ROM.BIN [378] /WRITE [/TRACE]
 WILLEM D28C64         [378] [/TRACE]
+WILLEM DM2764A        [378] /VPP
+WILLEM WM2764A ROM.BIN [378] /WRITE
 
 The LPT address is hexadecimal and defaults to 378.  RRF5 reads exactly 2048
 bytes and has no blank, verify, or write command.  A verify image for the other
@@ -55,6 +57,19 @@ the previous interrupt state is restored immediately afterward.  A failed
 byte gets one late read check and at most three total programming attempts.
 The log reports retry bytes, total retries, and late completions; repeated
 retries identify a marginal used EEPROM even when final verification passes.
+
+WM2764A is only for ST M2764A parts.  It requires /WRITE and a separate
+M2764A.OK beginning with WILLEM-M2764A-WRITE-GATE-1.  It first scans all 8192
+bytes with VPP off and refuses a nonblank chip.  With externally selected and
+measured 6.0V VCC and 12.5V VPP it applies up to 25 one-ms pulses per non-FF
+byte, verifies after each, then applies one 3*n-ms overprogram pulse.  It
+removes VPP before VCC and rejects /TRACE.
+
+SUCCESS FROM WM2764A IS NOT FINAL VERIFICATION.  The board cannot switch 6V
+to 5V in software.  After it powers down, remove programmer power, select the
+normal 5V/VPP=VCC read setup, repower, and run V2764 with the same image.
+Before the first write, remove the chip and run DM2764A /VPP to measure both
+rails at its pauses.  Never run that diagnostic with a chip installed.
 
 D28C64 is a non-writing socket diagnostic.  REMOVE THE CHIP before running it.
 It pauses while holding the 28C64 control pins in measurable states.  Follow

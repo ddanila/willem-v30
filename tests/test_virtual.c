@@ -30,6 +30,14 @@ struct virtual_willem {
     int sdp_state;
     unsigned long sdp_commands;
     unsigned long delay_us;
+    unsigned long eprom_initial_pulses;
+    unsigned long eprom_overprogram_pulses;
+    unsigned long eprom_overprogram_ms;
+    wl_u8 eprom_pulses[ROM_SIZE];
+    int eprom_pulses_needed;
+    int eprom_sequence_error;
+    int vpp_without_vcc;
+    int vcc_removed_before_vpp;
 };
 
 static void virtual_data_write(ctx, value)
@@ -90,6 +98,10 @@ int raw_value;
     old = v->control;
     v->control = raw_value ^ WL_CTL_XOR;
     v->control_writes++;
+    if (!(old & WL_CTL_VPP) && (v->control & WL_CTL_VPP) &&
+        !(v->control & WL_CTL_VCC)) v->vpp_without_vcc = 1;
+    if ((old & WL_CTL_VCC) && !(v->control & WL_CTL_VCC) &&
+        (old & WL_CTL_VPP)) v->vcc_removed_before_vpp = 1;
     if (v->control & WL_CTL_VPP) v->vpp_seen = 1;
     if (!(old & WL_CTL_WE) && (v->control & WL_CTL_WE) &&
         (v->control & WL_CTL_VCC) && !(v->control & WL_CTL_MUX)) {
@@ -142,6 +154,33 @@ int usec;
     v->delay_us += (unsigned long)usec;
 }
 
+static void virtual_program_pulse(ctx, milliseconds)
+void *ctx;
+unsigned milliseconds;
+{
+    struct virtual_willem *v;
+
+    v = (struct virtual_willem *)ctx;
+    if (!(v->control & WL_CTL_VCC) || !(v->control & WL_CTL_VPP) ||
+        (v->control & WL_CTL_MUX) || !(v->control & WL_CTL_WE) ||
+        !milliseconds) {
+        v->eprom_sequence_error = 1;
+        return;
+    }
+    if (milliseconds == 1U) {
+        v->eprom_initial_pulses++;
+        v->eprom_pulses[v->address]++;
+        if (v->eprom_pulses[v->address] >= v->eprom_pulses_needed)
+            v->rom[v->address] &= v->data;
+    } else {
+        v->eprom_overprogram_pulses++;
+        v->eprom_overprogram_ms += milliseconds;
+        if (milliseconds != (unsigned)v->eprom_pulses[v->address] * 3U)
+            v->eprom_sequence_error = 1;
+        v->rom[v->address] &= v->data;
+    }
+}
+
 static wl_u8 pattern(address)
 wl_u16 address;
 {
@@ -164,6 +203,7 @@ int main()
     io.control_write = virtual_control_write;
     io.status_read = virtual_status_read;
     io.delay_us = virtual_delay;
+    io.program_pulse_ms = virtual_program_pulse;
 
     wl_init(&wl, &io);
     wl_begin_2716_read(&wl);
@@ -333,5 +373,68 @@ int main()
         return 1;
     }
     printf("virtual 28C64 failure paths passed: timeout and corrupt data\n");
+
+    /* ST M2764A Fast Programming uses VCC-before-VPP, up to 25 one-ms
+       pulses with verify after each, then one 3*n-ms overprogram pulse. */
+    memset(v.rom, 0xff, sizeof(v.rom));
+    memset(v.eprom_pulses, 0, sizeof(v.eprom_pulses));
+    v.eprom_pulses_needed = 2;
+    v.eprom_initial_pulses = 0;
+    v.eprom_overprogram_pulses = 0;
+    v.eprom_overprogram_ms = 0;
+    v.eprom_sequence_error = 0;
+    v.vpp_without_vcc = 0;
+    v.vcc_removed_before_vpp = 0;
+    v.vpp_seen = 0;
+    wl_begin_m2764a_program(&wl);
+    if (!(v.control & WL_CTL_VCC) || !(v.control & WL_CTL_VPP) ||
+        !(v.control & WL_CTL_WE) || (v.control & WL_CTL_MUX)) {
+        fprintf(stderr, "wrong M2764A program-mode controls: %02x\n", v.control);
+        return 1;
+    }
+    for (address = 0; address < 32U; address++) {
+        unsigned pulses;
+        wl_u8 verified;
+        if (!wl_program_m2764a_byte(&wl, address, pattern(address),
+                                    &pulses, &verified) ||
+            pulses != 2U || verified != pattern(address)) {
+            fprintf(stderr, "M2764A programming failed at %04x\n", address);
+            return 1;
+        }
+    }
+    wl_end_read(&wl);
+    if (v.eprom_sequence_error || v.vpp_without_vcc ||
+        v.vcc_removed_before_vpp || v.eprom_initial_pulses != 64UL ||
+        v.eprom_overprogram_pulses != 32UL ||
+        v.eprom_overprogram_ms != 192UL ||
+        (v.control & (WL_CTL_VPP | WL_CTL_VCC))) {
+        fprintf(stderr, "unsafe or incorrect M2764A sequence\n");
+        return 1;
+    }
+    for (address = 0; address < 32U; address++)
+        if (v.rom[address] != pattern(address)) return 1;
+    printf("virtual M2764A fast programming passed: 64 initial pulses, 32 overprogram pulses\n");
+
+    /* A cell that has not verified after 25 initial pulses must fail without
+       receiving an overprogram pulse, and shutdown must still drop VPP first. */
+    memset(v.eprom_pulses, 0, sizeof(v.eprom_pulses));
+    v.rom[0x0123U] = 0xffU;
+    v.eprom_pulses_needed = 26;
+    v.eprom_initial_pulses = 0;
+    v.eprom_overprogram_pulses = 0;
+    wl_begin_m2764a_program(&wl);
+    {
+        unsigned pulses;
+        wl_u8 verified;
+        if (wl_program_m2764a_byte(&wl, 0x0123U, 0x5aU,
+                                   &pulses, &verified) || pulses != 25U ||
+            verified == 0x5aU || v.eprom_overprogram_pulses != 0UL) {
+            fprintf(stderr, "M2764A 25-pulse failure limit not enforced\n");
+            return 1;
+        }
+    }
+    wl_end_read(&wl);
+    if (v.control & (WL_CTL_VPP | WL_CTL_VCC)) return 1;
+    printf("virtual M2764A failure limit and safe shutdown passed\n");
     return 0;
 }

@@ -1,6 +1,6 @@
 # Willem V30
 
-Current development version: `0.1.0-dev`
+Current development version: `0.2.0-dev`
 
 Small, auditable MS-DOS tools for classic LPT-connected Willem EPROM
 programmers, targeting the NEC V20/V30 and 8086 instruction set.
@@ -11,7 +11,8 @@ The initial hardware target is a Willem PCB5.0E operating in its PCB3B
 compatibility mode. The initial device targets are:
 
 - К573РФ5/2716: dedicated 2 KiB read-only path
-- 2764/27C64: read, blank-check, and verify first
+- 2764/27C64: read, blank-check, and verify
+- ST M2764A: gated two-stage Fast Programming and verification
 - AT28C64: read, blank-check, program, and verify
 
 Physical ZIF placement, compatibility selection, power precautions, and the
@@ -28,7 +29,8 @@ Real-hardware work is staged conservatively:
 
 1. Validate read-only operation using a known Juku 2764.
 2. Validate address and data integrity against the expected ROM image.
-3. Enable AT28C64 programming only after read operation is proven.
+3. Enable programming only after read operation and device-specific rails are
+   proven.
 
 The final DOS distribution will use 8.3 filenames and CRLF text files.
 
@@ -57,6 +59,8 @@ WILLEM B28C64         [378] [/TRACE]
 WILLEM V2764  ROM.BIN [378] [/TRACE]
 WILLEM V28C64 ROM.BIN [378] [/TRACE]
 WILLEM W28C64 ROM.BIN [378] /WRITE
+WILLEM DM2764A        [378] /VPP
+WILLEM WM2764A ROM.BIN [378] /WRITE
 ```
 
 The optional LPT base is hexadecimal and defaults to `378`. Every operation
@@ -89,6 +93,50 @@ The final log also contains a machine-readable `DOSRAVI_WRITE_METRIC` with
 separate PIT-driven programming and full-verification times, byte/retry counts,
 image CRC-32, and build ID.
 
+`WM2764A` is intentionally specific to ST's `M2764A` (including `M2764AF1`),
+not a generic 2764 command. It requires a separate `M2764A.OK` whose first line
+is `WILLEM-M2764A-WRITE-GATE-1`, refuses any nonblank byte before enabling
+VPP, then follows ST's Fast Programming Algorithm at externally selected and
+measured 6.0 V VCC and 12.5 V VPP: up to 25 PIT-timed 1 ms pulses with byte
+verify, followed by one `3*n` ms overprogram pulse. VCC is applied before VPP;
+shutdown removes VPP before VCC. `/TRACE` is forbidden.
+
+The board cannot change from programming VCC to read VCC in software, so a
+successful command is only a **program phase**, never final success. It powers
+down and records `final_5v_verify_required=1`. Remove programmer power, set
+normal 5 V VCC/VPP=VCC read configuration, repower, then run `V2764` against
+the same image. `DM2764A /VPP`, with an empty socket, provides the mandatory
+meter pauses before the first physical attempt. See
+[`docs/hardware.md`](docs/hardware.md).
+
+The reference PCB5.0E completed this gate and four physical M2764AF1 writes on
+2026-08-26. All four later passed independent normal-rail verification; the
+exact measurements, image identities, pulse counts, and interrupted-run safety
+observations are recorded in
+[`docs/m2764a-physical-acceptance.md`](docs/m2764a-physical-acceptance.md).
+
+After two independent blank reads, a nonuniform control-chip read, and the
+empty-socket meter test, create the reviewed token with:
+
+```sh
+python3 tools/create_m2764a_gate.py --output M2764A.OK \
+  --blank-read BLANK1.BIN --blank-read BLANK2.BIN \
+  --control-read CONTROL.BIN --chip-marking M2764AF1 \
+  --vcc 6.00 --vpp 12.50 --ambient 25
+```
+
+The normal gate rejects programming VCC below 5.75 V. A deliberate first-chip
+experiment measured narrowly below that limit may use `--allow-marginal-vcc`
+only for 5.70..<5.75 V. The exact value and
+`VCC_STATUS=MARGINAL_EXPERIMENTAL_USER_ACCEPTED` are then preserved in the
+token; this does not make the rail data-sheet compliant.
+
+For a routine follow-up attempt, `--writer-blank-scan-only` explicitly omits
+the separate host reads. `WM2764A` still scans all 8192 bytes with VPP off and
+aborts before enabling programming voltage on any non-`FF` byte. The gate
+records `HOST_BLANK_READS=0`; do not use this option when independent archival
+blank-read evidence is required.
+
 ## Build and test
 
 ```sh
@@ -103,9 +151,9 @@ recovery, corruption rejection, and the physical-read acceptance gate.
 
 The distribution builder rejects non-8.3 filenames and verifies that every
 text file contains CRLF rather than bare LF line endings. `HWSETUP.TXT` keeps
-unconfirmed physical-board details prominently gated; it must not be treated
-as final hardware instructions until the PCB5.0E jumpers, socket position, and
-power procedure have been verified.
+dangerous physical-board details prominently gated. The recorded reference
+PCB5.0E setup is physically verified, but another clone still requires its own
+selector identity and empty-socket rail measurements before M2764A writing.
 
 After two physical reads, enforce the hardware gate on the modern host with:
 

@@ -258,6 +258,81 @@ struct willem *wl;
     delay_us(wl, 50000);
 }
 
+void wl_begin_m2764a_program(wl)
+struct willem *wl;
+{
+    /* The socket/DIP route holds E low and maps DB-25 pin 17 to P.  Establish
+       output-disable and inactive P before applying the programming rails.
+       The operator selects 6.0 V VCC and 12.5 V VPP on the board. */
+    wl_vpp(wl, 0);
+    wl_oe(wl, 1);
+    wl_we(wl, 1);
+    wl_vcc(wl, 1);
+    delay_us(wl, 2);
+    wl_vpp(wl, 1);
+    delay_us(wl, 2);
+}
+
+static void pulse_m2764a(wl, milliseconds)
+struct willem *wl;
+unsigned milliseconds;
+{
+    unsigned remaining;
+
+    if (wl->io.program_pulse_ms) {
+        wl->io.program_pulse_ms(wl->io.ctx, milliseconds);
+        return;
+    }
+
+    wl_we(wl, 0);
+    remaining = milliseconds;
+    while (remaining) {
+        delay_us(wl, 1000);
+        remaining--;
+    }
+    wl_we(wl, 1);
+}
+
+int wl_program_m2764a_byte(wl, address, value, initial_pulses, verified)
+struct willem *wl;
+wl_u16 address;
+int value;
+unsigned *initial_pulses;
+wl_u8 *verified;
+{
+    unsigned pulse;
+    wl_u8 actual;
+
+    actual = 0xffU;
+    for (pulse = 1; pulse <= 25U; pulse++) {
+        wl_oe(wl, 1);
+        wl_set_address(wl, (wl_u32)address, WL_ADDR_FIRST_BIT);
+        wl_set_data(wl, value);
+        delay_us(wl, 2);
+        pulse_m2764a(wl, 1U);
+        delay_us(wl, 2);
+
+        actual = wl_read_byte(wl, address);
+        if (actual == (wl_u8)value) {
+            /* Fast Programming Algorithm: one 3*n ms overprogram pulse
+               after the first successful byte verify. */
+            wl_oe(wl, 1);
+            wl_set_address(wl, (wl_u32)address, WL_ADDR_FIRST_BIT);
+            wl_set_data(wl, value);
+            delay_us(wl, 2);
+            pulse_m2764a(wl, pulse * 3U);
+            delay_us(wl, 2);
+            if (initial_pulses) *initial_pulses = pulse;
+            if (verified) *verified = actual;
+            return 1;
+        }
+    }
+
+    if (initial_pulses) *initial_pulses = 25U;
+    if (verified) *verified = actual;
+    return 0;
+}
+
 static void pulse_28c64_byte(wl, address, value)
 struct willem *wl;
 wl_u16 address;

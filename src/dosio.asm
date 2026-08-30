@@ -7,6 +7,7 @@ GLOBAL _dos_inb
 GLOBAL _dos_wait_us
 GLOBAL _dos_datetime
 GLOBAL _dos_sdp_write
+GLOBAL _dos_m2764a_pulse
 GLOBAL _dos_bios_ticks
 GLOBAL _dos_rename
 
@@ -131,6 +132,68 @@ _dos_sdp_write:
     add dx, 2
     mov al, 007h
     out dx, al
+    ret
+
+; void dos_m2764a_pulse(unsigned base, unsigned milliseconds)
+; Entry assumptions: logical VCC/VPP/P are on/on/high, G is high and the
+; address/data path is selected.  Their raw PC control values are 06h idle
+; and 0Eh with the active-low P pin asserted.  A PIT-derived one-millisecond
+; interval is used for each unit.  Only the tightly bounded initial 1 ms
+; pulse masks interrupts; longer 3*n ms overprogram pulses leave IRQs enabled.
+_dos_m2764a_pulse:
+    push bp
+    mov bp, sp
+    push bx
+    push cx
+    push dx
+    push si
+    mov dx, [bp+4]
+    add dx, 2
+    mov cx, [bp+6]
+    mov si, cx
+    or cx, cx
+    jz .eprom_done
+    cmp cx, 1
+    jne .eprom_assert
+    pushf
+    cli
+.eprom_assert:
+    mov al, 00eh
+    out dx, al
+.eprom_millisecond:
+    ; Wait 1193 PIT ticks, or approximately 999.85 us.  Loop overhead places
+    ; the 1 ms initial pulse safely inside the specified 0.95..1.05 ms range.
+    xor al, al
+    out 043h, al
+    in al, 040h
+    mov bl, al
+    in al, 040h
+    mov bh, al
+.eprom_pit_loop:
+    xor al, al
+    out 043h, al
+    in al, 040h
+    mov dl, al
+    in al, 040h
+    mov dh, al
+    mov ax, bx
+    sub ax, dx
+    cmp ax, 1193
+    jb .eprom_pit_loop
+    loop .eprom_millisecond
+    mov dx, [bp+4]
+    add dx, 2
+    mov al, 006h
+    out dx, al
+    cmp si, 1
+    jne .eprom_done
+    popf
+.eprom_done:
+    pop si
+    pop dx
+    pop cx
+    pop bx
+    pop bp
     ret
 
 ; unsigned dos_inb(unsigned port)

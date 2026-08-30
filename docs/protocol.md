@@ -96,7 +96,7 @@ the bank's printed `ON` side only when the X appears in the rendered ON row.
 The PCB5.0E socket position and other board jumpers still require confirmation
 against the original Willem application or a reliable PCB5.0E manual.
 
-## Safety gate
+## Safety gates
 
 Read-only operation never enables VPP. The AT28C64 write command is locked
 until two physical reads of the known Juku 2764 match each other and the known
@@ -104,6 +104,10 @@ image. The host validator enforces that gate by creating `WRITE.OK` only after
 all comparisons pass; DOS additionally requires the explicit `/WRITE` option.
 Original-software trace comparison remains desirable protocol corroboration,
 but is not encoded in the file-token gate.
+
+ST M2764A programming has a different, non-interchangeable `M2764A.OK` gate
+and explicit `/WRITE`. `WM2764A` performs a complete VPP-off blank scan before
+it can select VPP. The 28C64 token cannot authorize this 12.5 V path.
 
 ## AT28C64B protected-write core
 
@@ -122,11 +126,22 @@ The DOS sequence follows the manufacturer's SDP protected-write algorithm:
 
 The DOS path emits the four loads through compact 8086 assembly with no file
 I/O or tracing between them, keeping below the specified 150 us byte-load
-limit on the V30. `/TRACE` is rejected for writes. The implementation does not
-use an EPROM VPP/PRESTO algorithm. Virtual tests prove that a protected device
+limit on the V30. `/TRACE` is rejected for writes. Virtual tests prove that a protected device
 rejects an ordinary write, accepts the exact SDP sequence, and never sees VPP.
 The DOS routine preserves FLAGS and masks hardware interrupts only across the
 four timing-sensitive loads. A byte that still mismatches gets a late read and
 at most three total protected-write attempts; all retries are recorded.
 
 Reference: [Microchip AT28C64B data sheet](https://ww1.microchip.com/downloads/aemDocuments/documents/MPD/ProductDocuments/DataSheets/AT28C64B-64-Kbit-8Kx8-Parallel-EEPROM-with-Page-Write-and-Software-Data-Protection-DS20006432.pdf).
+
+## ST M2764A Fast Programming core
+
+With DIP `12Bh`, the socket route holds M2764A `E` low, DB25 pin 14 controls
+`G`, and DB25 pin 17 controls `P`. The DOS backend uses PIT channel 0 to hold
+each initial pulse inside the specified 0.95..1.05 ms interval. It verifies at
+12.5 V after every initial pulse, stops after 25 failures, and applies one
+2.85..78.75 ms overprogram pulse (`3*n` ms) after success. VCC precedes VPP;
+VPP is removed first. A final full comparison at VCC=5 V and VPP=5 V is a
+separate `V2764` run because the board regulator selection is manual.
+
+Reference: [ST M2764A data sheet](https://www.pilianidis.gr/images/sync_products/03-M2764AF1/ST%20Microelectronics_M2764AF1.pdf).

@@ -148,6 +148,66 @@ Safe connection sequence for the first test:
 6. Run the read command; after it returns and reports safe shutdown, shut down
    before moving the chip, jumpers, or cables.
 
+## ST M2764AF1 programming hold point
+
+Do not physically run `WM2764A` merely because its virtual tests pass. Before
+the first chip, positively identify the board's VCC and VPP selectors and use
+an empty ZIF socket with:
+
+```text
+WILLEM DM2764A 378 /VPP
+```
+
+At the pauses, meter from chip pin 14 / ZIF contact 16 ground. Require pin 28 /
+ZIF30 to be 5.75..6.25 V and pin 1 / ZIF3 to be 12.2..12.8 V. Abort and remove
+power if either is outside that range. Program only at 20..30 °C ambient, the
+data sheet's 25±5 °C range. This diagnostic applies VCC before VPP
+and removes VPP first, but `/VPP` and the empty-socket confirmation remain
+operator interlocks. Never move a selector or chip while powered.
+
+Only the exact ST `M2764A` algorithm is supported. With power removed, use the
+same bottom-aligned 28-pin placement and DIP `12Bh`; select 6.0 V VCC and
+12.5 V VPP. The write command requires `/WRITE`, `M2764A.OK`, a blank chip,
+and an exact 8192-byte image:
+
+Create that token only through `tools/create_m2764a_gate.py`, which requires
+two independent all-FF reads, a nonuniform control-chip read to reject a stuck
+bus, the complete M2764A marking, and the recorded meter values. It deletes a
+stale token before validation and refuses measurements outside the data-sheet
+ranges.
+
+For a deliberately accepted first-chip experiment only, the gate generator can
+record a measured 5.70..<5.75 V VCC with `--allow-marginal-vcc`. It marks the
+token `VCC_STATUS=MARGINAL_EXPERIMENTAL_USER_ACCEPTED`; the value remains below
+the data-sheet programming range and may cause programming or margin failure.
+Values below 5.70 V or above 6.25 V remain blocked.
+
+For a routine follow-up programming attempt, `--writer-blank-scan-only` may
+replace the two separate host reads. This choice is recorded in the token and
+relies on the writer's mandatory full VPP-off scan, which aborts before VPP on
+the first non-`FF` byte. Retain the two-read mode when independent blank-read
+evidence is part of the experiment.
+
+```text
+WILLEM WM2764A TARGET.BIN 378 /WRITE
+```
+
+It first reads every byte with VPP off and will not raise VPP unless all are
+`FF`. It then performs ST Fast Programming and a full comparison at the
+programming rails, powers down with VPP removed before VCC, and stops. That is
+not the data sheet's final verification. Remove programmer power, return the
+board to normal 5 V VCC with VPP=VCC/read configuration, repower, and run:
+
+```text
+WILLEM V2764 TARGET.BIN 378
+```
+
+Do not call the chip programmed successfully until this separate 5 V verify
+passes. The reference board completed this gate on 2026-08-26 and programmed
+four M2764AF1 devices; see
+[`m2764a-physical-acceptance.md`](m2764a-physical-acceptance.md). That result
+does not authorize an unmeasured clone or a different EPROM algorithm.
+
 On 2026-08-09, a misplaced J2 produced a repeatable-looking but invalid
 AT28C64 dump with address/page aliasing. After programmer power was removed and
 J2 corrected, two independent reads matched the pinned source image exactly.
