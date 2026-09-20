@@ -40,6 +40,28 @@ OE. `wl_begin_2764_read` and `wl_read_byte` reproduce those transitions. Both
 finish with VPP off, VCC off, address zero, and data zero. The DOS port adds
 hardware-clocked minimum delays but does not change the signal order.
 
+## 27256 read sequence and September 2026 correction
+
+The pinned `chips/27xx.cpp` registers **27256 with ce=0**, while 2764 and
+27128 use ce=1. `chips/modules.h` passes that value through `start_action`
+to `hw_set_ce`; the Willem driver drives DB25 pin17 accordingly. DIP1B3
+routes this as the 27256 enable path, whereas DIP12B uses the 2764 PGM path.
+
+The initial `dosravi-27256-read-v1` incorrectly reused `wl_begin_2764_read`,
+holding pin17 high. This is a software defect independent of correct jumper
+settings and plausibly explains the exact programmer-output echo observed
+on two chips. Virtual tests originally checked capacity/addressing without
+modeling 27256 CE; they consequently missed it.
+
+`dosravi-27256-ce-fix-v2` uses `wl_begin_27256_read`, with the same startup
+levels as 2716 (pin17 low), but its own physical routing and 32 KiB capacity.
+The virtual model now disables 27256 ROM data when CE is high and explicitly
+checks CE low, VCC on, VPP off, and the full A13/A14 range. Restoring the old
+startup in a mutation test fails. On the same second physical 27256, the
+corrected reader replaced the echo with all FF. This supports the CE diagnosis;
+a known-programmed 27256 control and repeat verification remain pending.
+Do not treat the old echo captures as chip data or proof of defective chips.
+
 ## 2764 program routing
 
 The same pinned `chips/27xx.cpp` registers 2764 programming as

@@ -6,6 +6,7 @@
 
 #define ROM_SIZE 8192
 #define RF5_SIZE 2048
+#define EPROM256_SIZE 32768U
 #define LOG_NAME "WILLEM.LOG"
 #define TRACE_NAME "WTRACE.BIN"
 #define LOG_ROTATE_SIZE 24576UL
@@ -13,7 +14,7 @@
 #define M2764A_GATE_NAME "M2764A.OK"
 #define WILLEM_VERSION "0.2.0-dev"
 #ifndef WILLEM_BUILD_ID
-#define WILLEM_BUILD_ID "dosravi-m2764a-write-v1"
+#define WILLEM_BUILD_ID "dosravi-27512-read-v1"
 #endif
 
 #define ACTION_READ 1
@@ -25,6 +26,8 @@
 #define DEVICE_28C64 2
 #define DEVICE_RF5 3
 #define DEVICE_M2764A 4
+#define DEVICE_27256 5
+#define DEVICE_27512 6
 
 extern void dos_outb(unsigned port, unsigned value);
 extern unsigned dos_inb(unsigned port);
@@ -68,7 +71,7 @@ struct dos_context {
 };
 
 static FILE *log_file;
-static unsigned char rom_buffer[ROM_SIZE];
+static unsigned char rom_buffer[EPROM256_SIZE];
 
 static int archive_append_file(name, binary)
 char *name;
@@ -223,18 +226,25 @@ unsigned milliseconds;
     dos_m2764a_pulse(ctx->base, milliseconds);
 }
 
-static unsigned crc16(data, size)
+static unsigned crc16_update(crc, data, size)
+unsigned crc;
 unsigned char *data;
 unsigned size;
 {
-    unsigned crc, i, bit;
-    crc = 0xffffU;
+    unsigned i, bit;
     for (i = 0; i < size; i++) {
         crc ^= (unsigned)data[i] << 8;
         for (bit = 0; bit < 8; bit++)
             crc = (crc & 0x8000U) ? (crc << 1) ^ 0x1021U : crc << 1;
     }
     return crc;
+}
+
+static unsigned crc16(data, size)
+unsigned char *data;
+unsigned size;
+{
+    return crc16_update(0xffffU, data, size);
 }
 
 static unsigned long crc32(data, size)
@@ -394,6 +404,8 @@ static void usage()
     puts("WILLEM V30 read/check/gated-write utility");
     puts("Usage: WILLEM RRF5  output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM R2764 output.bin [base] [/PROFILE:name] [/TRACE]");
+    puts("       WILLEM R27512 output.bin [base] [/PROFILE:name] [/TRACE]");
+    puts("       WILLEM R27256 output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM R28C64 output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM B2764 [base] [/TRACE]");
     puts("       WILLEM B28C64 [base] [/TRACE]");
@@ -414,6 +426,10 @@ int *device;
         *action = ACTION_READ; *device = DEVICE_RF5;
     } else if (same_command(text, "R2764")) {
         *action = ACTION_READ; *device = DEVICE_2764;
+    } else if (same_command(text, "R27512")) {
+        *action = ACTION_READ; *device = DEVICE_27512;
+    } else if (same_command(text, "R27256")) {
+        *action = ACTION_READ; *device = DEVICE_27256;
     } else if (same_command(text, "R28C64")) {
         *action = ACTION_READ; *device = DEVICE_28C64;
     } else if (same_command(text, "B2764")) {
@@ -451,6 +467,8 @@ int action;
 static char *device_name(device)
 int device;
 {
+    if (device == DEVICE_27512) return "27512/27C512";
+    if (device == DEVICE_27256) return "27256/27C256";
     if (device == DEVICE_RF5) return "K573RF5/2716";
     if (device == DEVICE_M2764A) return "ST-M2764A";
     return device == DEVICE_2764 ? "2764/27C64" : "AT28C64";
@@ -459,12 +477,17 @@ int device;
 static unsigned device_size(device)
 int device;
 {
+    /* 27512 uses the separate streaming path, never a 16-bit image size. */
+    if (device == DEVICE_27512) return 0;
+    if (device == DEVICE_27256) return EPROM256_SIZE;
     return device == DEVICE_RF5 ? RF5_SIZE : ROM_SIZE;
 }
 
 static unsigned device_dip_mask(device)
 int device;
 {
+    if (device == DEVICE_27512) return 0x1d4U;
+    if (device == DEVICE_27256) return 0x1b3U;
     return device == DEVICE_RF5 ? 0x1a3U : 0x12bU;
 }
 
@@ -604,6 +627,49 @@ struct dos_context *context;
     wait_enter("Confirm pin 1 no longer has 12.5V");
 }
 
+/* The COM memory segment cannot hold a 64 KiB image. Stream bounded chunks
+   with OE inactive between reads; use a long offset so FFFF does not wrap. */
+static int read_27512(wl, file, profile)
+struct willem *wl;
+FILE *file;
+struct read_profile *profile;
+{
+    unsigned long offset, started, elapsed;
+    unsigned i, crc;
+    int result;
+
+    crc = 0xffffU;
+    result = 1;
+    started = dos_bios_ticks();
+    logmsg("Power transition: enabling VCC, VPP off");
+    wl_begin_27512_read(wl);
+    for (offset = 0; offset < 65536UL; offset += ROM_SIZE) {
+        for (i = 0; i < ROM_SIZE; i++)
+            rom_buffer[i] = wl_read_byte(wl, (wl_u16)(offset + i));
+        crc = crc16_update(crc, rom_buffer, ROM_SIZE);
+        if (fwrite(rom_buffer, 1, ROM_SIZE, file) != ROM_SIZE) {
+            logmsg("ERROR: failed writing output image at offset %lu", offset);
+            goto shutdown;
+        }
+        logmsg("Scan progress: %lu/65536 bytes", offset + ROM_SIZE);
+    }
+    if (fflush(file) != 0) {
+        logmsg("ERROR: failed flushing output image");
+        goto shutdown;
+    }
+    result = 0;
+shutdown:
+    elapsed = (dos_bios_ticks() - started) * 55UL;
+    logmsg("DOSRAVI_METRIC read_ms=%lu profile=%s includes_chunk_io=1",
+           elapsed, profile->name);
+    logmsg("Power transition: safe shutdown begins");
+    wl_end_read(wl);
+    logmsg("Safe shutdown complete: VCC off, VPP off");
+    if (!result)
+        logmsg("Read complete: bytes=65536 CRC16-CCITT=%04X", crc);
+    return result;
+}
+
 int main(argc, argv)
 int argc;
 char **argv;
@@ -617,7 +683,7 @@ char **argv;
     unsigned retry_bytes, total_retries, late_bytes;
     unsigned pulse_count, total_initial_pulses, max_initial_pulses;
     unsigned overprogram_pulses, blank_mismatches;
-    unsigned power_on_ms, image_size, dip_mask;
+    unsigned power_on_ms, image_size, dip_mask, chunk;
     unsigned long read_started, read_ms, program_started, program_ms;
     unsigned long verify_started, verify_ms, image_crc32;
     unsigned char actual, expected, verified;
@@ -825,6 +891,11 @@ char **argv;
         goto close_trace;
     }
 
+    if (device == DEVICE_27512) {
+        result = read_27512(&wl, file, profile);
+        goto close_trace;
+    }
+
     mismatch_count = 0;
     written = 0;
     unchanged = 0;
@@ -871,6 +942,7 @@ char **argv;
     } else {
         if (action == ACTION_WRITE) wl_begin_28c64_write(&wl);
         else if (device == DEVICE_RF5) wl_begin_2716_read(&wl);
+        else if (device == DEVICE_27256) wl_begin_27256_read(&wl);
         else if (device == DEVICE_2764) wl_begin_2764_read(&wl);
         else wl_begin_28c64_read(&wl);
         powered = 1;
@@ -1038,11 +1110,17 @@ char **argv;
             result = 0;
         }
     } else if (action == ACTION_READ) {
-        if (fwrite(rom_buffer, 1, image_size, file) != image_size) {
-            logmsg("ERROR: failed writing output image");
-            fclose(file);
-            file = 0;
-            goto close_trace;
+        /* Dev86 stdio cannot reliably report a single 32768-byte write.
+           Keep transfers below its signed 16-bit count boundary. */
+        for (address = 0; address < image_size; address += chunk) {
+            chunk = image_size - address;
+            if (chunk > ROM_SIZE) chunk = ROM_SIZE;
+            if (fwrite(rom_buffer + address, 1, chunk, file) != chunk) {
+                logmsg("ERROR: failed writing output image");
+                fclose(file);
+                file = 0;
+                goto close_trace;
+            }
         }
         fclose(file);
         file = 0;

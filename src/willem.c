@@ -209,6 +209,24 @@ struct willem *wl;
     if (milliseconds) delay_us(wl, (int)milliseconds * 1000);
 }
 
+void wl_begin_27256_read(wl)
+struct willem *wl;
+{
+    /* Geepro 27xx.cpp: read_27256 uses start_action(0, 0), unlike
+       2764's start_action(0, 1). With DIP 1B3, DB25 pin 17 must be
+       low to select the 27256. The 2716 startup has the same levels;
+       the physical routing and capacity remain device-specific. */
+    wl_begin_2716_read(wl);
+}
+
+void wl_begin_27512_read(wl)
+struct willem *wl;
+{
+    /* Geepro read_27512 also uses start_action(0, 0). DIP1D4 routes
+       A15 to chip pin 1; CE stays low and programming VPP stays off. */
+    wl_begin_2716_read(wl);
+}
+
 void wl_begin_2764_read(wl)
 struct willem *wl;
 {

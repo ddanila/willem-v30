@@ -53,6 +53,8 @@ matching known-Juku physical reads.
 ```text
 WILLEM RRF5   OUT.BIN [378] [/PROFILE:name] [/TRACE]
 WILLEM R2764  OUT.BIN [378] [/PROFILE:name] [/TRACE]
+WILLEM R27256 OUT.BIN [378] [/PROFILE:name] [/TRACE]
+WILLEM R27512 OUT.BIN [378] [/PROFILE:name] [/TRACE]
 WILLEM R28C64 OUT.BIN [378] [/PROFILE:name] [/TRACE]
 WILLEM B2764          [378] [/TRACE]
 WILLEM B28C64         [378] [/TRACE]
@@ -69,6 +71,16 @@ physical switch 1; follow the numbering and the `ON` mark printed on the DIP
 bank. `RRF5` always creates exactly 2048 bytes and has no corresponding
 blank, verify, or write command. Verification images for the other devices
 must be exactly 8192 bytes.
+
+`R27256` reads exactly 32768 bytes from a 27256/27C256 using the EPROM
+read sequence with VPP off. Use Normal 28-pin routing, DIP mask `1B3h`
+(ON: 1,2,5,6,8,9), and bottom alignment with two empty rows at the lever.
+At conservative timing, allow approximately eight minutes per read; use a
+DOSRAVI execution timeout of at least 900 seconds. Build `dosravi-27256-ce-fix-v2` corrects the original R27256 CE polarity
+error (27256 requires pin17 low, unlike 2764). Earlier captures showed output
+echo; the corrected reader eliminated it on the same second chip, yielding
+all FF. Other corrected captures included an FF/F7-only chip. A
+known-programmed 27256 control and repeat verification remain pending.
 
 Read commands accept audited runtime timing tables through `/PROFILE:name`.
 The ordered experimental sequence is `conservative,address2,oe2,latch2,`
@@ -164,3 +176,18 @@ python3 tools/validate_read.py --unlock WRITE.OK \
 
 The tool rejects wrong sizes, non-repeatable reads, disagreement with the known
 image, and repeatable all-zero/all-FF stuck-bus captures.
+
+### 27512 / 27C512 reads
+
+`WILLEM R27512 BIOS.BIN 378 /PROFILE:conservative` reads all 64 KiB using
+DIP `1D4h` (ON 3,5,7,8,9), Normal 28-pin routing, 5 V VCC, and VPP off.
+See `docs/hardware.md` for placement. Build `dosravi-27512-read-v1` streams
+8 KiB chunks with a 32-bit offset and a continuous CRC16, avoiding the DOS
+64 KiB segment limit. Use DOSRAVI EXEC timeout 1800 seconds; a conservative
+read takes approximately 15 minutes. Only the read command is implemented
+for this device.
+
+Physical 27512 validation: one 65536-byte capture identified Cirrus Logic
+GD-5422 VGA BIOS 1.00d, with a valid 32 KiB option-ROM checksum and an all-zero
+upper half. Host CRC16 `39AF` matched the DOS reader. Repeatability has not
+been checked. [Capture and evidence](https://github.com/ddanila/dumps/tree/main/unknown/cirrus-gd5422-27512-20260921).

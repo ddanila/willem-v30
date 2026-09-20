@@ -54,6 +54,45 @@ The 2764/27C64 and AT28C64 DIP mask is `12Bh` (ON: 1, 2, 4, 6, 9).
 AT28C64 control-pin measurements confirmed the required idle, read, and write
 levels with this setting. Mask bit 0 maps to numbered switch 1 in Geepro.
 
+## 27256 / 27C256 read-only settings
+
+Use the same Normal 28-pin J1/J2 routing and bottom-aligned placement as the
+2764 above, with two empty rows at the lever end and the notch toward the lever.
+Keep J9/J10 toward DB25, VCC at 5 V, and software VPP off.
+Set DIP mask `1B3h`: ON 1,2,5,6,8,9; OFF 3,4,7,10,11,12.
+This mask and placement come from the pinned Geepro `family=27256` entry.
+
+`R27256` reads addresses `0000h` through `7FFFh` and saves exactly 32768 bytes
+after safe shutdown. Output is transferred in 8 KiB chunks to avoid Dev86's
+signed 16-bit stdio count boundary. Conservative hardware reads are expected
+to take roughly eight minutes; set DOSRAVI `--exec-timeout 900` or longer.
+The virtual-board test covers active-low CE and A13/A14, and DOSBox checks
+the complete file. Use build `dosravi-27256-ce-fix-v2` or later: the original
+R27256 implementation held CE high and produced programmer-output echo.
+DIP1B3 and Normal routing remain the required settings.
+
+## 27512 / 27C512 read-only settings
+
+Use Normal 28-pin J1/J2 routing and the same bottom-aligned placement as
+27256: two empty rows at the lever end, notch toward the lever. Keep J9/J10
+toward DB25, 5 V VCC, and software programming VPP off.
+DIP mask `1D4h`: ON 3,5,7,8,9; OFF 1,2,4,6,10,11,12.
+Geepro's pinned `family=27512` entry supplies this mask; its `read_27512`
+uses `start_action(0, 0)`, with CE low. A15 is chip pin 1.
+
+`R27512` captures exactly 65536 bytes, addresses 0000h through FFFFh.
+It streams 8 KiB chunks because a full image cannot fit in the COM segment;
+OE is inactive between byte reads, including during file writes. The offset
+and progress counters are 32-bit. CRC16 carries across chunks. On output
+failure, the reader shuts down VCC/VPP and returns failure; any partial file
+is not a successful dump. The read metric includes chunk file I/O and CRC.
+Use build `dosravi-27512-read-v1` or later. Conservative reads take about
+15 minutes; use DOSRAVI `--exec-timeout 1800`. `R27256` is not a substitute.
+
+Sources:
+- https://github.com/danielg4/geepro/blob/a08efcaf6479730d552c5f96bad0a2a01bf0635f/drivers/willem.xml.in#L93-L102
+- https://github.com/danielg4/geepro/blob/a08efcaf6479730d552c5f96bad0a2a01bf0635f/chips/27xx.cpp#L336-L339
+
 ## К573РФ5 / 2716 read-only settings
 
 К573РФ5 is a 24-pin, 2K x 8 2716-class EPROM. It must not use the normal

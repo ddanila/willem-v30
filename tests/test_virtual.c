@@ -5,9 +5,10 @@
 
 #define ROM_SIZE 8192
 #define RF5_SIZE 2048
+#define EPROM256_SIZE 32768U
 
 struct virtual_willem {
-    wl_u8 rom[ROM_SIZE];
+    wl_u8 rom[65536UL];
     wl_u8 data;
     wl_u8 control;
     wl_u8 read_shift;
@@ -16,6 +17,7 @@ struct virtual_willem {
     wl_u16 address_bits;
     wl_u16 address;
     int read_loaded;
+    int route_27256;
     unsigned long data_writes;
     unsigned long control_writes;
     unsigned long status_reads;
@@ -58,14 +60,17 @@ int value;
                                ((value & WL_D1) ? 1UL : 0UL);
             v->address_bits++;
             if (v->address_bits == 24) {
-                v->address = (wl_u16)(v->address_shift & 0x1fffUL);
+                v->address = (wl_u16)(v->address_shift & 0xffffUL);
                 v->address_bits = 0;
                 v->address_shift = 0;
             }
         }
 
         if (!(old & WL_D1) && (value & WL_D1) && (value & WL_D2)) {
-            if ((v->busy_reads || v->busy_forever) &&
+            if (v->route_27256 && (v->control & WL_CTL_WE)) {
+                /* DIP1B3 routes pin17 to active-low 27256 CE. */
+                v->read_shift = 0xff;
+            } else if ((v->busy_reads || v->busy_forever) &&
                 v->address == v->pending_address) {
                 v->read_shift = v->pending_data ^ 0x80U;
                 if (!v->busy_forever) {
@@ -103,7 +108,7 @@ int raw_value;
     if ((old & WL_CTL_VCC) && !(v->control & WL_CTL_VCC) &&
         (old & WL_CTL_VPP)) v->vcc_removed_before_vpp = 1;
     if (v->control & WL_CTL_VPP) v->vpp_seen = 1;
-    if (!(old & WL_CTL_WE) && (v->control & WL_CTL_WE) &&
+    if (!v->route_27256 && !(old & WL_CTL_WE) && (v->control & WL_CTL_WE) &&
         (v->control & WL_CTL_VCC) && !(v->control & WL_CTL_MUX)) {
         if (v->require_sdp && v->sdp_state == 0 &&
             v->address == 0x1555U && v->data == 0xaaU) {
@@ -184,7 +189,7 @@ unsigned milliseconds;
 static wl_u8 pattern(address)
 wl_u16 address;
 {
-    return (wl_u8)(((address * 73U) ^ (address >> 3) ^ 0xa5U) & 0xffU);
+    return (wl_u8)(((address * 73U) ^ (address >> 3) ^ (address >> 8) ^ 0xa5U) & 0xffU);
 }
 
 int main()
@@ -193,6 +198,7 @@ int main()
     struct willem wl;
     struct wl_io io;
     wl_u16 address;
+    unsigned long full_address;
     wl_u8 actual;
 
     memset(&v, 0, sizeof(v));
@@ -252,6 +258,68 @@ int main()
 
     printf("virtual 2764 read passed: %u bytes, %lu status reads\n",
            ROM_SIZE, v.status_reads);
+
+    /* Include A13/A14 in both addresses and data: an 8 KiB alias must fail. */
+    for (address = 0; address < EPROM256_SIZE; address++)
+        v.rom[address] = pattern(address);
+    v.status_reads = 0;
+    v.route_27256 = 1;
+    /* Prove the old 2764 startup leaves a 27256 disabled. */
+    wl_begin_2764_read(&wl);
+    if (wl_read_byte(&wl, 0) != 0xffU) {
+        fprintf(stderr, "27256 model did not reject inactive CE\n");
+        return 1;
+    }
+    wl_end_read(&wl);
+    v.status_reads = 0;
+    wl_begin_27256_read(&wl);
+    if (!(v.control & WL_CTL_VCC) ||
+        (v.control & (WL_CTL_WE | WL_CTL_VPP))) {
+        fprintf(stderr, "27256 must hold CE low and VPP off\n");
+        return 1;
+    }
+    for (address = 0; address < EPROM256_SIZE; address++) {
+        actual = wl_read_byte(&wl, address);
+        if (actual != pattern(address) || v.address != address) {
+            fprintf(stderr, "27256 address/data mismatch at %04x\n", address);
+            return 1;
+        }
+    }
+    wl_end_read(&wl);
+    if (v.status_reads != EPROM256_SIZE * 8UL || v.vpp_seen ||
+        (v.control & (WL_CTL_VPP | WL_CTL_VCC))) {
+        fprintf(stderr, "unsafe or incomplete 27256 read\n");
+        return 1;
+    }
+    v.route_27256 = 0;
+    printf("virtual 27256 read passed: 32768 bytes, active-low CE and A13/A14 checked\n");
+
+    for (full_address = 0; full_address < 65536UL; full_address++)
+        v.rom[full_address] = pattern((wl_u16)full_address);
+    v.route_27256 = 1; /* Both routes require active-low CE. */
+    v.status_reads = 0;
+    wl_begin_27512_read(&wl);
+    if (!(v.control & WL_CTL_VCC) ||
+        (v.control & (WL_CTL_WE | WL_CTL_VPP))) {
+        fprintf(stderr, "27512 must hold CE low and VPP off\n");
+        return 1;
+    }
+    for (full_address = 0; full_address < 65536UL; full_address++) {
+        actual = wl_read_byte(&wl, (wl_u16)full_address);
+        if (actual != pattern((wl_u16)full_address) ||
+            v.address != full_address) {
+            fprintf(stderr, "27512 address/data mismatch at %04lx\n", full_address);
+            return 1;
+        }
+    }
+    wl_end_read(&wl);
+    if (v.status_reads != 65536UL * 8UL || v.vpp_seen ||
+        (v.control & (WL_CTL_VPP | WL_CTL_VCC))) {
+        fprintf(stderr, "unsafe or incomplete 27512 read\n");
+        return 1;
+    }
+    v.route_27256 = 0;
+    printf("virtual 27512 read passed: 65536 bytes, CE and A15 checked\n");
 
     v.status_reads = 0;
     wl_begin_28c64_read(&wl);
