@@ -297,3 +297,26 @@ _dos_datetime:
     pop bx
     pop bp
     ret
+
+; Console output bypasses DOSRAVI stdout capture without stdio allocation.
+; DOS AH=06h direct console output does not check Ctrl-C.
+GLOBAL _dos_console
+_dos_console:
+    push bp
+    mov bp, sp
+    push si
+    push dx
+    mov si, [bp+4]
+.next:
+    mov dl, [si]
+    inc si
+    or dl, dl
+    jz .done
+    mov ah, 06h
+    int 21h
+    jmp .next
+.done:
+    pop dx
+    pop si
+    pop bp
+    ret

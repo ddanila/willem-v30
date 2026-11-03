@@ -191,3 +191,10 @@ Physical 27512 validation: one 65536-byte capture identified Cirrus Logic
 GD-5422 VGA BIOS 1.00d, with a valid 32 KiB option-ROM checksum and an all-zero
 upper half. Host CRC16 `39AF` matched the DOS reader. Repeatability has not
 been checked. [Capture and evidence](https://github.com/ddanila/dumps/tree/main/unknown/cirrus-gd5422-27512-20260921).
+
+### Empty-socket 2716 voltage check
+
+`WILLEM D2716 378 /VPP` provides manually confirmed 5 V / 25 V measurement
+steps for РФ2/РФ5 routing, with safe shutdown on declined confirmation or EOF.
+See [hardware setup](docs/hardware.md#empty-socket-2716--рф2--рф5-voltage-diagnostic).
+This is not a 2716 programming command; physical 25 V validation is pending.

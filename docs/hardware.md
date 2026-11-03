@@ -299,3 +299,55 @@ or D16 before comparing it.
 - [Pinned Geepro 2716 device entry](https://github.com/danielg4/geepro/blob/a08efcaf6479730d552c5f96bad0a2a01bf0635f/drivers/willem.xml)
 - [Pinned Geepro 2716 read implementation](https://github.com/danielg4/geepro/blob/a08efcaf6479730d552c5f96bad0a2a01bf0635f/chips/27xx.cpp)
 - [Intel 2716 data sheet](https://www.theoddys.com/acorn/semiconductor_datasheets/2716%20Intel.pdf)
+
+## Empty-socket 2716 / РФ2 / РФ5 voltage diagnostic
+
+`WILLEM D2716 378 /VPP` checks the manually selected 5 V VCC and 25 V
+VPP with **no chip installed**. It does not program an EPROM or measure
+voltages automatically. Keep J9/J10 toward DB25, J1/J2 on the ZIF-side
+pairs, DIP 1A3h (ON 1,2,6,8,9), and the established barrel supply with USB
+power disconnected. Set selectors only with power removed.
+
+Viewed from above with the lever at the top, ZIF contacts run 1..16 down
+left and 32..17 down right. Black probe: ZIF16 (chip ground pin12).
+VCC: ZIF28 (chip24). VPP: ZIF25 (chip21). These are 2716-routing contacts,
+not the contacts used by DM2764A.
+
+The diagnostic requires a complete `YES` line at each step:
+
+1. Confirm the empty socket and settings, then enable VCC only.
+2. Measure ZIF28 and ZIF25: both should be 4.75..5.25 V. Confirm to enable VPP.
+3. Record ZIF25 (target 25.0 V, 24.5..25.5 V) and ZIF28 (4.75..5.25 V).
+   Confirm to remove programming VPP.
+4. Check ZIF25 has returned to the 5 V read rail, then confirm to remove VCC.
+
+Any other response or EOF exits through VPP-before-VCC shutdown, returning
+failure. Use a non-YES response to stop normally; if the computer hangs or
+voltage is wrong, remove programmer power. Do not use Ctrl-C as a rail-off
+command. No programming pulses are issued. Never redirect prefilled YES
+answers on real hardware: each confirmation follows an actual meter check.
+The diagnostic waits for local keyboard input; DOSRAVI can launch it, but the
+operator must answer at the laptop. This is an unloaded check, not evidence
+that the converter maintains voltage under programming load.
+
+Validation: `make dos test` and `python3 tests/test_2716_diag.py`.
+The latter executes the actual COM on emulated 8086/80186 CPUs and checks
+port traces for rail ordering, EOF at every pause, and rejection before I/O
+without `/VPP`. Physical 25 V measurement remains pending.
+
+### Owner measurement, 2026-11-03: excessive VPP before diagnostic
+
+With the requested 2716 jumpers set, barrel supply connected, socket empty,
+and plain DOS booted without programmer software, the owner observed the
+VPP LED lit. Meter readings: **31 V between ZIF25 and ZIF16**, confirmed
+measurement contacts; **VCC 5.03 V**. The linear regulator felt hot; no
+measured temperature or current was supplied. No EPROM was installed and
+D2716 had not been run. Advised removing programmer power.
+
+The measured VPP exceeds the РФ2/РФ5 programming limit; do not insert a chip.
+VCC is within 4.75..5.25 V. Boot-time LPT state may explain enablement, but
+neither that cause nor the cause of the excessive voltage is established.
+Recheck the exact selector arrangement and regulator circuit before proceeding.
+A heatsink would not establish correct voltage regulation. The first live
+check should establish both rail-off control and correct unloaded voltage;
+loaded regulation remains unverified.

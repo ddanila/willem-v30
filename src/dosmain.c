@@ -14,7 +14,7 @@
 #define M2764A_GATE_NAME "M2764A.OK"
 #define WILLEM_VERSION "0.2.0-dev"
 #ifndef WILLEM_BUILD_ID
-#define WILLEM_BUILD_ID "dosravi-27512-read-v1"
+#define WILLEM_BUILD_ID "dosravi-2716-voltage-diag-v1"
 #endif
 
 #define ACTION_READ 1
@@ -34,6 +34,7 @@ extern unsigned dos_inb(unsigned port);
 extern void dos_wait_us(unsigned usec);
 extern void dos_datetime(unsigned *fields);
 extern void dos_sdp_write(unsigned base, unsigned address, unsigned value);
+extern void dos_console(char *text);
 extern void dos_m2764a_pulse(unsigned base, unsigned milliseconds);
 extern unsigned long dos_bios_ticks(void);
 extern unsigned dos_rename(char *old_name, char *new_name);
@@ -414,6 +415,7 @@ static void usage()
     puts("       WILLEM WM2764A image.bin [base] /WRITE");
     puts("       WILLEM W28C64 image.bin [base] /WRITE [/TRACE]");
     puts("       WILLEM D28C64 [base] [/TRACE]  (chip removed)");
+    puts("       WILLEM D2716 [base] /VPP (EMPTY socket; 5V/25V meter test)");
     puts("       WILLEM DM2764A [base] /VPP  (chip removed; meter test)");
 }
 
@@ -446,6 +448,8 @@ int *device;
         *action = ACTION_WRITE; *device = DEVICE_M2764A;
     } else if (same_command(text, "D28C64")) {
         *action = ACTION_DIAG; *device = DEVICE_28C64;
+    } else if (same_command(text, "D2716")) {
+        *action = ACTION_DIAG; *device = DEVICE_RF5;
     } else if (same_command(text, "DM2764A")) {
         *action = ACTION_DIAG; *device = DEVICE_M2764A;
     } else {
@@ -600,6 +604,49 @@ struct dos_context *context;
     log_ports(context, "Controls returned inactive before shutdown");
 }
 
+/* A complete YES line is required; EOF/empty input never advances a rail. */
+static int confirm_2716(message)
+char *message;
+{
+    char answer[16];
+    logmsg("PAUSE: %s", message);
+    fflush(stdout);
+    /* DOSRAVI captures stdout/stderr; keep meter prompts visible locally. */
+    dos_console(message);
+    dos_console("\r\nYES + ENTER continues; else shuts off.\r\n");
+    if (!fgets(answer, sizeof(answer), stdin)) return 0;
+    return strcmp(answer, "YES\n") == 0 ||
+           strcmp(answer, "YES\r\n") == 0;
+}
+
+static int run_2716_diagnostic(wl, context)
+struct willem *wl;
+struct dos_context *context;
+{
+    logmsg("D2716 EMPTY SOCKET ONLY; no programming.");
+
+    logmsg("Ground ZIF16; VCC ZIF28; VPP ZIF25. No chip installed.");
+    if (!confirm_2716("EMPTY socket, DIP1A3, J1/J2 toward ZIF, VCC5/VPP25: enable VCC?"))
+        return 0;
+    wl_vpp(wl, 0);
+    wl_oe(wl, 0);
+    wl_we(wl, 0);
+    wl_vcc(wl, 1);
+    port_delay(context, 5000);
+    log_ports(context, "D2716 VCC ON, programming VPP OFF");
+    if (!confirm_2716("ZIF28 and ZIF25 both 4.75..5.25V? Enable 25V?"))
+        return 0;
+    wl_vpp(wl, 1);
+    port_delay(context, 5000);
+    log_ports(context, "D2716 VCC ON, programming VPP ON");
+    if (!confirm_2716("Record ZIF25=24.5..25.5V, ZIF28=4.75..5.25V; remove VPP?"))
+        return 0;
+    wl_vpp(wl, 0);
+    port_delay(context, 5000);
+    log_ports(context, "D2716 VPP OFF, VCC ON");
+    return confirm_2716("ZIF25 back to 4.75..5.25V? Finish?");
+}
+
 static void run_m2764a_diagnostic(wl, context)
 struct willem *wl;
 struct dos_context *context;
@@ -749,7 +796,8 @@ char **argv;
         if (action == ACTION_WRITE &&
             (same_command(argv[i], "/WRITE") ||
              same_command(argv[i], "-WRITE"))) continue;
-        if (action == ACTION_DIAG && device == DEVICE_M2764A &&
+        if (action == ACTION_DIAG &&
+            (device == DEVICE_M2764A || device == DEVICE_RF5) &&
             (same_command(argv[i], "/VPP") ||
              same_command(argv[i], "-VPP"))) continue;
         selected = profile_value(argv[i]);
@@ -778,9 +826,11 @@ char **argv;
     }
 
     context.base = base;
-    if (action == ACTION_DIAG && device == DEVICE_M2764A &&
+    if (action == ACTION_DIAG &&
+            (device == DEVICE_M2764A || device == DEVICE_RF5) &&
         !wants_vpp_confirm(argc, argv)) {
-        logmsg("ERROR: DM2764A requires explicit /VPP confirmation and an empty socket");
+        logmsg("ERROR: %s requires explicit /VPP confirmation and an empty socket",
+               device == DEVICE_RF5 ? "D2716" : "DM2764A");
         goto done;
     }
     if (action == ACTION_WRITE) {
@@ -871,6 +921,8 @@ char **argv;
     if (device == DEVICE_M2764A)
         logmsg("Required DIP mask=%03Xh; PROGRAM MODE REQUIRES measured VCC=6.0V and VPP=12.5V",
                dip_mask);
+    else if (action == ACTION_DIAG && device == DEVICE_RF5)
+        logmsg("Required DIP mask=%03Xh; EMPTY SOCKET 5V/25V measurement", dip_mask);
     else
         logmsg("Required DIP mask=%03Xh; VPP MUST remain off", dip_mask);
     display_dips(dip_mask);
@@ -878,7 +930,10 @@ char **argv;
     logmsg("Initial raw DATA=%02X STATUS=%02X CONTROL=%02X",
            dos_inb(base), dos_inb(base + 1), dos_inb(base + 2));
     if (action == ACTION_DIAG) {
-        if (device == DEVICE_M2764A)
+        result = 0;
+        if (device == DEVICE_RF5)
+            result = run_2716_diagnostic(&wl, &context) ? 0 : 1;
+        else if (device == DEVICE_M2764A)
             run_m2764a_diagnostic(&wl, &context);
         else
             run_28c64_diagnostic(&wl, &context);
@@ -887,7 +942,7 @@ char **argv;
         wl_end_read(&wl);
         powered = 0;
         logmsg("Safe shutdown complete: VCC off, VPP off");
-        result = 0;
+        if (result) logmsg("D2716 aborted; rails safely disabled");
         goto close_trace;
     }
 

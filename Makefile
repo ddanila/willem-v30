@@ -38,6 +38,7 @@ dos: build/dos/WILLEM.COM
 
 dos-test: dos
 	bash tools/test_dosbox.sh
+	python3 tests/test_2716_diag.py
 
 dist: dos
 	rm -rf build/dist
