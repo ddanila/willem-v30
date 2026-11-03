@@ -351,3 +351,27 @@ Recheck the exact selector arrangement and regulator circuit before proceeding.
 A heatsink would not establish correct voltage regulation. The first live
 check should establish both rail-off control and correct unloaded voltage;
 loaded regulation remains unverified.
+
+Follow-up unloaded readings from the owner, same session:
+
+| VPP selector label | Measured VPP |
+| --- | --- |
+| 12 V | 12.66 V |
+| 15 V | 15 V |
+| 21 V | approximately 31 V |
+| 25 V | approximately 31 V |
+
+Research did not locate an exact matching fault report. The PCB3B converter
+schematic reproduced by PY2BBS shows a 15 kohm feedback resistor R11 bypassed
+by J6 for the lower settings and inserted for the higher settings. Thus an
+open resistor/joint/track in that branch is a plausible explanation for both
+high settings losing regulation while the low settings work. This is an
+inference from a related circuit, not a confirmed component diagnosis or a
+verified reference designation on this 2015 clone. First check selector
+orientation/contact and map that feedback branch on the actual board, with
+power disconnected. Do not replace components solely by the reference label.
+
+Sources:
+- https://www.py2bbs.qsl.br/download/willem_pcb3b_to_pcb45.pdf (page 5 schematic)
+- https://www.ti.com/lit/ds/symlink/mc34063a.pdf (feedback comparator / divider)
+- https://www.mikrocontroller.net/attachment/180082/Standard_Willem_Programmer_User_Guide.pdf (selected VPP should match the meter reading, approximately 0.5 V tolerance)
