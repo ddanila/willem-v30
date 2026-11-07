@@ -86,4 +86,6 @@ that rejects the old startup, checks all 65,536 addresses, and detects /WE low
 while powered. `tests/test_fastaddr.py` compares 3,132 assembly/C traces,
 including both pin17 states. DOSBox tests exercise the compiled 8086/80186
 read commands. Physical verification of the corrected AT29C512 build remains
-pending; no new chip read was performed during this investigation.
+pending at the end of the emulator investigation. A subsequent authorized
+physical attempt with v2 removed the BF pattern but still produced anomalous
+04/06 bytes among FF; see `hardware.md` for the recorded result.

@@ -471,4 +471,9 @@ read checks passed but did not model flash /WE; this build is superseded.
 
 Corrected local `RD29V2.COM`: 31336 bytes, SHA256
 `937e232bd00ee32480c3ed29dd6378f3792888921b9ab7fb70fc7dd6901397e4`.
-Not yet uploaded or used on the physical AT29C512.
+Uploaded and physically read on 2026-11-07 (359370 ms, 65536 bytes, exit 0,
+VCC/VPP-off logged). The BF pattern disappeared, but the capture contains
+64742 FF bytes and 794 anomalous 04/06 bytes exclusively at offsets
+125..127 modulo 128. This is not validated firmware or a confirmed blank
+chip; a remaining read-path issue is unresolved. Evidence: DOSRAVI session
+`norma-vmd4-at29c512-20261107-read3-resume`.
