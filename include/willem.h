@@ -52,6 +52,7 @@ void wl_set_address(struct willem *wl, wl_u32 address, wl_u32 first_bit);
 void wl_set_data(struct willem *wl, int value);
 wl_u8 wl_get_data(struct willem *wl);
 void wl_begin_2716_read(struct willem *wl);
+void wl_begin_2732_read(struct willem *wl);
 void wl_begin_2764_read(struct willem *wl);
 void wl_begin_27256_read(struct willem *wl);
 void wl_begin_27512_read(struct willem *wl);

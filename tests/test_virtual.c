@@ -235,7 +235,28 @@ int main()
     printf("virtual K573RF5/2716 read passed: %u bytes, VPP never requested\n",
            RF5_SIZE);
 
-    v.status_reads = 0;
+    memset(&v, 0, sizeof(v));
+    v.route_27256 = 1; /* Same active-low pin17 selection for 2732. */
+    for (address = 0; address < 4096U; address++)
+        v.rom[address] = (wl_u8)(pattern(address) ^ (address >> 11));
+    wl_init(&wl, &io);
+    wl_begin_2732_read(&wl);
+    if (!(v.control & WL_CTL_VCC) ||
+        (v.control & (WL_CTL_WE | WL_CTL_VPP))) return 1;
+    for (address = 0; address < 4096U; address++) {
+        actual = wl_read_byte(&wl, address);
+        if (actual != (wl_u8)(pattern(address) ^ (address >> 11))) {
+            fprintf(stderr, "2732 mismatch at %04x\n", address);
+            return 1;
+        }
+    }
+    wl_end_read(&wl);
+    if (v.status_reads != 4096UL * 8UL || v.vpp_seen || v.byte_writes ||
+        (v.control & (WL_CTL_VCC | WL_CTL_VPP))) return 1;
+    printf("virtual 2732 full-address read passed: 4096 bytes, VPP off\n");
+    memset(&v, 0, sizeof(v));
+    for (address = 0; address < ROM_SIZE; address++) v.rom[address] = pattern(address);
+    wl_init(&wl, &io);
     wl_begin_2764_read(&wl);
     for (address = 0; address < ROM_SIZE; address++) {
         actual = wl_read_byte(&wl, address);

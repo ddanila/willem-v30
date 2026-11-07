@@ -375,3 +375,25 @@ Sources:
 - https://www.py2bbs.qsl.br/download/willem_pcb3b_to_pcb45.pdf (page 5 schematic)
 - https://www.ti.com/lit/ds/symlink/mc34063a.pdf (feedback comparator / divider)
 - https://www.mikrocontroller.net/attachment/180082/Standard_Willem_Programmer_User_Guide.pdf (selected VPP should match the meter reading, approximately 0.5 V tolerance)
+
+## 2732 read-only settings
+
+With power removed, select the special **2732** J1/J2 pattern (not Normal
+or 2716), DIP `1C0h`: ON 7,8,9; all others OFF. Keep J9/J10 toward DB25
+on this tested clone, 5 V VCC, software VPP off, established barrel supply
+selection and USB disconnected. Bottom-align the 24-pin chip: four empty
+rows at the lever end, notch toward lever, chip pin 1 at ZIF5.
+
+`R2732 FILE.BIN 378 /PROFILE:conservative` reads exactly 4096 bytes
+(0000h–0FFFh), including A11, and shuts down VCC/VPP afterward. No 2732
+write command is provided. Build ID: `dosravi-2732-read-v1`. Software checks
+cover full-address readback and DOS command handling; physical validation
+is pending. Do not use R2716, which reads only 2048 bytes.
+
+The DOS executable is 30288 bytes, CRC32 `bea303d3`, SHA256
+`eece740b613644a470712eb1d550aafe45875ac9d3cf13b4ebbca4f87a9a8969`.
+A local copy is saved as `build/dos/RD2732.COM` in the primary checkout.
+
+Reference: Geepro's pinned
+[2732 read controls](https://github.com/danielg4/geepro/blob/a08efcaf6479730d552c5f96bad0a2a01bf0635f/chips/27xx.cpp#L316-L319)
+and [DIP mask](https://github.com/danielg4/geepro/blob/a08efcaf6479730d552c5f96bad0a2a01bf0635f/drivers/willem.xml.in#L66-L75).

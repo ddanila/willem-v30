@@ -209,6 +209,14 @@ struct willem *wl;
     if (milliseconds) delay_us(wl, (int)milliseconds * 1000);
 }
 
+void wl_begin_2732_read(wl)
+struct willem *wl;
+{
+    /* Geepro read_2732 uses read_2716_(4096, 0): same control
+       levels, special 2732 routing and DIP1C0 supply A11. */
+    wl_begin_2716_read(wl);
+}
+
 void wl_begin_27256_read(wl)
 struct willem *wl;
 {

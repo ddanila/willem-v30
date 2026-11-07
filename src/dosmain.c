@@ -6,6 +6,7 @@
 
 #define ROM_SIZE 8192
 #define RF5_SIZE 2048
+#define EPROM32_SIZE 4096
 #define EPROM256_SIZE 32768U
 #define LOG_NAME "WILLEM.LOG"
 #define TRACE_NAME "WTRACE.BIN"
@@ -14,7 +15,7 @@
 #define M2764A_GATE_NAME "M2764A.OK"
 #define WILLEM_VERSION "0.2.0-dev"
 #ifndef WILLEM_BUILD_ID
-#define WILLEM_BUILD_ID "dosravi-2716-voltage-diag-v1"
+#define WILLEM_BUILD_ID "dosravi-2732-read-v1"
 #endif
 
 #define ACTION_READ 1
@@ -28,6 +29,7 @@
 #define DEVICE_M2764A 4
 #define DEVICE_27256 5
 #define DEVICE_27512 6
+#define DEVICE_2732 7
 
 extern void dos_outb(unsigned port, unsigned value);
 extern unsigned dos_inb(unsigned port);
@@ -404,6 +406,7 @@ static void usage()
 {
     puts("WILLEM V30 read/check/gated-write utility");
     puts("Usage: WILLEM RRF5  output.bin [base] [/PROFILE:name] [/TRACE]");
+    puts("       WILLEM R2732 output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM R2764 output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM R27512 output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM R27256 output.bin [base] [/PROFILE:name] [/TRACE]");
@@ -426,6 +429,8 @@ int *device;
 {
     if (same_command(text, "RRF5") || same_command(text, "R2716")) {
         *action = ACTION_READ; *device = DEVICE_RF5;
+    } else if (same_command(text, "R2732")) {
+        *action = ACTION_READ; *device = DEVICE_2732;
     } else if (same_command(text, "R2764")) {
         *action = ACTION_READ; *device = DEVICE_2764;
     } else if (same_command(text, "R27512")) {
@@ -473,6 +478,7 @@ int device;
 {
     if (device == DEVICE_27512) return "27512/27C512";
     if (device == DEVICE_27256) return "27256/27C256";
+    if (device == DEVICE_2732) return "2732";
     if (device == DEVICE_RF5) return "K573RF5/2716";
     if (device == DEVICE_M2764A) return "ST-M2764A";
     return device == DEVICE_2764 ? "2764/27C64" : "AT28C64";
@@ -483,6 +489,7 @@ int device;
 {
     /* 27512 uses the separate streaming path, never a 16-bit image size. */
     if (device == DEVICE_27512) return 0;
+    if (device == DEVICE_2732) return EPROM32_SIZE;
     if (device == DEVICE_27256) return EPROM256_SIZE;
     return device == DEVICE_RF5 ? RF5_SIZE : ROM_SIZE;
 }
@@ -490,6 +497,7 @@ int device;
 static unsigned device_dip_mask(device)
 int device;
 {
+    if (device == DEVICE_2732) return 0x1c0U;
     if (device == DEVICE_27512) return 0x1d4U;
     if (device == DEVICE_27256) return 0x1b3U;
     return device == DEVICE_RF5 ? 0x1a3U : 0x12bU;
@@ -523,10 +531,11 @@ unsigned mask;
 static void display_zif(device)
 int device;
 {
-    if (device == DEVICE_RF5) {
+    if (device == DEVICE_RF5 || device == DEVICE_2732) {
         logmsg("ZIF pair: lever/notch -> [--][--][--][--][1/24] ... [12/13]");
         logmsg("Leave FOUR rows empty at lever end; place chip at far end");
-        logmsg("Use SPECIAL 2716 route; notch faces empty rows and lever");
+        logmsg("Use SPECIAL %s route; notch faces empty rows and lever",
+               device == DEVICE_2732 ? "2732" : "2716");
     } else {
         logmsg("ZIF pair: lever/notch -> [--][--][1/28] ... [14/15] <- far end");
         logmsg("Leave TWO complete rows empty at lever end; do NOT center chip");
@@ -996,6 +1005,7 @@ char **argv;
         }
     } else {
         if (action == ACTION_WRITE) wl_begin_28c64_write(&wl);
+        else if (device == DEVICE_2732) wl_begin_2732_read(&wl);
         else if (device == DEVICE_RF5) wl_begin_2716_read(&wl);
         else if (device == DEVICE_27256) wl_begin_27256_read(&wl);
         else if (device == DEVICE_2764) wl_begin_2764_read(&wl);
