@@ -9,5 +9,5 @@ with tempfile.TemporaryDirectory(prefix='willem-fast512-guard-') as d:
   args+=['-c',c]
  args+=['-c','exit']
  subprocess.run(args,env=dict(os.environ,SDL_VIDEODRIVER='dummy',SDL_AUDIODRIVER='dummy'),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,check=True,timeout=30)
- s=(p/'WILLEM.LOG').read_text();assert s.count('/FASTADDR requires R27512 without /TRACE')==3;assert not list(p.glob('*.BIN'));assert 'Power transition' not in s
+ s=(p/'WILLEM.LOG').read_text();assert s.count('/FASTADDR requires R27512 or R29C512 without /TRACE')==3;assert not list(p.glob('*.BIN'));assert 'Power transition' not in s
  print('FASTADDR trace/wrong-device/write rejection passed before power-on')

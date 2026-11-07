@@ -15,7 +15,7 @@
 #define M2764A_GATE_NAME "M2764A.OK"
 #define WILLEM_VERSION "0.2.0-dev"
 #ifndef WILLEM_BUILD_ID
-#define WILLEM_BUILD_ID "dosravi-27512-fastaddr-v1"
+#define WILLEM_BUILD_ID "dosravi-at29c512-read-v1"
 #endif
 
 #define ACTION_READ 1
@@ -30,6 +30,7 @@
 #define DEVICE_27256 5
 #define DEVICE_27512 6
 #define DEVICE_2732 7
+#define DEVICE_AT29C512 8
 
 extern void dos_outb(unsigned port, unsigned value);
 extern unsigned dos_inb(unsigned port);
@@ -409,6 +410,7 @@ static void usage()
     puts("Usage: WILLEM RRF5  output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM R2732 output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM R2764 output.bin [base] [/PROFILE:name] [/TRACE]");
+    puts("       WILLEM R29C512 output.bin [base] [/PROFILE:name] [/FASTADDR | /TRACE]");
     puts("       WILLEM R27512 output.bin [base] [/PROFILE:name] [/FASTADDR | /TRACE]");
     puts("       WILLEM R27256 output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM R28C64 output.bin [base] [/PROFILE:name] [/TRACE]");
@@ -434,6 +436,8 @@ int *device;
         *action = ACTION_READ; *device = DEVICE_2732;
     } else if (same_command(text, "R2764")) {
         *action = ACTION_READ; *device = DEVICE_2764;
+    } else if (same_command(text, "RAT29C512") || same_command(text, "R29C512")) {
+        *action = ACTION_READ; *device = DEVICE_AT29C512;
     } else if (same_command(text, "R27512")) {
         *action = ACTION_READ; *device = DEVICE_27512;
     } else if (same_command(text, "R27256")) {
@@ -477,6 +481,7 @@ int action;
 static char *device_name(device)
 int device;
 {
+    if (device == DEVICE_AT29C512) return "AT29C512 (32-pin read routing)";
     if (device == DEVICE_27512) return "27512/27C512";
     if (device == DEVICE_27256) return "27256/27C256";
     if (device == DEVICE_2732) return "2732";
@@ -489,7 +494,7 @@ static unsigned device_size(device)
 int device;
 {
     /* 27512 uses the separate streaming path, never a 16-bit image size. */
-    if (device == DEVICE_27512) return 0;
+    if (device == DEVICE_27512 || device == DEVICE_AT29C512) return 0;
     if (device == DEVICE_2732) return EPROM32_SIZE;
     if (device == DEVICE_27256) return EPROM256_SIZE;
     return device == DEVICE_RF5 ? RF5_SIZE : ROM_SIZE;
@@ -498,6 +503,7 @@ int device;
 static unsigned device_dip_mask(device)
 int device;
 {
+    if (device == DEVICE_AT29C512) return 0x634U;
     if (device == DEVICE_2732) return 0x1c0U;
     if (device == DEVICE_27512) return 0x1d4U;
     if (device == DEVICE_27256) return 0x1b3U;
@@ -532,7 +538,11 @@ unsigned mask;
 static void display_zif(device)
 int device;
 {
-    if (device == DEVICE_RF5 || device == DEVICE_2732) {
+    if (device == DEVICE_AT29C512) {
+        logmsg("Use verified PLCC32-to-DIP32 adapter; fill all 32 ZIF contacts");
+        logmsg("Normal routing; adapter DIP pin 1 toward lever; follow PLCC pin-1 mark");
+        logmsg("Require pin31 WE HIGH, pin32 VCC=5V; VPP OFF; no ID/write commands");
+    } else if (device == DEVICE_RF5 || device == DEVICE_2732) {
         logmsg("ZIF pair: lever/notch -> [--][--][--][--][1/24] ... [12/13]");
         logmsg("Leave FOUR rows empty at lever end; place chip at far end");
         logmsg("Use SPECIAL %s route; notch faces empty rows and lever",
@@ -855,8 +865,8 @@ char **argv;
         }
         base_seen = 1;
     }
-    if (fast_address && (action != ACTION_READ || device != DEVICE_27512 || wants_trace(argc, argv))) {
-        logmsg("ERROR: /FASTADDR requires R27512 without /TRACE");
+    if (fast_address && (action != ACTION_READ || (device != DEVICE_27512 && device != DEVICE_AT29C512) || wants_trace(argc, argv))) {
+        logmsg("ERROR: /FASTADDR requires R27512 or R29C512 without /TRACE");
         goto done;
     }
     profile = find_profile(profile_name);
@@ -987,7 +997,7 @@ char **argv;
         goto close_trace;
     }
 
-    if (device == DEVICE_27512 || device == DEVICE_27256) {
+    if (device == DEVICE_27512 || device == DEVICE_27256 || device == DEVICE_AT29C512) {
         result = read_27512(&wl, file, profile, base, fast_address, device);
         goto close_trace;
     }

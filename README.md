@@ -207,3 +207,8 @@ C address-shifting overhead. Expected Pocket8086 time: approximately six minutes
 (pending measurement on this build). See `docs/hardware.md` for validation and
 setup. The optional assembly equivalence check uses Python Unicorn:
 `python3 tests/test_fastaddr.py`.
+
+AT29C512 read-only support (64 KiB):
+`WILLEM R29C512 OUT.BIN 378 /PROFILE:conservative /FASTADDR`.
+`RAT29C512` is an alias. PLCC32 requires verified adapter routing and WE held
+high; see `docs/hardware.md`. Do not use the 28-pin 27C512 DIP setup.

@@ -434,3 +434,43 @@ read path. R27256/R27512 full-file regression checks cover both streamed sizes.
 
 Prepared executable: `RD512F1.COM`, 30796 bytes, CRC32 `522490ba`,
 SHA256 `782daca83f37133092f10b34b0c94c2c29a903ad51c21a85a06bfd7a709ef936`.
+
+## AT29C512, including PLCC32 (2026-11-07)
+
+Read-only command `R29C512` (alias `RAT29C512`) captures 65536 bytes and accepts
+`/PROFILE:conservative /FASTADDR`. No AT29C512 erase, program, unlock or product-ID
+command is implemented. The data-sheet read condition is CE low, OE low and WE
+high. Reading requires no command sequence. Expected time is approximately six
+minutes on Pocket8086; physical verification remains pending.
+
+This profile assumes a **verified JEDEC PLCC32-to-DIP32 adapter** in the ZIF,
+not a 28-pin EPROM adapter and not an unverified built-in PLCC socket. PLCC
+package shape does not change the algorithm; socket wiring does matter.
+Use the 32-pin 27C010 read routing, Normal J1/J2, DIP634:
+ON 3,5,6,10,11; OFF 1,2,4,7,8,9,12. J9/J10 toward DB25, 5 V VCC, programming
+VPP off, parked A19 jumper. Fill all 32 ZIF contacts; adapter DIP pin 1 faces
+the lever. Place the PLCC by its own pin-1 mark and adapter markings, not by
+assuming its bevel faces the ZIF lever.
+
+AT29C512 PLCC/DIP logical pin numbers correspond: 32 VCC, 16 GND, 31 WE,
+22 CE, 24 OE, 3 A15; 1,2,30 are NC. The 27C010 profile supplies the common
+address/data/read controls and keeps its pin31 program-enable inactive (high).
+For this flash chip that pin is WE. Before first physical use, verify the
+actual adapter connectivity and that pin31 remains at the inactive high read
+level. A built-in PLCC socket requires its own verified routing; these settings
+are not a claim that every socket on the clone is interchangeable.
+
+The accelerated address function and data sampling are shared with R27512;
+only the device identity, capacity selection and physical setup differ. The
+read-start control levels are also the same, but DIP634 routes them differently
+from DIP1D4. Software tests cannot establish a real adapter's wiring.
+
+Sources: Atmel AT29C512 data sheet 0456F, pages 1–3 (pinout, READ condition,
+program inhibit), https://www.allelcoelec.pt/datasheets.26/AT29C512-15JI.pdf ;
+Geepro commit a08efcaf6479730d552c5f96bad0a2a01bf0635f drivers/willem.xml.in,
+27C010 family DIP634, and chips/27xx.cpp read_27C010 start_action(0,0).
+
+AT29C512 build `dosravi-at29c512-read-v1`: `RD29V1.COM`, 31264 bytes,
+CRC32 `acd0b105`, SHA256
+`d9e0ef92cd6cec65fe8a93b74610b4d8e070f78c3e0e78d40ebb88465934af46`. DOSBox 8086/80186 full-size
+read checks passed; physical adapter/WE verification remains pending.
