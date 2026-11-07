@@ -22,6 +22,10 @@ build/dos/dosio.o: src/dosio.asm
 	mkdir -p build/dos
 	nasm -f as86 $< -o $@
 
+build/dos/fastaddr.o: src/fastaddr.asm
+	mkdir -p build/dos
+	nasm -f as86 $< -o $@
+
 build/dos/willem.o: src/willem.c include/willem.h
 	mkdir -p build/dos
 	bcc $(DOSFLAGS) -Iinclude -c $< -o $@
@@ -30,7 +34,7 @@ build/dos/dosmain.o: src/dosmain.c include/willem.h
 	mkdir -p build/dos
 	bcc $(DOSFLAGS) -Iinclude -c $< -o $@
 
-build/dos/WILLEM.COM: build/dos/dosmain.o build/dos/willem.o build/dos/dosio.o
+build/dos/WILLEM.COM: build/dos/dosmain.o build/dos/willem.o build/dos/dosio.o build/dos/fastaddr.o
 	bcc -0 -Md -i -o $@ $^
 
 dos: build/dos/WILLEM.COM
@@ -39,6 +43,7 @@ dos: build/dos/WILLEM.COM
 dos-test: dos
 	bash tools/test_dosbox.sh
 	python3 tests/test_2716_diag.py
+	python3 tests/test_fastaddr_guard.py
 
 dist: dos
 	rm -rf build/dist
@@ -46,3 +51,7 @@ dist: dos
 
 clean:
 	rm -rf build
+
+# Optional Unicorn dependency; does not access programmer hardware.
+fastaddr-test:
+	python3 tests/test_fastaddr.py

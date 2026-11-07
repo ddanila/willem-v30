@@ -15,7 +15,7 @@
 #define M2764A_GATE_NAME "M2764A.OK"
 #define WILLEM_VERSION "0.2.0-dev"
 #ifndef WILLEM_BUILD_ID
-#define WILLEM_BUILD_ID "dosravi-2732-read-v1"
+#define WILLEM_BUILD_ID "dosravi-27512-fastaddr-v1"
 #endif
 
 #define ACTION_READ 1
@@ -39,6 +39,7 @@ extern void dos_sdp_write(unsigned base, unsigned address, unsigned value);
 extern void dos_console(char *text);
 extern void dos_m2764a_pulse(unsigned base, unsigned milliseconds);
 extern unsigned long dos_bios_ticks(void);
+extern unsigned dos_shift_address(unsigned base, unsigned long address, unsigned data, unsigned control);
 extern unsigned dos_rename(char *old_name, char *new_name);
 
 struct read_profile {
@@ -74,7 +75,7 @@ struct dos_context {
 };
 
 static FILE *log_file;
-static unsigned char rom_buffer[EPROM256_SIZE];
+static unsigned char rom_buffer[ROM_SIZE];
 
 static int archive_append_file(name, binary)
 char *name;
@@ -408,7 +409,7 @@ static void usage()
     puts("Usage: WILLEM RRF5  output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM R2732 output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM R2764 output.bin [base] [/PROFILE:name] [/TRACE]");
-    puts("       WILLEM R27512 output.bin [base] [/PROFILE:name] [/TRACE]");
+    puts("       WILLEM R27512 output.bin [base] [/PROFILE:name] [/FASTADDR | /TRACE]");
     puts("       WILLEM R27256 output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM R28C64 output.bin [base] [/PROFILE:name] [/TRACE]");
     puts("       WILLEM B2764 [base] [/TRACE]");
@@ -685,12 +686,35 @@ struct dos_context *context;
 
 /* The COM memory segment cannot hold a 64 KiB image. Stream bounded chunks
    with OE inactive between reads; use a long offset so FFFF does not wrap. */
-static int read_27512(wl, file, profile)
+static unsigned char read_large_byte(wl, base, address, fast_address)
+struct willem *wl;
+unsigned base;
+unsigned long address;
+int fast_address;
+{
+    unsigned char value;
+    if (!fast_address) return wl_read_byte(wl, (wl_u16)address);
+    wl->data = (unsigned char)dos_shift_address(base, address,
+                                               wl->data, wl->control);
+    wl->control |= WL_CTL_MUX;
+    port_delay(wl->io.ctx, wl->address_setup_us);
+    wl_oe(wl, 1);
+    wl_oe(wl, 0);
+    port_delay(wl->io.ctx, wl->oe_settle_us);
+    value = wl_get_data(wl);
+    wl_oe(wl, 1);
+    return value;
+}
+
+static int read_27512(wl, file, profile, base, fast_address, device)
 struct willem *wl;
 FILE *file;
 struct read_profile *profile;
+unsigned base;
+int fast_address;
+int device;
 {
-    unsigned long offset, started, elapsed;
+    unsigned long offset, started, elapsed, size;
     unsigned i, crc;
     int result;
 
@@ -698,16 +722,18 @@ struct read_profile *profile;
     result = 1;
     started = dos_bios_ticks();
     logmsg("Power transition: enabling VCC, VPP off");
-    wl_begin_27512_read(wl);
-    for (offset = 0; offset < 65536UL; offset += ROM_SIZE) {
+    size = device == DEVICE_27256 ? 32768UL : 65536UL;
+    if (device == DEVICE_27256) wl_begin_27256_read(wl);
+    else wl_begin_27512_read(wl);
+    for (offset = 0; offset < size; offset += ROM_SIZE) {
         for (i = 0; i < ROM_SIZE; i++)
-            rom_buffer[i] = wl_read_byte(wl, (wl_u16)(offset + i));
+            rom_buffer[i] = read_large_byte(wl, base, offset + i, fast_address);
         crc = crc16_update(crc, rom_buffer, ROM_SIZE);
         if (fwrite(rom_buffer, 1, ROM_SIZE, file) != ROM_SIZE) {
             logmsg("ERROR: failed writing output image at offset %lu", offset);
             goto shutdown;
         }
-        logmsg("Scan progress: %lu/65536 bytes", offset + ROM_SIZE);
+        logmsg("Scan progress: %lu/%lu bytes", offset + ROM_SIZE, size);
     }
     if (fflush(file) != 0) {
         logmsg("ERROR: failed flushing output image");
@@ -722,7 +748,7 @@ shutdown:
     wl_end_read(wl);
     logmsg("Safe shutdown complete: VCC off, VPP off");
     if (!result)
-        logmsg("Read complete: bytes=65536 CRC16-CCITT=%04X", crc);
+        logmsg("Read complete: bytes=%lu CRC16-CCITT=%04X", size, crc);
     return result;
 }
 
@@ -744,7 +770,7 @@ char **argv;
     unsigned long verify_started, verify_ms, image_crc32;
     unsigned char actual, expected, verified;
     int result, action, device, first_option, i, base_seen, powered, profile_seen;
-    int write_failed, attempt;
+    int write_failed, attempt, fast_address;
     char *profile_name;
     struct read_profile *profile;
 
@@ -756,6 +782,7 @@ char **argv;
     context.sequence = 0;
     profile_name = "legacy";
     profile_seen = 0;
+    fast_address = 0;
     profile = 0;
     read_started = 0;
     read_ms = 0;
@@ -800,6 +827,7 @@ char **argv;
     base_seen = 0;
     for (i = first_option; i < argc; i++) {
         char *selected;
+        if (same_command(argv[i], "/FASTADDR")) { fast_address = 1; continue; }
         if (same_command(argv[i], "/TRACE") ||
             same_command(argv[i], "-TRACE")) continue;
         if (action == ACTION_WRITE &&
@@ -826,6 +854,10 @@ char **argv;
             goto done;
         }
         base_seen = 1;
+    }
+    if (fast_address && (action != ACTION_READ || device != DEVICE_27512 || wants_trace(argc, argv))) {
+        logmsg("ERROR: /FASTADDR requires R27512 without /TRACE");
+        goto done;
     }
     profile = find_profile(profile_name);
     if (action == ACTION_READ && !profile) {
@@ -955,8 +987,8 @@ char **argv;
         goto close_trace;
     }
 
-    if (device == DEVICE_27512) {
-        result = read_27512(&wl, file, profile);
+    if (device == DEVICE_27512 || device == DEVICE_27256) {
+        result = read_27512(&wl, file, profile, base, fast_address, device);
         goto close_trace;
     }
 

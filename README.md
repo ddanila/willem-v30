@@ -199,3 +199,11 @@ been checked. [Capture and evidence](https://github.com/ddanila/dumps/tree/main/
 steps for РФ2/РФ5 routing, with safe shutdown on declined confirmation or EOF.
 See [hardware setup](docs/hardware.md#empty-socket-2716--рф2--рф5-voltage-diagnostic).
 This is not a 2716 programming command; physical 25 V validation is pending.
+
+For accelerated 64 KiB 27512/27C512 reads, use
+`WILLEM R27512 OUT.BIN 378 /PROFILE:conservative /FASTADDR`.
+This preserves the established read protocol and settling delays while removing
+C address-shifting overhead. Expected Pocket8086 time: approximately six minutes
+(pending measurement on this build). See `docs/hardware.md` for validation and
+setup. The optional assembly equivalence check uses Python Unicorn:
+`python3 tests/test_fastaddr.py`.

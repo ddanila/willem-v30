@@ -36,7 +36,7 @@ run_dosbox() {
     printf '%s\r\n' \
         'WILLEM R2732 R2732.BIN 378' \
         'WILLEM RRF5 RF5.BIN 378 /PROFILE:conservative' \
-        'WILLEM R27512 R27512.BIN 378' \
+        'WILLEM R27512 R27512.BIN 378 /FASTADDR' \
         'WILLEM R27256 R27256.BIN 378' \
         'WILLEM R2764 R2764.BIN 378' \
         'WILLEM R2764 PROFILE.BIN 378 /PROFILE:conservative' \
@@ -111,9 +111,9 @@ run_dosbox() {
     [[ $(grep -ic 'Read complete: bytes=32768 CRC16-CCITT=e1f0' "$drive/ALLLOG.TXT") == 1 ]]
     [[ $(grep -ic 'Required DIP mask=1b3h' "$drive/ALLLOG.TXT") == 1 ]]
     [[ $(grep -c 'Read complete: bytes=2048' "$drive/ALLLOG.TXT") == 1 ]]
-    [[ $(grep -c 'DOSRAVI_PROFILE name=conservative address_setup_us=4 oe_settle_us=4 input_latch_us=4 input_clock_us=4 power_on_ms=5 build_id=dosravi-2732-read-v1' "$drive/ALLLOG.TXT") == 2 ]]
+    [[ $(grep -c 'DOSRAVI_PROFILE name=conservative address_setup_us=4 oe_settle_us=4 input_latch_us=4 input_clock_us=4 power_on_ms=5 build_id=dosravi-27512-fastaddr-v1' "$drive/ALLLOG.TXT") == 2 ]]
     [[ $(grep -Ec 'DOSRAVI_METRIC read_ms=[1-9][0-9]* profile=conservative' "$drive/ALLLOG.TXT") == 2 ]]
-    [[ $(grep -c 'DOSRAVI_PROFILE name=powerfast address_setup_us=1 oe_settle_us=1 input_latch_us=1 input_clock_us=1 power_on_ms=150 build_id=dosravi-2732-read-v1' "$drive/ALLLOG.TXT") == 1 ]]
+    [[ $(grep -c 'DOSRAVI_PROFILE name=powerfast address_setup_us=1 oe_settle_us=1 input_latch_us=1 input_clock_us=1 power_on_ms=150 build_id=dosravi-27512-fastaddr-v1' "$drive/ALLLOG.TXT") == 1 ]]
     [[ $(grep -Ec 'DOSRAVI_METRIC read_ms=[1-9][0-9]* profile=powerfast' "$drive/ALLLOG.TXT") == 1 ]]
     [[ $(grep -c 'ERROR: unknown read profile <unknown>' "$drive/ALLLOG.TXT") == 1 ]]
     [[ $(grep -c 'ERROR: invalid command line' "$drive/ALLLOG.TXT") == 1 ]]
@@ -125,8 +125,8 @@ run_dosbox() {
     [[ $(grep -c '12.5V write gate is locked' "$drive/ALLLOG.TXT") == 1 ]]
     [[ $(grep -c 'DM2764A requires explicit /VPP confirmation and an empty socket' "$drive/ALLLOG.TXT") == 1 ]]
     [[ $(grep -c 'WRITE PASSED: programmed=0 unchanged=8192 verified=8192' "$drive/ALLLOG.TXT") == 1 ]]
-    [[ $(grep -Ec 'DOSRAVI_WRITE_METRIC program_ms=[0-9]+ verify_ms=[0-9]+ changed=0 unchanged=8192 retry_bytes=0 retries=0 late=0 image_crc32=[0-9A-Fa-f]{8} build_id=dosravi-2732-read-v1' "$drive/ALLLOG.TXT") == 1 ]]
-    [[ $(grep -Ec 'DOSRAVI_M2764A_METRIC program_ms=0 high_voltage_verify_ms=0 programmed=0 ff_skipped=0 initial_pulses=0 retry_bytes=0 retries=0 overprogram_pulses=0 max_initial=0 blank_mismatches=8192 image_crc32=[0-9A-Fa-f]{8} final_5v_verify_required=1 build_id=dosravi-2732-read-v1' "$drive/ALLLOG.TXT") == 1 ]]
+    [[ $(grep -Ec 'DOSRAVI_WRITE_METRIC program_ms=[0-9]+ verify_ms=[0-9]+ changed=0 unchanged=8192 retry_bytes=0 retries=0 late=0 image_crc32=[0-9A-Fa-f]{8} build_id=dosravi-27512-fastaddr-v1' "$drive/ALLLOG.TXT") == 1 ]]
+    [[ $(grep -Ec 'DOSRAVI_M2764A_METRIC program_ms=0 high_voltage_verify_ms=0 programmed=0 ff_skipped=0 initial_pulses=0 retry_bytes=0 retries=0 overprogram_pulses=0 max_initial=0 blank_mismatches=8192 image_crc32=[0-9A-Fa-f]{8} final_5v_verify_required=1 build_id=dosravi-27512-fastaddr-v1' "$drive/ALLLOG.TXT") == 1 ]]
     [[ $(grep -c 'DIP ON.*\[X\]\[X\]\[ \]\[X\]\[ \]\[X\]\[ \]\[ \]\[X\]' "$drive/ALLLOG.TXT") == 10 ]]
     [[ $(grep -c 'DIP ON.*\[X\]\[X\]\[ \]\[ \]\[ \]\[X\]\[ \]\[X\]\[X\]' "$drive/ALLLOG.TXT") == 1 ]]
     [[ $(grep -c 'Leave TWO complete rows empty at lever end' "$drive/ALLLOG.TXT") == 12 ]]

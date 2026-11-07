@@ -397,3 +397,40 @@ A local copy is saved as `build/dos/RD2732.COM` in the primary checkout.
 Reference: Geepro's pinned
 [2732 read controls](https://github.com/danielg4/geepro/blob/a08efcaf6479730d552c5f96bad0a2a01bf0635f/chips/27xx.cpp#L316-L319)
 and [DIP mask](https://github.com/danielg4/geepro/blob/a08efcaf6479730d552c5f96bad0a2a01bf0635f/drivers/willem.xml.in#L66-L75).
+
+## Accelerated 27C512 reads (2026-11-07)
+
+Build `dosravi-27512-fastaddr-v1` enables the previously hardware-tested 8086
+assembly address shifter for `R27512` with `/FASTADDR`:
+
+```
+RD512F1.COM R27512 CHIP.BIN 378 /PROFILE:conservative /FASTADDR
+```
+
+The 24 address clocks and port values are identical to the portable path;
+CPU callback overhead is removed. Address/OE/data settling waits and the data
+sampling algorithm are retained. VPP stays off, CE stays low, and all 65536
+bytes including A15 are streamed. The option rejects other commands and tracing
+before hardware I/O. No original Windows Willem trace was required: equivalence
+is checked against the existing working protocol, not asserted against an
+unobserved original-software trace.
+
+Expected Pocket8086 read time is about six minutes, extrapolated from the
+previous 131072-byte fast-address read (715935 ms); this 27C512 build has not
+been physically timed yet. Allow EXEC timeout 1800 seconds and serial timeout
+20 seconds for retrieval. Without /FASTADDR the portable path remains available.
+
+Validation: `make test dos dos-test` and `python3 tests/test_fastaddr.py`
+(the latter requires Unicorn). The address test executes actual 8086 code and
+compares 1566 complete port-write traces including 0000/7FFF/8000/FFFF and
+spread-out 16-bit addresses. DOSBox checks 65536-byte output on 8086/80186.
+The optimization does not establish current physical setup or chip condition.
+
+The old 32 KiB static buffer left insufficient COM stack/heap headroom after
+adding code (caught by DOSBox before hardware use). This build streams R27256
+through the same 8 KiB buffer, preserving its existing startup and portable
+read path. R27256/R27512 full-file regression checks cover both streamed sizes.
+`python3 tests/test_fastaddr_guard.py` checks option rejection under DOSBox.
+
+Prepared executable: `RD512F1.COM`, 30796 bytes, CRC32 `522490ba`,
+SHA256 `782daca83f37133092f10b34b0c94c2c29a903ad51c21a85a06bfd7a709ef936`.
