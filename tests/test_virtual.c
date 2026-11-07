@@ -18,6 +18,8 @@ struct virtual_willem {
     wl_u16 address;
     int read_loaded;
     int route_27256;
+    int route_at29c512;
+    unsigned long flash_we_low;
     unsigned long data_writes;
     unsigned long control_writes;
     unsigned long status_reads;
@@ -67,8 +69,9 @@ int value;
         }
 
         if (!(old & WL_D1) && (value & WL_D1) && (value & WL_D2)) {
-            if (v->route_27256 && (v->control & WL_CTL_WE)) {
-                /* DIP1B3 routes pin17 to active-low 27256 CE. */
+            if ((v->route_27256 && (v->control & WL_CTL_WE)) ||
+                (v->route_at29c512 && !(v->control & WL_CTL_WE))) {
+                /* DIP1B3 needs CE low; DIP634 flash needs WE high. */
                 v->read_shift = 0xff;
             } else if ((v->busy_reads || v->busy_forever) &&
                 v->address == v->pending_address) {
@@ -108,7 +111,10 @@ int raw_value;
     if ((old & WL_CTL_VCC) && !(v->control & WL_CTL_VCC) &&
         (old & WL_CTL_VPP)) v->vcc_removed_before_vpp = 1;
     if (v->control & WL_CTL_VPP) v->vpp_seen = 1;
-    if (!v->route_27256 && !(old & WL_CTL_WE) && (v->control & WL_CTL_WE) &&
+    if (v->route_at29c512 && (v->control & WL_CTL_VCC) &&
+        !(v->control & WL_CTL_WE)) v->flash_we_low++;
+    if (!v->route_27256 && !v->route_at29c512 &&
+        !(old & WL_CTL_WE) && (v->control & WL_CTL_WE) &&
         (v->control & WL_CTL_VCC) && !(v->control & WL_CTL_MUX)) {
         if (v->require_sdp && v->sdp_state == 0 &&
             v->address == 0x1555U && v->data == 0xaaU) {
@@ -341,6 +347,33 @@ int main()
     }
     v.route_27256 = 0;
     printf("virtual 27512 read passed: 65536 bytes, CE and A15 checked\n");
+
+    v.route_at29c512 = 1;
+    wl_begin_27512_read(&wl);
+    if (wl_read_byte(&wl, 0) != 0xff || !v.flash_we_low) {
+        fprintf(stderr, "AT29C512 model did not reject old WE-low startup\n");
+        return 1;
+    }
+    wl_end_read(&wl);
+    v.flash_we_low = 0;
+    v.status_reads = 0;
+    wl_begin_at29c512_read(&wl);
+    for (full_address = 0; full_address < 65536UL; full_address++) {
+        actual = wl_read_byte(&wl, (wl_u16)full_address);
+        if (actual != pattern((wl_u16)full_address) ||
+            v.address != full_address) {
+            fprintf(stderr, "AT29C512 mismatch at %04lx\n", full_address);
+            return 1;
+        }
+    }
+    wl_end_at29c512_read(&wl);
+    if (v.flash_we_low || v.vpp_seen || v.status_reads != 65536UL * 8UL ||
+        (v.control & (WL_CTL_VPP | WL_CTL_VCC))) {
+        fprintf(stderr, "unsafe or incomplete AT29C512 read\n");
+        return 1;
+    }
+    v.route_at29c512 = 0;
+    printf("virtual AT29C512 read passed: 65536 bytes, WE high while powered\n");
 
     v.status_reads = 0;
     wl_begin_28c64_read(&wl);

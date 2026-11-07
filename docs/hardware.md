@@ -443,34 +443,32 @@ command is implemented. The data-sheet read condition is CE low, OE low and WE
 high. Reading requires no command sequence. Expected time is approximately six
 minutes on Pocket8086; physical verification remains pending.
 
-This profile assumes a **verified JEDEC PLCC32-to-DIP32 adapter** in the ZIF,
-not a 28-pin EPROM adapter and not an unverified built-in PLCC socket. PLCC
-package shape does not change the algorithm; socket wiring does matter.
-Use the 32-pin 27C010 read routing, Normal J1/J2, DIP634:
-ON 3,5,6,10,11; OFF 1,2,4,7,8,9,12. J9/J10 toward DB25, 5 V VCC, programming
-VPP off, parked A19 jumper. Fill all 32 ZIF contacts; adapter DIP pin 1 faces
-the lever. Place the PLCC by its own pin-1 mark and adapter markings, not by
-assuming its bevel faces the ZIF lever.
+Use Normal J1/J2, DIP634: ON 3,5,6,10,11; all others OFF. Keep J9/J10
+toward DB25, 5 V VCC and programming VPP off. The original Willem 0.97ja
+AT29C512/PCB3 profile displays this same switch setting. The published PCB5.0
+schematic connects the ordinary **PLCC32** socket in parallel with ZIF32;
+the **FWH/LPC** socket has different wiring and is not appropriate.
+A JEDEC PLCC32-to-DIP32 adapter is another option; fill all 32 ZIF contacts
+and orient its DIP pin 1 toward the lever. Match chip and socket pin-1 markings.
 
-AT29C512 PLCC/DIP logical pin numbers correspond: 32 VCC, 16 GND, 31 WE,
-22 CE, 24 OE, 3 A15; 1,2,30 are NC. The 27C010 profile supplies the common
-address/data/read controls and keeps its pin31 program-enable inactive (high).
-For this flash chip that pin is WE. Before first physical use, verify the
-actual adapter connectivity and that pin31 remains at the inactive high read
-level. A built-in PLCC socket requires its own verified routing; these settings
-are not a claim that every socket on the clone is interchangeable.
+AT29C512 PLCC/DIP pins: 32 VCC, 16 GND, 31 /WE, 22 /CE, 24 /OE, 3 A15;
+1,2,30 NC. In DIP634, switch 11 routes **DB25 pin 17 to /WE**. Hold that
+host pin HIGH, unlike the 27512 profile. Switch 8 OFF leaves /CE low.
+The accelerated address function and data sampling remain shared with R27512.
 
-The accelerated address function and data sampling are shared with R27512;
-only the device identity, capacity selection and physical setup differ. The
-read-start control levels are also the same, but DIP634 routes them differently
-from DIP1D4. Software tests cannot establish a real adapter's wiring.
-
-Sources: Atmel AT29C512 data sheet 0456F, pages 1–3 (pinout, READ condition,
-program inhibit), https://www.allelcoelec.pt/datasheets.26/AT29C512-15JI.pdf ;
-Geepro commit a08efcaf6479730d552c5f96bad0a2a01bf0635f drivers/willem.xml.in,
-27C010 family DIP634, and chips/27xx.cpp read_27C010 start_action(0,0).
+**Correction:** v1 incorrectly used the 27512 startup and held /WE low.
+The previous claim that this startup kept pin31 inactive was wrong.
+Do not use RD29V1.COM for further captures. Version
+`dosravi-at29c512-we-fix-v2` has dedicated flash startup/shutdown and keeps
+/WE high from before VCC-on until after VCC-off. See
+[original-software experiment](original-at29c512.md) for trace evidence,
+sources and the distinction between software validation and physical readback.
 
 AT29C512 build `dosravi-at29c512-read-v1`: `RD29V1.COM`, 31264 bytes,
 CRC32 `acd0b105`, SHA256
 `d9e0ef92cd6cec65fe8a93b74610b4d8e070f78c3e0e78d40ebb88465934af46`. DOSBox 8086/80186 full-size
-read checks passed; physical adapter/WE verification remains pending.
+read checks passed but did not model flash /WE; this build is superseded.
+
+Corrected local `RD29V2.COM`: 31336 bytes, SHA256
+`937e232bd00ee32480c3ed29dd6378f3792888921b9ab7fb70fc7dd6901397e4`.
+Not yet uploaded or used on the physical AT29C512.

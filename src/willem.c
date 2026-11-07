@@ -270,6 +270,24 @@ struct willem *wl;
     wl_we(wl, 1);
 }
 
+void wl_begin_at29c512_read(wl)
+struct willem *wl;
+{
+    /* Original Willem 0.97ja AT29C512/PCB3 read uses raw CONTROL 05/07:
+       pin17 high, VPP off. DIP634 switch 11 routes pin17 to chip /WE;
+       switch 8 is open so chip /CE is held low. Establish /WE before VCC.
+       The existing EEPROM startup has these same connector levels. */
+    wl_begin_28c64_read(wl);
+}
+
+void wl_end_at29c512_read(wl)
+struct willem *wl;
+{
+    /* Keep /WE high until the supply is disabled. */
+    wl_vcc(wl, 0);
+    wl_end_read(wl);
+}
+
 void wl_begin_28c64_write(wl)
 struct willem *wl;
 {

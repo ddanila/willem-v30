@@ -3,6 +3,7 @@
 Requires Unicorn (pip install unicorn) and nasm; no physical I/O is performed.
 """
 import ctypes as C
+from itertools import product
 from pathlib import Path
 import random
 import subprocess
@@ -46,12 +47,12 @@ with tempfile.TemporaryDirectory(prefix='willem-fastaddr-') as directory:
                  0x1ffff, 0x800000, 0xffffff] + [rng.randrange(0x1000000) for _ in range(256)]
     tested = 0
     for address in addresses:
-        for data in (0, 4, 0xff):
+        for data, control in product((0, 4, 0xff), (4, 12)):
             expected.clear()
-            wl = Willem(io, data, 4, 4, 4, 4, 4, 5)
+            wl = Willem(io, data, control, 4, 4, 4, 4, 5)
             lib.wl_set_address(C.byref(wl), address, 0x800000)
             # The C caller performs the address delay and final MUX-off write.
-            assert expected[-2:] == [('delay', 4), (0x37a, 0x0f)]
+            assert expected[-2:] == [('delay', 4), (0x37a, control ^ 0x0b)]
             expected_ports = expected[:-2]
             cpu = Uc(UC_ARCH_X86, UC_MODE_16)
             cpu.mem_map(0, 0x10000)
@@ -60,7 +61,7 @@ with tempfile.TemporaryDirectory(prefix='willem-fastaddr-') as directory:
                     UC_X86_REG_DX, UC_X86_REG_SI, UC_X86_REG_DI]
             for index, reg in enumerate(regs): cpu.reg_write(reg, 0x2200+index)
             cpu.reg_write(UC_X86_REG_SP, 0x8000)
-            words = [0x2000, 0x378, address & 0xffff, address >> 16, data, 4]
+            words = [0x2000, 0x378, address & 0xffff, address >> 16, data, control]
             cpu.mem_write(0x8000, b''.join(w.to_bytes(2, 'little') for w in words))
             actual = []
             def out_hook(uc, port, size, value, _):
@@ -78,7 +79,7 @@ with tempfile.TemporaryDirectory(prefix='willem-fastaddr-') as directory:
             clocks = 0
             for port, value in actual:
                 if port == 0x37a:
-                    assert value == 0x0d  # VCC on, VPP off, CE low, MUX enabled
+                    assert value == ((control | 2) ^ 0x0b)  # Preserve CE/WE level.
                 else:
                     if not old & 1 and value & 1:
                         shifted = (shifted << 1) | ((value >> 1) & 1)

@@ -15,7 +15,7 @@
 #define M2764A_GATE_NAME "M2764A.OK"
 #define WILLEM_VERSION "0.2.0-dev"
 #ifndef WILLEM_BUILD_ID
-#define WILLEM_BUILD_ID "dosravi-at29c512-read-v1"
+#define WILLEM_BUILD_ID "dosravi-at29c512-we-fix-v2"
 #endif
 
 #define ACTION_READ 1
@@ -733,7 +733,8 @@ int device;
     started = dos_bios_ticks();
     logmsg("Power transition: enabling VCC, VPP off");
     size = device == DEVICE_27256 ? 32768UL : 65536UL;
-    if (device == DEVICE_27256) wl_begin_27256_read(wl);
+    if (device == DEVICE_AT29C512) wl_begin_at29c512_read(wl);
+    else if (device == DEVICE_27256) wl_begin_27256_read(wl);
     else wl_begin_27512_read(wl);
     for (offset = 0; offset < size; offset += ROM_SIZE) {
         for (i = 0; i < ROM_SIZE; i++)
@@ -755,7 +756,8 @@ shutdown:
     logmsg("DOSRAVI_METRIC read_ms=%lu profile=%s includes_chunk_io=1",
            elapsed, profile->name);
     logmsg("Power transition: safe shutdown begins");
-    wl_end_read(wl);
+    if (device == DEVICE_AT29C512) wl_end_at29c512_read(wl);
+    else wl_end_read(wl);
     logmsg("Safe shutdown complete: VCC off, VPP off");
     if (!result)
         logmsg("Read complete: bytes=%lu CRC16-CCITT=%04X", size, crc);

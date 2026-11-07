@@ -212,3 +212,5 @@ AT29C512 read-only support (64 KiB):
 `WILLEM R29C512 OUT.BIN 378 /PROFILE:conservative /FASTADDR`.
 `RAT29C512` is an alias. PLCC32 requires verified adapter routing and WE held
 high; see `docs/hardware.md`. Do not use the 28-pin 27C512 DIP setup.
+Use build `dosravi-at29c512-we-fix-v2` or later: v1 held /WE low.
+The [original Willem comparison](docs/original-at29c512.md) documents the fix.
