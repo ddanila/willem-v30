@@ -15,7 +15,7 @@
 #define M2764A_GATE_NAME "M2764A.OK"
 #define WILLEM_VERSION "0.2.0-dev"
 #ifndef WILLEM_BUILD_ID
-#define WILLEM_BUILD_ID "dosravi-rf2-program-v3"
+#define WILLEM_BUILD_ID "dosravi-rf2-pit2-v4"
 #endif
 
 #define ACTION_READ 1

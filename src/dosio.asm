@@ -218,6 +218,8 @@ _dos_bios_ticks:
     ret
 
 ; void dos_wait_us(unsigned usec)
+; FIXME: legacy raw-PIT0 timing below under-delays in BIOS mode 3 (two
+; decrements per clock). Not used to time the corrected 2716 pulse.
 ; Non-destructively latch/read PIT channel 0.  Its 1.193182 MHz clock is
 ; independent of 8086/V30 instruction speed, so a faster V30 cannot shorten
 ; programmer setup or pulse timing.  The largest caller delay is 50 ms, less
@@ -321,44 +323,66 @@ _dos_console:
     pop bp
     ret
 
-; Fixed positive 50 ms pulse, standard 2716 CE/PGM. VCC/VPP on, OE high.
-; 59659 PIT ticks = 49.9999 ms. Mask IRQs only for this bounded interval;
-; preserve flags. One interval avoids accumulating 50 C/PIT-call overheads.
+; 2716 positive pulse, timed by PIT2 mode 0 at 1.193182 MHz.
+; PIT0 mode 3 decrements twice per clock: never use its raw count here.
+; Owns the speaker timer; restores port61 but leaves PIT2 in mode 0.
+; The no-LPT entry runs exactly the same timing path for qualification.
 GLOBAL _dos_2716_pulse
+GLOBAL _dos_timer2_50ms
 _dos_2716_pulse:
     push bp
     mov bp, sp
+    mov ax, [bp+4]
+    add ax, 2
+    jmp short timer2_common
+_dos_timer2_50ms:
+    push bp
+    mov bp, sp
+    xor ax, ax
+timer2_common:
     push bx
     push cx
     push dx
+    push si
+    push di
     pushf
     cli
-    mov dx, [bp+4]
-    add dx, 2
-    mov al, 006h
-    out dx, al
-    xor al, al
-    out 043h, al
-    in al, 040h
-    mov cl, al
-    in al, 040h
-    mov ch, al
-.wait:
-    xor al, al
-    out 043h, al
-    in al, 040h
+    mov di, ax                  ; zero means timing only, no LPT access
+    in al, 061h
     mov bl, al
-    in al, 040h
-    mov bh, al
-    mov ax, cx
-    sub ax, bx
-    cmp ax, 59659
-    jb .wait
-    mov dx, [bp+4]
-    add dx, 2
-    mov al, 00eh
+    and al, 0fch                ; gate low, speaker muted
+    mov cl, al
+    out 061h, al
+    mov al, 0b0h                ; PIT2, low/high byte, mode 0, binary
+    out 043h, al
+    mov ax, 59659               ; 49.9999 ms of input clocks
+    out 042h, al
+    mov al, ah
+    out 042h, al
+    or di, di
+    jz .start_timer
+    mov dx, di
+    mov al, 006h                ; CE high, OE high, VPP/VCC on
     out dx, al
+.start_timer:
+    mov al, cl
+    or al, 1
+    out 061h, al                ; gate high starts countdown
+.wait:
+    in al, 061h
+    test al, 020h               ; OUT2 goes high at terminal count
+    jz .wait
+    or di, di
+    jz .restore
+    mov dx, di
+    mov al, 00eh                ; CE low ends pulse
+    out dx, al
+.restore:
+    mov al, bl
+    out 061h, al
     popf
+    pop di
+    pop si
     pop dx
     pop cx
     pop bx

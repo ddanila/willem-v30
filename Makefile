@@ -74,4 +74,13 @@ experiment: build/dos/RF2EXP.COM
 port-model-test: dos experiment
 	python3 tests/test_dos_port_model.py
 	python3 tests/test_rf2_experiment.py
+	python3 tests/test_rf2_probe.py
 	python3 tests/test_rf2_fill.py
+
+# No LPT accesses: exercises the exact 2716 timer path for host-clock checks.
+build/dos/timer2_probe.o: tools/timer2_probe.c
+	mkdir -p build/dos
+	bcc $(DOSFLAGS) -c $< -o $@
+
+build/dos/T2PROBE.COM: build/dos/timer2_probe.o build/dos/dosio.o
+	bcc -0 -Md -i -o $@ $^

@@ -199,3 +199,54 @@ Physical run: `rf2-vpp-measure-20261110-1`, execution 3307434228, exit zero,
 30250 ms. The helper reported VPP/VCC off and no programming pulses. Binary
 SHA-256: `e7537251a7b6b982e0cec90912a38d2159493c4a97dc961e7e2ac0876c3ce146`.
 This was a rail measurement, not a programming or blank-verification operation.
+
+### Corrected 2716 timing and new-chip cold-read experiment
+
+The owner authorized a new blank RF2: first verify all FF, then program the
+Robotron image's first byte C3 at 0000, switch both rails off, and read in a
+separate operation before deciding whether to continue.
+
+The 2716 pulse now uses **PIT2 mode 0**, explicitly loaded with 59659 input
+clocks (approximately 50 ms). This avoids interpreting BIOS PIT0 mode-3 raw
+counts as input clocks. CE rises before the timer gate opens and falls after
+terminal count. IRQ flags and port61 are restored. The helper owns the speaker
+timer and leaves PIT2 in mode 0; it does not reprogram PIT0. The old general
+`dos_wait_us` and M2764A pulse paths still need separate correction; this change
+qualifies the 2716 pulse, not every delay in the program.
+
+`T2PROBE.COM` exercises the exact timer path 100 times without LPT access.
+The host-clock qualification took 5.7876 s including protocol/output download,
+consistent with 100 × 50 ms waits. DOSRAVI's target-reported time was only
+2915 ms; it must not be used as wall-clock pulse qualification while these
+repeated waits mask interrupts. This is aggregate software timing evidence,
+not an oscilloscope measurement of the physical CE waveform.
+
+Unicorn executes the actual assembly with a clocked mode-0 PIT2 model, checking
+pulse polarity/duration, gate sequencing, register/IRQ preservation and the
+no-LPT entry. The actual bcc-built diagnostic was tested in the DOSBox LPT model
+with healthy, A6-aliased and A9-aliased chips. `P` performs a full blank scan,
+sends exactly one pulse, switches rails off, and does no immediate readback.
+A second attempt on the now-nonblank chip is refused. A separate read reveals
+any injected aliases. Core C tests and actual DOS 8086/80186 address/gate tests
+also passed.
+
+Physical blank read `rf2-new-20261110-blank1` (execution 4244218639) returned
+2048/2048 FF with the older conservative reader. The subsequent command
+`RF2P50.COM P 0 C3 0` repeated the full blank guard and sent exactly one pulse,
+then reported both rails off without immediate verification (execution
+995219095). Detailed identities, hashes and stdout are in
+`evidence/rf2-pit2-probe.json`.
+
+**Result: A9 mirroring persists.** Separate conservative power-cycle read
+`rf2-new-20261110-coldread1` (execution 2383684433, exit zero) returned C3 at
+0000 and 0200, with every other byte FF. Diagnostic capture `evidence/RF2P50.BIN`
+has SHA-256 `53f876473a44a4fb6d699beb535d42d7eb02b40481a32c0066d4d728e8647390`.
+This equals the earlier one-byte A9-mirrored capture, despite a new chip,
+corrected pulse timer and no immediate verification. No further pulses were
+sent and no full-image write was attempted. Both rails are off.
+
+The old half-length pulse is therefore insufficient to explain the observed
+mirror. A9 signal/loading, device decoding and the out-of-spec 4.30 V read-mode
+VPP remain unresolved; a software dump does not establish that two physical
+cells were programmed. The current chip now has programmed data and must not
+be described as blank.

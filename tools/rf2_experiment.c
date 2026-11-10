@@ -4,7 +4,8 @@
    F fills only the A9-zero half from a mirror-consistent image, preserving
    existing matching bytes. Only FF cells can receive a single pulse.
    Delay is added after each C OUT (not inside the ASM address shifter).
-   All commands finish with VPP/VCC off. No changes to normal writer timing. */
+   P requires a fully blank chip, sends one pulse, powers off without reading.
+   All commands finish with VPP/VCC off. Pulses use the corrected PIT2 timer. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -56,8 +57,8 @@ int argc; char **argv;
     wl_u8 high, low;
     int result;
     FILE *file;
-    if (argc != 5 || (strcmp(argv[1], "R") && strcmp(argv[1], "W") && strcmp(argv[1], "F") && strcmp(argv[1], "A"))) {
-        puts("RF2EXP R file pace order | W addr byte pace | F image pace 200 | A addr seconds pace (hex)");
+    if (argc != 5 || (strcmp(argv[1], "R") && strcmp(argv[1], "W") && strcmp(argv[1], "F") && strcmp(argv[1], "A") && strcmp(argv[1], "P"))) {
+        puts("RF2EXP R file pace order | W addr byte pace | F image pace 200 | P addr byte pace | A addr seconds pace (hex)");
         return 1;
     }
     result = 1;
@@ -154,10 +155,31 @@ int argc; char **argv;
         }
         result = 0;
     } else {
+        if (!strcmp(argv[1], "P")) {
+            for (i = 0; i < 2048U; i++) {
+                if (wl_read_byte(&wl, i) != 0xffU) {
+                    printf("REFUSED: nonblank address %04X; no pulse\n", i);
+                    goto safe;
+                }
+            }
+        }
         low = wl_read_byte(&wl, address);
         printf("Before %04X=%02X pace=%u us\n", address, low, pace);
         if (low == 0xffU) {
             wl_begin_2716_program(&wl);
+            if (!strcmp(argv[1], "P")) {
+                /* Owner-requested one-pulse experiment: no immediate read.
+                   Full blank scan has completed before enabling VPP. */
+                wl_oe(&wl, 1);
+                wl_set_address(&wl, (wl_u32)address, WL_ADDR_FIRST_BIT);
+                dos_wait_us(1000U);
+                wl_set_data(&wl, (int)value);
+                dos_wait_us(1000U);
+                dos_2716_pulse(0x378U);
+                wl_end_read(&wl);
+                puts("One PIT2 50ms pulse sent; rails OFF; no immediate verification");
+                result = 0;
+            } else {
             result = wl_program_2716_byte(&wl, address, (int)value, &high) ? 0 : 2;
             wl_vpp(&wl, 0);
             dos_wait_us(10000U);
@@ -165,6 +187,7 @@ int argc; char **argv;
             printf("One pulse %04X <- %02X: high-VPP=%02X normal=%02X\n",
                    address, value, high, low);
             if (low != value) result = 2;
+            }
         } else puts("REFUSED: target byte is not FF; no pulse");
     }
 safe:
