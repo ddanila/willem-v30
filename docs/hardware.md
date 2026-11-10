@@ -116,7 +116,7 @@ ZIF contact pair:    1/32  2/31  3/30  4/29  5/28 ... 16/17
 ```
 
 Do not confuse J1/J2 beside the ZIF with the DB25-side J9/J10 compatibility
-selector. Never move either pair while powered. `RRF5` is the only RF5 command:
+selector. Never move either pair while powered. `RRF5` is the RF5/RF2 read command:
 it reads addresses `0000h` through `07FFh`, never enables software VPP, writes
 exactly 2048 bytes to the output file, and performs a safe VCC/VPP shutdown
 before saving the result.
@@ -477,3 +477,11 @@ VCC/VPP-off logged). The BF pattern disappeared, but the capture contains
 125..127 modulo 128. This is not validated firmware or a confirmed blank
 chip; a remaining read-path issue is unresolved. Evidence: DOSRAVI session
 `norma-vmd4-at29c512-20261107-read3-resume`.
+
+## Standard 2716 / RF2 / RF5 programming
+
+`W2716` (aliases `WRF2`, `WRF5`) uses the same special 2716 routing and
+DIP `1A3`, with measured **5 V VCC and 25 V programming VPP**. The positive
+50 ms pulse is specific to this family. See the root README for the write
+gate and verification procedure. Do not use this command for a 2732 or the
+three-supply TI TMS2716.

@@ -448,6 +448,41 @@ struct willem *wl;
     wl_oe(wl, 0);
     wl_we(wl, 0);
     wl_vcc(wl, 0);
-    wl_set_address(wl, 0, WL_ADDR_FIRST_BIT);
+    wl_set_address(wl, 0UL, WL_ADDR_FIRST_BIT);
     wl_set_data(wl, 0);
+}
+
+/* Standard 2716 / K573RF2 / K573RF5: VCC=5V, VPP=25V, positive CE.
+   Unlike M2764A there is no fast-pulse/overprogram algorithm here. */
+void wl_begin_2716_program(wl)
+struct willem *wl;
+{
+    wl_vpp(wl, 0);
+    wl_we(wl, 0);
+    wl_oe(wl, 1);
+    wl_vcc(wl, 1);
+    delay_us(wl, 5000);
+    wl_vpp(wl, 1);
+    delay_us(wl, 1000);
+}
+
+int wl_program_2716_byte(wl, address, value, verified)
+struct willem *wl;
+wl_u16 address;
+int value;
+wl_u8 *verified;
+{
+    /* No fallback: the DOS backend must supply the bounded hardware pulse. */
+    if (!wl->io.pulse_2716) return 0;
+    if ((wl_u8)value != 0xffU) {
+        wl_oe(wl, 1);
+        wl_set_address(wl, (wl_u32)address, WL_ADDR_FIRST_BIT);
+        delay_us(wl, 100);
+        wl_set_data(wl, value);
+        delay_us(wl, 100);
+        wl->io.pulse_2716(wl->io.ctx);
+        delay_us(wl, 1000);
+    }
+    *verified = wl_read_byte(wl, address);
+    return *verified == (wl_u8)value;
 }

@@ -15,7 +15,7 @@
 #define M2764A_GATE_NAME "M2764A.OK"
 #define WILLEM_VERSION "0.2.0-dev"
 #ifndef WILLEM_BUILD_ID
-#define WILLEM_BUILD_ID "dosravi-at29c512-we-fix-v2"
+#define WILLEM_BUILD_ID "dosravi-rf2-program-v2"
 #endif
 
 #define ACTION_READ 1
@@ -38,6 +38,7 @@ extern void dos_wait_us(unsigned usec);
 extern void dos_datetime(unsigned *fields);
 extern void dos_sdp_write(unsigned base, unsigned address, unsigned value);
 extern void dos_console(char *text);
+extern void dos_2716_pulse(unsigned base);
 extern void dos_m2764a_pulse(unsigned base, unsigned milliseconds);
 extern unsigned long dos_bios_ticks(void);
 extern unsigned dos_shift_address(unsigned base, unsigned long address, unsigned data, unsigned control);
@@ -219,6 +220,13 @@ int usec;
     struct dos_context *ctx = (struct dos_context *)vctx;
     dos_wait_us((unsigned)usec);
     trace_record(ctx, 'D', 0, (unsigned)usec);
+}
+
+static void port_2716_pulse(vctx)
+void *vctx;
+{
+    struct dos_context *ctx = (struct dos_context *)vctx;
+    dos_2716_pulse(ctx->base);
 }
 
 static void port_program_pulse(vctx, milliseconds)
@@ -418,6 +426,7 @@ static void usage()
     puts("       WILLEM B28C64 [base] [/TRACE]");
     puts("       WILLEM V2764 image.bin [base] [/TRACE]");
     puts("       WILLEM V28C64 image.bin [base] [/TRACE]");
+    puts("       WILLEM W2716 image.bin [base] /WRITE (RF2/RF5, 5V/25V)");
     puts("       WILLEM WM2764A image.bin [base] /WRITE");
     puts("       WILLEM W28C64 image.bin [base] /WRITE [/TRACE]");
     puts("       WILLEM D28C64 [base] [/TRACE]  (chip removed)");
@@ -454,6 +463,9 @@ int *device;
         *action = ACTION_VERIFY; *device = DEVICE_28C64;
     } else if (same_command(text, "W28C64")) {
         *action = ACTION_WRITE; *device = DEVICE_28C64;
+    } else if (same_command(text, "W2716") || same_command(text, "WRF2") ||
+               same_command(text, "WRF5")) {
+        *action = ACTION_WRITE; *device = DEVICE_RF5;
     } else if (same_command(text, "WM2764A")) {
         *action = ACTION_WRITE; *device = DEVICE_M2764A;
     } else if (same_command(text, "D28C64")) {
@@ -485,7 +497,7 @@ int device;
     if (device == DEVICE_27512) return "27512/27C512";
     if (device == DEVICE_27256) return "27256/27C256";
     if (device == DEVICE_2732) return "2732";
-    if (device == DEVICE_RF5) return "K573RF5/2716";
+    if (device == DEVICE_RF5) return "K573RF2/RF5/2716";
     if (device == DEVICE_M2764A) return "ST-M2764A";
     return device == DEVICE_2764 ? "2764/27C64" : "AT28C64";
 }
@@ -891,7 +903,13 @@ char **argv;
             logmsg("ERROR: write commands require explicit /WRITE confirmation");
             goto done;
         }
-        if (device == DEVICE_M2764A) {
+        if (device == DEVICE_RF5) {
+            if (!write_gate_valid("RF2.OK", "WILLEM-2716-5V-25V-GATE-1")) {
+                logmsg("ERROR: RF2.OK required: confirm measured 5V VCC and 25V VPP");
+                goto done;
+            }
+            logmsg("2716 5V/25V write gate accepted from RF2.OK");
+        } else if (device == DEVICE_M2764A) {
             if (!write_gate_valid(M2764A_GATE_NAME,
                                   "WILLEM-M2764A-WRITE-GATE-1")) {
                 logmsg("ERROR: valid %s is required; 12.5V write gate is locked",
@@ -951,6 +969,7 @@ char **argv;
     io.status_read = port_status_read;
     io.delay_us = port_delay;
     io.program_pulse_ms = port_program_pulse;
+    io.pulse_2716 = port_2716_pulse;
     wl_init(&wl, &io);
 
     power_on_ms = device == DEVICE_28C64 ? 200U : 5U;
@@ -967,6 +986,9 @@ char **argv;
                profile->input_clock_us, power_on_ms, WILLEM_BUILD_ID);
     }
 
+    if (action == ACTION_WRITE && device == DEVICE_RF5)
+        wl_set_read_timing(&wl, 4U, 4U, 4U, 4U, 10U);
+
     logmsg("Operation=%s device=%s image=%s LPT=%03Xh trace=%s",
            action_name(action), device_name(device),
            image_name ? image_name : "(none)", base,
@@ -974,6 +996,8 @@ char **argv;
     if (device == DEVICE_M2764A)
         logmsg("Required DIP mask=%03Xh; PROGRAM MODE REQUIRES measured VCC=6.0V and VPP=12.5V",
                dip_mask);
+    else if (action == ACTION_WRITE && device == DEVICE_RF5)
+        logmsg("Required DIP mask=%03Xh; measured VCC=5V, VPP=25V; positive 50ms CE", dip_mask);
     else if (action == ACTION_DIAG && device == DEVICE_RF5)
         logmsg("Required DIP mask=%03Xh; EMPTY SOCKET 5V/25V measurement", dip_mask);
     else
@@ -1018,11 +1042,13 @@ char **argv;
 
     logmsg("Power transition: enabling VCC, VPP off");
     if (action == ACTION_READ) read_started = dos_bios_ticks();
-    if (action == ACTION_WRITE && device == DEVICE_M2764A) {
+    if (action == ACTION_WRITE &&
+        (device == DEVICE_M2764A || device == DEVICE_RF5)) {
         /* Refuse a mixed-up or incompletely erased UV EPROM before VPP can
            possibly be enabled.  This is intentionally stricter than merely
            checking whether the requested zero bits are compatible. */
-        wl_begin_2764_read(&wl);
+        if (device == DEVICE_RF5) wl_begin_2716_read(&wl);
+        else wl_begin_2764_read(&wl);
         powered = 1;
         logmsg("Pre-program blank check begins with VPP off");
         for (address = 0; address < image_size; address++) {
@@ -1041,6 +1067,10 @@ char **argv;
         logmsg("Safe shutdown complete after blank check: VCC off, VPP off");
         if (blank_mismatches) {
             write_failed = 1;
+        } else if (device == DEVICE_RF5) {
+            wl_begin_2716_program(&wl);
+            powered = 1;
+            logmsg("2716 programming rails enabled: VCC before VPP, CE low");
         } else {
             logmsg("Power transition: enabling measured 6.0V VCC before 12.5V VPP");
             wl_begin_m2764a_program(&wl);
@@ -1060,7 +1090,30 @@ char **argv;
     if (action == ACTION_WRITE) {
         crc = crc16(rom_buffer, image_size);
         image_crc32 = crc32(rom_buffer, image_size);
-        if (device == DEVICE_M2764A) {
+        if (device == DEVICE_RF5) {
+            if (!write_failed) {
+                logmsg("2716 fixed 50ms programming begins: image CRC32=%08lX", image_crc32);
+                program_started = dos_bios_ticks();
+                for (address = 0; address < image_size; address++) {
+                    expected = rom_buffer[address];
+                    if (!wl_program_2716_byte(&wl, address, expected, &verified)) {
+                        logmsg("ERROR: 2716 verify failed at %04Xh read=%02X wanted=%02X; no retry",
+                               address, verified, expected);
+                        write_failed = 1;
+                        break;
+                    }
+                    if (expected == 0xffU) unchanged++;
+                    else written++;
+                    if ((address & 0xffU) == 0xffU)
+                        logmsg("Write progress: %u/%u bytes, programmed=%u FF-skipped=%u",
+                               address + 1, image_size, written, unchanged);
+                }
+                program_ms = (dos_bios_ticks() - program_started) * 55UL;
+                wl_vpp(&wl, 0);
+                dos_wait_us(10000U);
+                logmsg("2716 VPP off; programming failure=%u", write_failed);
+            }
+        } else if (device == DEVICE_M2764A) {
             if (!write_failed) {
                 logmsg("M2764A Fast Programming begins: bytes=%u image CRC16-CCITT=%04X",
                        image_size, crc);

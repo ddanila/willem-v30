@@ -1,7 +1,7 @@
 # Serial boot EPROM preparation — 2026-11-10
 
-Preparation only: neither chip has been programmed, blank-checked, or read back
-in this task. No physical serial connection or programmer operation was started.
+Prepared images and subsequent physical work are recorded below. Programming
+results remain pending until a complete readback matches.
 
 | Target | DOS filename | EPROM | Bytes | Serial protocol |
 |---|---|---|---:|---|
@@ -56,31 +56,19 @@ J9/J10 toward DB25, 5 V VCC and 25 V programming VPP. With the lever at the top,
 chip pin 1 sits at ZIF5; four rows are empty at the lever end. Ground is ZIF16,
 VCC ZIF28, VPP ZIF25. Move chips and jumpers with power removed.
 
-The empty-socket diagnostic is in the separate `diag-2716-vpp` worktree at
-`/home/ddanila/fun/willem-v30-diag2716`, revision `afc2d76`:
+The current preparation branch includes the empty-socket diagnostic:
 
 ```
 WILLEM D2716 378 /VPP
 ```
 
-It requires an empty socket and actual meter readings before each local `YES`:
-VCC/read-VPP about 5 V, programming VPP about 25 V with VCC still 5 V, then VPP
-returning to 5 V before shutdown. Do not feed automatic YES answers. This command
-is not on the preparation branch and has not been run after the repair. Its
-existing executable remains in that worktree's `build/dos/`.
+It requires an empty socket and actual meter readings before each local `YES`.
+The owner confirmed the post-repair switched-rail measurements during this
+programming session. No automated D2716 measurement is claimed.
 
-The current custom programmer provides **RRF5/R2716 and R2732 reads, but no RF5
-or 2732 write command**. No write-enable token or automatic burn script is included.
-Before programming:
-
-1. Obtain the full 2732 manufacturer/suffix and select its own voltage, routing
-   and algorithm; do not inherit the RF5's 25 V setting.
-2. Check the RF5 switched rails with the empty-socket diagnostic.
-3. Implement and qualify device-specific custom write paths, or establish
-   validated original-software programming profiles.
-4. Blank-check replacements, program the correct image, and compare complete
-   readbacks (2048/4096 bytes) against `SHA256SUMS`.
-5. Preserve original machine ROMs for rollback.
+The custom programmer now provides `W2716` / `WRF2` / `WRF5` programming.
+The Kaypro 2732 still needs an identified part and a separately qualified writer;
+do not inherit the RF2 voltage or pulse polarity for that chip.
 
 ## Safe idle command executed after preparation
 
@@ -122,4 +110,29 @@ remains RF5. The first RF5 is suspect, not proven defective: signal echo and a
 contact/routing issue are not distinguished by an all-FF replacement read.
 The RF2 data sheet specifies the standard 2K x 8 pinout, 5 V supply and 25 V
 programming input: https://static.chipdip.ru/lib/818/DOC054818967.pdf .
-A validated RF2/2716 write path is still absent; no burn is ready or performed.
+The RF2/2716 writer has now been implemented. The owner confirmed the switched
+rail measurements after the R11 repair ("I already measured, all good").
+See the programming evidence for the eventual write/readback result.
+
+## RF2 programming attempts
+
+The first attempt passed its blank check, then stopped at address 0001.
+Independent readback found C3 at 0000 and 06 at 036D; all other bytes were FF.
+The new writer was at fault: its address call lacked an explicit 32-bit cast,
+which the old K&R DOS compiler requires. That chip needs UV erasure because
+036D must contain DD. The owner installed a replacement blank chip.
+
+Build `dosravi-rf2-program-v2` fixes the call. A new regression test executes
+the actual bcc-compiled core across all 2048 addresses on both 8086 and 80186;
+it passes the fixed code and rejects the original defect. Pulse assembly,
+write guards, and portable tests also pass. Attempt logs and readbacks are
+preserved in `evidence/`; physical success requires a complete image match.
+
+The replacement chip passed its blank check and verified through address 003F,
+but failed at 0040 (C1 instead of DD). Independent readback shows identical
+64-byte blocks at 0000 and 0040; C3 AND DD = C1 confirms the observed alias
+pattern. Reseating produced an identical SHA-256. A6 is chip pin 2 / ZIF6.
+The first chip distinguished A6, pointing more strongly to the replacement
+chip/contact than to a permanent shared programmer fault; the exact cause
+remains unresolved. Both attempts ended with VPP/VCC off. Neither chip contains
+a usable boot image; affected chips require UV erasure before reuse.

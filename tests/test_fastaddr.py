@@ -22,7 +22,7 @@ PULSE = C.CFUNCTYPE(None, C.c_void_p, C.c_uint)
 
 class IO(C.Structure):
     _fields_ = [('ctx', C.c_void_p), ('data', WRITE), ('control', WRITE),
-                ('status', READ), ('delay', WRITE), ('pulse', PULSE)]
+                ('status', READ), ('delay', WRITE), ('pulse', PULSE), ('pulse2716', C.c_void_p)]
 
 class Willem(C.Structure):
     _fields_ = [('io', IO), ('data', C.c_ubyte), ('control', C.c_ubyte)] + [

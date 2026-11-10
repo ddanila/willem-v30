@@ -1,0 +1,20 @@
+{
+  "execution_id": 143308492,
+  "writer_build": "dosravi-rf2-program-v2",
+  "result": "aborted at 0040, C1 read instead of DD",
+  "blank_check_nonblank": 0,
+  "verified_non_ff_bytes": 62,
+  "ff_skipped": 2,
+  "readback_sha256": "0083c8b747b96d5c8f961502e7642de2472d6ee5b03cc9dc5cf8a48a3e239aa1",
+  "readback_non_ff": 124,
+  "finding": "0000-003F and 0040-007F identical, with 0000/0040=C1; all bytes from 0080 onwards FF. A6 alias consistent with C3 AND DD = C1 at shared location.",
+  "cause_location": "Unresolved: contact, chip, or programmer A6 path. Chip pin 2 / ZIF contact 6.",
+  "rails_at_end": "VPP off, VCC off",
+  "next": "Check replacement exact marking and pin 2/contact; do not program more blank chips until A6 path is resolved.",
+  "reseated_readback": {
+    "execution_id": 3436413120,
+    "identical": true,
+    "sha256": "0083c8b747b96d5c8f961502e7642de2472d6ee5b03cc9dc5cf8a48a3e239aa1"
+  },
+  "comparison_with_first_chip": "First-chip readback distinguishes A6: 0000=C3 vs 0040=FF; 036D=06 vs 032D=FF. Replacement chip/contact is therefore a stronger suspect than a permanent shared programmer fault."
+}

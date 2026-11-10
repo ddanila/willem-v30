@@ -1,0 +1,15 @@
+{
+  "build_id": "dosravi-rf2-program-v2",
+  "size": 32808,
+  "sha256": "6e5cc11d940c7013618ff8a73d7443ddae416d99b524fdb20c07158acb173a18",
+  "crc32": "8fba086e",
+  "tests": {
+    "portable_core": "passed; full 2716 image, FF skip, failed cell, rail sequence",
+    "pulse_assembly": "passed under Unicorn: positive 50ms, PIT wrap, flags and registers",
+    "bcc_dos_core": "all 2048 addresses passed under DOSBox 8086 and 80186",
+    "regression_mutant": "missing wl_u32 cast deliberately restored: 4084 errors; regression caught",
+    "dos_write_guards": "both CPUs passed missing /WRITE, missing gate, trace, image size, nonblank refusal",
+    "full_dos_regression": "v2 make dos-test passed: 8086/80186 matrix, D2716 rail guards, write guards, all-address DOS core, FASTADDR guards"
+  },
+  "physical_programming": "Not qualified end-to-end: v1 address ABI defect fixed; v2 replacement chip shows persistent A6 alias. See attempt records."
+}

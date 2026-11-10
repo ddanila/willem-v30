@@ -192,6 +192,22 @@ unsigned milliseconds;
     }
 }
 
+static void virtual_2716_pulse(ctx)
+void *ctx;
+{
+    struct virtual_willem *v = (struct virtual_willem *)ctx;
+    if (v->control != (WL_CTL_VPP | WL_CTL_VCC)) {
+        v->eprom_sequence_error = 1;
+        return;
+    }
+    virtual_control_write(ctx, (v->control | WL_CTL_WE) ^ WL_CTL_XOR);
+    virtual_delay(ctx, 25000);
+    virtual_delay(ctx, 25000);
+    virtual_control_write(ctx, (v->control & ~WL_CTL_WE) ^ WL_CTL_XOR);
+    v->eprom_initial_pulses++;
+    if (!v->corrupt_commit) v->rom[v->address] &= v->data;
+}
+
 static wl_u8 pattern(address)
 wl_u16 address;
 {
@@ -216,6 +232,7 @@ int main()
     io.status_read = virtual_status_read;
     io.delay_us = virtual_delay;
     io.program_pulse_ms = virtual_program_pulse;
+    io.pulse_2716 = 0;
 
     wl_init(&wl, &io);
     wl_begin_2716_read(&wl);
@@ -558,5 +575,33 @@ int main()
     wl_end_read(&wl);
     if (v.control & (WL_CTL_VPP | WL_CTL_VCC)) return 1;
     printf("virtual M2764A failure limit and safe shutdown passed\n");
+    memset(&v, 0, sizeof(v));
+    memset(v.rom, 0xff, sizeof(v.rom));
+    v.route_27256 = 1; /* CE low reads, no EEPROM edge-write model. */
+    io.pulse_2716 = virtual_2716_pulse;
+    wl_init(&wl, &io);
+    wl_begin_2716_program(&wl);
+    for (address = 0; address < RF5_SIZE; address++) {
+        if (!wl_program_2716_byte(&wl, address, pattern(address), &actual))
+            return 1;
+    }
+    if (!v.eprom_initial_pulses || v.eprom_initial_pulses >= RF5_SIZE)
+        return 1; /* Non-FF bytes pulsed, FF bytes skipped. */
+    wl_vpp(&wl, 0);
+    for (address = 0; address < RF5_SIZE; address++)
+        if (wl_read_byte(&wl, address) != pattern(address)) return 1;
+    wl_end_read(&wl);
+    if (v.eprom_sequence_error || v.vpp_without_vcc ||
+        v.vcc_removed_before_vpp || (v.control & 5)) return 1;
+    v.corrupt_commit = 1;
+    v.rom[123] = 0xff;
+    v.eprom_initial_pulses = 0;
+    wl_begin_2716_program(&wl);
+    if (wl_program_2716_byte(&wl, 123, 0x42, &actual) ||
+        v.eprom_initial_pulses != 1 || actual != 0xff) return 1;
+    wl_end_read(&wl);
+    if (v.control & 5) return 1;
+    puts("virtual 2716 full-image programming, FF skip, single-pulse failure and safe rails passed");
+
     return 0;
 }

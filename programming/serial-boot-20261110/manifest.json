@@ -1,6 +1,6 @@
 {
   "date": "2026-11-10",
-  "purpose": "Preparation only; no programming or physical serial operations performed",
+  "purpose": "Serial boot image preparation and physical programming evidence",
   "images": [
     {
       "file": "R1715MW2.BIN",
@@ -9,7 +9,7 @@
       "repository": "https://github.com/ddanila/ravi.git",
       "revision": "2491ec9559abaafe00a294f33ef97b7ec0d1e645",
       "source": "build/programming-20261110/R1715MW2.BIN",
-      "device": "K573RF5 / standard 2716",
+      "device": "K573RF2 / standard 2716",
       "protocol": "W2",
       "framing": "9600 8N1",
       "programmed": false,
@@ -35,14 +35,15 @@
     "model": "Willem PCB5.0E 2015 clone",
     "repair": "Owner installed missing R11 with 15.4 kohm and adjusted adjacent trimmer",
     "owner_measurement": "25.0 V at ZIF VPP contact in default LPT idle state; VPP asserted by that default",
-    "switched_rail_check_after_repair": false,
-    "loaded_programming_voltage_verified": false
+    "switched_rail_check_after_repair": true,
+    "loaded_programming_voltage_verified": false,
+    "switched_rail_confirmation": "Owner: I already measured, all good; in response to request for post-repair switched rail check, 2026-11-10. No new numeric readings supplied."
   },
   "remaining": [
-    "Confirm exact 2732 manufacturer/part marking and its programming profile",
-    "Verify switched 2716 rails with empty-socket D2716 diagnostic",
-    "Implement and qualify device-specific writer paths, or select validated original software",
-    "Blank-check replacement chips, program, then compare complete readbacks"
+    "Resolve A6 alias on replacement chip/programmer before further programming",
+    "UV-erase affected chips before reuse",
+    "Complete Robotron programming and independent full readback",
+    "Identify exact Kaypro 2732 part and qualify its separate writer"
   ],
   "software_validation": {
     "robotron": {
@@ -59,10 +60,9 @@
     }
   },
   "current_robotron_candidate": {
-    "family": "K573RF2",
-    "owner_corrected_from": "RF5",
-    "read_result": "2048 bytes FF",
+    "family": "replacement RF2/RF5-compatible chip; exact marking not restated",
     "programming_ready": false,
-    "reason": "No validated RF2/2716 write command; switched programming rail diagnostic pending"
+    "reason": "Second attempt revealed A6 alias; first 64-byte block mirrored at 0040. No full image programmed.",
+    "needs_erasure": true
   }
 }

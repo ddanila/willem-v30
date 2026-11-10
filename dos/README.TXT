@@ -13,7 +13,7 @@ when reading an 8 KiB 2764 or 28C64.
 CURRENT SAFETY STAGE
 --------------------
 
-This build has a dedicated read-only K573RF5/2716 path.  It can also read,
+This build reads and programs K573RF2/RF5/2716 (2 KiB).  It can also read,
 blank-check, and verify 2764/27C64 and AT28C64 devices.
 AT28C64 writing is locked until a known Juku 2764 has been read correctly on
 the real programmer and the host validator has created WRITE.OK.
@@ -91,3 +91,15 @@ hardware validation, not every routine read.
 Read HWSETUP.TXT before connecting or powering real hardware.
 
 Source: https://github.com/ddanila/willem-v30
+
+RF2 / RF5 / STANDARD 2716 PROGRAMMING
+------------------------------------
+WILLEM W2716 IMAGE.BIN 378 /WRITE
+Aliases: WRF2 and WRF5. Exact image size: 2048 bytes.
+Requires RF2.OK first line: WILLEM-2716-5V-25V-GATE-1
+Create this gate only after measuring the switched 5V VCC / 25V VPP rails.
+DIP ON 1,2,6,8,9; J1/J2 special 2716 routing toward ZIF.
+The writer blank-checks with VPP off, applies one positive 50ms CE pulse per
+non-FF byte, verifies each byte, then switches VPP off for full verification.
+A failure aborts without retry. Both rails are switched off at completion.
+Read back independently and compare the entire image before installation.

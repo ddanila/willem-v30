@@ -320,3 +320,47 @@ _dos_console:
     pop si
     pop bp
     ret
+
+; Fixed positive 50 ms pulse, standard 2716 CE/PGM. VCC/VPP on, OE high.
+; 59659 PIT ticks = 49.9999 ms. Mask IRQs only for this bounded interval;
+; preserve flags. One interval avoids accumulating 50 C/PIT-call overheads.
+GLOBAL _dos_2716_pulse
+_dos_2716_pulse:
+    push bp
+    mov bp, sp
+    push bx
+    push cx
+    push dx
+    pushf
+    cli
+    mov dx, [bp+4]
+    add dx, 2
+    mov al, 006h
+    out dx, al
+    xor al, al
+    out 043h, al
+    in al, 040h
+    mov cl, al
+    in al, 040h
+    mov ch, al
+.wait:
+    xor al, al
+    out 043h, al
+    in al, 040h
+    mov bl, al
+    in al, 040h
+    mov bh, al
+    mov ax, cx
+    sub ax, bx
+    cmp ax, 59659
+    jb .wait
+    mov dx, [bp+4]
+    add dx, 2
+    mov al, 00eh
+    out dx, al
+    popf
+    pop dx
+    pop cx
+    pop bx
+    pop bp
+    ret

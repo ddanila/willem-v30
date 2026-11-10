@@ -10,7 +10,7 @@ code, data, heap, and stack within one 64 KiB segment.
 The initial hardware target is a Willem PCB5.0E operating in its PCB3B
 compatibility mode. The initial device targets are:
 
-- К573РФ5/2716: dedicated 2 KiB read-only path
+- К573РФ2/РФ5/2716: 2 KiB read and fixed 50 ms programming
 - 2764/27C64: read, blank-check, and verify
 - ST M2764A: gated two-stage Fast Programming and verification
 - AT28C64: read, blank-check, program, and verify
@@ -64,14 +64,15 @@ WILLEM V28C64 ROM.BIN [378] [/TRACE]
 WILLEM W28C64 ROM.BIN [378] /WRITE
 WILLEM DM2764A        [378] /VPP
 WILLEM WM2764A ROM.BIN [378] /WRITE
+WILLEM W2716 ROM.BIN [378] /WRITE
 ```
 
 The optional LPT base is hexadecimal and defaults to `378`. Every operation
 prints and logs a visual 12-switch DIP diagram. Geepro's mask maps bit 0 to
 physical switch 1; follow the numbering and the `ON` mark printed on the DIP
-bank. `RRF5` always creates exactly 2048 bytes and has no corresponding
-blank, verify, or write command. Verification images for the other devices
-must be exactly 8192 bytes.
+bank. `RRF5` always creates exactly 2048 bytes. `W2716` (aliases `WRF2`,
+`WRF5`) requires an exact 2048-byte image; it blank-checks before programming
+and verifies every byte afterward.
 
 `R27256` reads exactly 32768 bytes from a 27256/27C256 using the EPROM
 read sequence with VPP off. Use Normal 28-pin routing, DIP mask `1B3h`
@@ -198,7 +199,7 @@ been checked. [Capture and evidence](https://github.com/ddanila/dumps/tree/main/
 `WILLEM D2716 378 /VPP` provides manually confirmed 5 V / 25 V measurement
 steps for РФ2/РФ5 routing, with safe shutdown on declined confirmation or EOF.
 See [hardware setup](docs/hardware.md#empty-socket-2716--рф2--рф5-voltage-diagnostic).
-This is not a 2716 programming command; physical 25 V validation is pending.
+The separate `W2716` command programs standard 2716/RF2/RF5 devices.
 
 For accelerated 64 KiB 27512/27C512 reads, use
 `WILLEM R27512 OUT.BIN 378 /PROFILE:conservative /FASTADDR`.
@@ -214,3 +215,35 @@ AT29C512 read-only support (64 KiB):
 high; see `docs/hardware.md`. Do not use the 28-pin 27C512 DIP setup.
 Use build `dosravi-at29c512-we-fix-v2` or later: v1 held /WE low.
 The [original Willem comparison](docs/original-at29c512.md) documents the fix.
+
+### 2716 / RF2 / RF5 programming
+
+Use DIP `1A3`, special 2716 J1/J2 routing, **5 V VCC / 25 V VPP**.
+This is not the three-supply TI TMS2716. After measuring the switched rails,
+create `RF2.OK` with first line `WILLEM-2716-5V-25V-GATE-1` and run:
+
+```
+WILLEM W2716 R1715MW2.BIN 378 /WRITE
+```
+
+The gate records an operator prerequisite; software cannot measure voltage.
+The writer rejects tracing, wrong image sizes, and any nonblank byte before
+VPP is enabled. It applies one positive 50 ms CE pulse per non-FF byte,
+verifies each byte, and aborts on the first failure without retrying.
+After programming it disables VPP, waits 10 ms, and verifies the entire image
+at normal read voltage. Shutdown drops VPP before VCC. Perform a separate
+readback and compare the complete file before installing the chip.
+
+The fixed pulse uses PIT channel 0 (59659 ticks), preserving interrupt flags
+and registers. Virtual tests cover the full image and failed cells;
+`tests/test_2716_pulse.py` runs the actual assembly under Unicorn, and
+`tests/test_2716_write.py` checks DOS front-end guards under 8086/80186 DOSBox.
+Reference sequence: Geepro `chips/27xx.cpp` at
+`a08efcaf6479730d552c5f96bad0a2a01bf0635f`, `write_byte_2716`.
+
+Physical qualification on 2026-11-10 remains incomplete: the first build's
+missing 32-bit address cast was corrected in v2 and is now covered by a DOS
+compiler regression test. A replacement chip then exhibited A6 address aliasing,
+confirmed by independent readback after reseating. See
+[attempt records](programming/serial-boot-20261110/README.md#rf2-programming-attempts).
+Do not treat emulator tests as proof of a working chip/programmer address path.

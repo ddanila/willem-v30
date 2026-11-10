@@ -43,6 +43,8 @@ dos: build/dos/WILLEM.COM
 dos-test: dos
 	bash tools/test_dosbox.sh
 	python3 tests/test_2716_diag.py
+	python3 tests/test_2716_write.py
+	python3 tests/test_2716_dos_core.py
 	python3 tests/test_fastaddr_guard.py
 
 dist: dos
@@ -53,5 +55,8 @@ clean:
 	rm -rf build
 
 # Optional Unicorn dependency; does not access programmer hardware.
+pulse-test:
+	python3 tests/test_2716_pulse.py
+
 fastaddr-test:
 	python3 tests/test_fastaddr.py

@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-10",
+  "execution_id": 2370716711,
+  "writer_build": "dosravi-rf2-program-v1",
+  "result": "aborted at address 0001; addressing defect in new writer",
+  "blank_check_nonblank": 0,
+  "programmed_bytes_readback": {
+    "0000": "c3",
+    "036d": "06"
+  },
+  "all_other_bytes": "ff",
+  "readback_sha256": "faee3c07e0939e83ad5bc9ce63c0cf68906d65fc364445aa56a743278a663808",
+  "root_cause": "Missing explicit wl_u32 cast in 16-bit K&R bcc call to wl_set_address; second argument passed as 16 instead of 32 bits; host compiler tests did not expose the ABI defect.",
+  "repair": "Explicit cast added. DOS-compiled core now tests all 2048 write addresses, plus regression mutation check.",
+  "chip_status": "Requires UV erasure: 036d is 06 instead of desired DD; cannot be repaired by further programming. Owner installed a new blank chip.",
+  "rails_at_end": "VPP off, VCC off"
+}
