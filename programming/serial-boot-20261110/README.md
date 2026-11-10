@@ -81,3 +81,17 @@ Before programming:
 4. Blank-check replacements, program the correct image, and compare complete
    readbacks (2048/4096 bytes) against `SHA256SUMS`.
 5. Preserve original machine ROMs for rollback.
+
+## Safe idle command executed after preparation
+
+`tools/wloff.asm` builds with `nasm -f bin tools/wloff.asm -o build/dos/WLOFF.COM`.
+This 8086 DOS utility is fixed to the established LPT address 378h and PCB3B
+control mapping. It first sets raw control bit 0 to disable VPP while preserving
+other bits, then writes CONTROL=0Bh (logical controls inactive) and DATA=00h.
+It does not enable a rail, issue a programming pulse, or access a chip.
+
+On 2026-11-10, `WLOFF.COM` was uploaded and executed through DOSRAVI at 57600
+baud, execution ID 3966160539, exit code 0, elapsed 55 ms. Captured stdout confirms
+the port writes. Session: `dosravi/sessions/willem-safe-off-20261110`.
+A meter check of the resulting rail voltages remains an operator measurement;
+this execution is not a completed D2716 switched-rail diagnostic.

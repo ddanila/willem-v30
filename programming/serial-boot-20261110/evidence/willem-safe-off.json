@@ -1,0 +1,9 @@
+{
+  "execution_id": 3966160539,
+  "exit_code": 0,
+  "elapsed_ms": 55,
+  "sha256": "951fca25e8da966a53e950c3ec82101f2bc4b8f38fb4f917c31ce504325ce8a8",
+  "size": 91,
+  "physical_voltage_measured": false,
+  "stdout": "Willem LPT378: VPP OFF, VCC OFF; DATA=00 CONTROL=0B written.\n"
+}
