@@ -62,13 +62,22 @@
   },
   "current_robotron_candidate": {
     "family": "КС573РФ2",
-    "purpose": "Owner-authorized sacrificial diagnostics; remains installed",
+    "purpose": "Owner-authorized sacrificial RF2 diagnostics; later removed for U2716C35 control read",
     "programming_ready": false,
     "reason": "Stable A9 alias confirmed across all addresses, varying data, readers, timing, and access order. Exact electrical cause still requires pin measurement.",
     "current_contents": "RF2LAB.BIN diagnostic pattern; 1024 distinct locations mirrored across A9",
     "sha256": "eb8d23f22bd1a15359ad3030b35895857ee58904678b24ded1adb2fa36c06669",
     "total_verified_programmed_distinct_locations": 1016,
     "remaining_FF_distinct_locations": 8,
+    "rails": "VPP off, VCC off"
+  },
+  "later_control": {
+    "marking": "U2716C35",
+    "matching_reads": 2,
+    "all_address_bits_distinguished": true,
+    "programming_pulses": 0,
+    "sha256": "b97cfb4b68b56690c27730daaa347a8780579c8aa75d0169979cc63e33044b34",
+    "dump_repository": "https://github.com/ddanila/dumps/tree/main/unknown/u2716c35-20261110",
     "rails": "VPP off, VCC off"
   }
 }

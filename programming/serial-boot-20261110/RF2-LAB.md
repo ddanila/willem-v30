@@ -117,3 +117,20 @@ The first experimental reader reported a file-close error despite producing a
 complete matching image; following the established dev86 close convention fixed
 that reporting issue. Later read sessions exited zero and matched it exactly.
 The CE-disabled echo binary remains local, not in the firmware collection.
+
+## Later control: another U2716C35
+
+The owner subsequently replaced the diagnostic chip with a loose U2716C35,
+possibly from Robotron (unconfirmed). The old RD2716 reader and the separate
+assembly shifter produced identical 2048-byte nonblank dumps, SHA-256
+`b97cfb4b68b56690c27730daaa347a8780579c8aa75d0169979cc63e33044b34`.
+A6 pairs differ in 1508/2048 comparisons and A9 pairs in 2032/2048;
+all eleven address bits distinguish data. No programming pulses were sent.
+
+This control strengthens the chip-dependent input/decode or loading explanation
+and weighs against a permanently stuck shared programmer output. It still does
+not measure the failed RF2's pin voltage. The control ROM was compared against
+134 distinct references, including known Robotron keyboards and system ROMs;
+no exact or embedded match was found. Its acquisition and comparison evidence
+are preserved in [ddanila/dumps](https://github.com/ddanila/dumps/tree/main/unknown/u2716c35-20261110).
+Both rails are off; the U2716C35 control chip is now the last installed chip.
