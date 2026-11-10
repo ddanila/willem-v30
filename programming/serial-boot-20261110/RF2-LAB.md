@@ -135,15 +135,17 @@ not measure the failed RF2's pin voltage. The control ROM was compared against
 no exact or embedded match was found. Its acquisition and comparison evidence
 are preserved in [ddanila/dumps](https://github.com/ddanila/dumps/tree/main/unknown/u2716c35-20261110).
 Both rails were switched off after that control read. The owner subsequently
-installed three additional RF5 chips for read-only checks; RF5 #3 remains
-installed at the time of the measurements below.
+installed three additional RF5 chips for read-only checks. The owner later
+clarified that a blank RF2, not RF5 #3, was installed for the measurements below.
 
 
 ## Loaded supply measurement and timing concern
 
-With RF5 #3 installed, the owner measured **VCC 4.99 V at ZIF28** and
+With a blank RF2 installed (owner correction after the initial report), the owner measured **VCC 4.99 V at ZIF28** and
 **read-mode VPP 4.30 V at ZIF25**, both relative to ground ZIF16.
-These are measurements on this RF5, not measurements on the earlier RF2s.
+This is the same chip type as the earlier programming candidates; the owner
+has not identified it as one particular earlier physical specimen. Session
+directory names retain the original, mistaken RF5 attribution.
 The approximately 0.69 V difference is consistent with a diode drop, but its
 physical cause has not been established. The [RF2 specification](https://static.chipdip.ru/lib/818/DOC054818967.pdf)
 requires 4.75–5.25 V for the read level on pin 21. This observation therefore
@@ -177,5 +179,5 @@ the Pocket8086 timer mode and actual CE pulse width have not been independently
 measured. Existing pulse emulation modeled raw decrements as clock ticks, and
 the full LPT model checked sequencing/data rather than physical pulse duration.
 Those tests do not qualify pulse width. Timing correction and validation remain
-pending; no new programming was performed following these findings. Current
-RF5 read-only authorization does not authorize destructive experiments on it.
+pending; no new programming was performed following these findings. The currently installed blank RF2 is being used for rail measurements; no
+programming pulses are authorized by the request to measure programming VPP.
