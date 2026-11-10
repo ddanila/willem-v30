@@ -1,0 +1,20 @@
+{
+  "vendor_url": "https://www.mcumall.com/download/WillemProg/Willem_DOS.zip",
+  "advertised_version": "DOS 0.996",
+  "displayed_version": "0.992D Oct. 23 2001",
+  "files": {
+    "vendor_zip": {
+      "size": 56599,
+      "sha256": "af312597c8ddcc1c822c432d960f295454d451748bbcaf2f434110ce7bcfa15d"
+    },
+    "vendor_exe": {
+      "size": 201948,
+      "sha256": "6fbd7bd1fc5e8149fb0342c83b5180caf160d1fb52b17d5af517ec718f1888c3"
+    },
+    "physical_helper": {
+      "size": 8712,
+      "sha256": "ce90aca7546f72848dfc1a9d729ea4b4caebeac08a9e83d7a24b8ee27f1de53a"
+    }
+  },
+  "virtual_status": "byte oracle; does not qualify 4014/4021 latch timing or physical voltages"
+}

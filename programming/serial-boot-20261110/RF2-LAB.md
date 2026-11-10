@@ -250,3 +250,20 @@ mirror. A9 signal/loading, device decoding and the out-of-spec 4.30 V read-mode
 VPP remain unresolved; a software dump does not establish that two physical
 cells were programmed. The current chip now has programmed data and must not
 be described as blank.
+
+## Original DOS software comparison and additional physical experiment
+
+See [original Willem DOS 2716 comparison](../../docs/original-2716.md) for the
+unmodified WILEP996 captures and all limitations. Both 2716 profiles shifted A9
+normally and used the same positive CE pulse polarity as our writer. On the
+installed RF2, original-style 11-clock reads, full 24-clock reads and a
+programming-VPP-enabled verification read all retained the alias. One additional
+pulse using the original control sequence wrote A5 at requested 0201, then a
+fresh read showed A5 at both 0001 and 0201. The chip now contains those two A5
+readbacks plus C3 at 0000/0200. Both rails are off. Raw evidence and execution
+records are under `evidence/original-2716/`.
+
+The schematic identifies a diode and 2.2 kohm pull-down on the A9 socket path;
+that is the strongest remaining lead, not a confirmed component diagnosis.
+Physical A9 voltage/continuity measurement remains necessary to distinguish it
+from a chip fault. No hardware modification was performed or assumed.

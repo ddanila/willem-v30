@@ -1,0 +1,206 @@
+[
+  {
+    "session": "rf2-original-20261110-read11",
+    "programmer_stats": {
+      "exec_elapsed_ms": 7755,
+      "execution_id": 2143958113
+    },
+    "artifacts": [
+      {
+        "crc32": "4ec6fb5e",
+        "name": "upload:ORG2716.COM",
+        "sha256": "ce90aca7546f72848dfc1a9d729ea4b4caebeac08a9e83d7a24b8ee27f1de53a",
+        "size": 8712
+      },
+      {
+        "crc32": "78e4a7c7",
+        "name": "executions.json",
+        "sha256": "6d8bd553f53e7adf95836801a9275af7b21b34f1bba91bb271c6249df9de89b4",
+        "size": 358
+      },
+      {
+        "crc32": "b243017a",
+        "name": "STDOUT.TXT",
+        "sha256": "72a380599575b7fe98e61ec1a769e8ef8df88a9e24709272d2784a2997fd36f9",
+        "size": 28
+      },
+      {
+        "crc32": "00000000",
+        "name": "STDERR.TXT",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 0
+      },
+      {
+        "crc32": "5dce53e6",
+        "name": "ORG11.BIN",
+        "sha256": "53f876473a44a4fb6d699beb535d42d7eb02b40481a32c0066d4d728e8647390",
+        "size": 2048
+      }
+    ],
+    "stdout": "SAFE OFF: VPP off, VCC off\n"
+  },
+  {
+    "session": "rf2-original-20261110-readhigh",
+    "programmer_stats": {
+      "exec_elapsed_ms": 7810,
+      "execution_id": 2681737416
+    },
+    "artifacts": [
+      {
+        "crc32": "faf418bb",
+        "name": "executions.json",
+        "sha256": "5a2525eedccf2e2280474ad0d1c9e99fc2ae4bc0d69980656284efe653074bf1",
+        "size": 188
+      },
+      {
+        "crc32": "b243017a",
+        "name": "STDOUT.TXT",
+        "sha256": "72a380599575b7fe98e61ec1a769e8ef8df88a9e24709272d2784a2997fd36f9",
+        "size": 28
+      },
+      {
+        "crc32": "00000000",
+        "name": "STDERR.TXT",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 0
+      },
+      {
+        "crc32": "5dce53e6",
+        "name": "ORGHIGH.BIN",
+        "sha256": "53f876473a44a4fb6d699beb535d42d7eb02b40481a32c0066d4d728e8647390",
+        "size": 2048
+      }
+    ],
+    "stdout": "SAFE OFF: VPP off, VCC off\n"
+  },
+  {
+    "session": "rf2-original-20261110-write201",
+    "programmer_stats": {
+      "exec_elapsed_ms": 110,
+      "execution_id": 1950675055
+    },
+    "artifacts": [
+      {
+        "crc32": "9202db02",
+        "name": "executions.json",
+        "sha256": "b919c75cfbd738b834e60b4df3409d97b30fe9eae38c0bf70e8743bd0c4fe8ce",
+        "size": 181
+      },
+      {
+        "crc32": "9fbb6938",
+        "name": "STDOUT.TXT",
+        "sha256": "2bbe2e0d19405d09a0870de989629fb027a0e56cff7204525f9f0be6316551bb",
+        "size": 87
+      },
+      {
+        "crc32": "00000000",
+        "name": "STDERR.TXT",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 0
+      }
+    ],
+    "stdout": "ORIGINAL sequence 0201 <- a5 read=a5; one PIT2 50ms pulse\nSAFE OFF: VPP off, VCC off\n"
+  },
+  {
+    "session": "rf2-original-20261110-after201",
+    "programmer_stats": {
+      "exec_elapsed_ms": 7810,
+      "execution_id": 2337443060
+    },
+    "artifacts": [
+      {
+        "crc32": "9129580c",
+        "name": "executions.json",
+        "sha256": "fabedc9abaddb34d8385cca0415ee7e59bbe1fa8bb67d0619722f262cab07c58",
+        "size": 187
+      },
+      {
+        "crc32": "b243017a",
+        "name": "STDOUT.TXT",
+        "sha256": "72a380599575b7fe98e61ec1a769e8ef8df88a9e24709272d2784a2997fd36f9",
+        "size": 28
+      },
+      {
+        "crc32": "00000000",
+        "name": "STDERR.TXT",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 0
+      },
+      {
+        "crc32": "b5203a2c",
+        "name": "ORG201.BIN",
+        "sha256": "8079a4bd4408ef26a5ac1faf7bdfce143fdadd2b7bf1214ae480b5ad153ea466",
+        "size": 2048
+      }
+    ],
+    "stdout": "SAFE OFF: VPP off, VCC off\n"
+  },
+  {
+    "session": "rf2-original-20261110-read24",
+    "programmer_stats": {
+      "exec_elapsed_ms": 13365,
+      "execution_id": 3846107835
+    },
+    "artifacts": [
+      {
+        "crc32": "531cddb7",
+        "name": "executions.json",
+        "sha256": "77fe1beb433aa8838953fc7729cb3b8521b645150fb7a0b61127c598ce3dcced",
+        "size": 187
+      },
+      {
+        "crc32": "b243017a",
+        "name": "STDOUT.TXT",
+        "sha256": "72a380599575b7fe98e61ec1a769e8ef8df88a9e24709272d2784a2997fd36f9",
+        "size": 28
+      },
+      {
+        "crc32": "00000000",
+        "name": "STDERR.TXT",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 0
+      },
+      {
+        "crc32": "b5203a2c",
+        "name": "ORG24.BIN",
+        "sha256": "8079a4bd4408ef26a5ac1faf7bdfce143fdadd2b7bf1214ae480b5ad153ea466",
+        "size": 2048
+      }
+    ],
+    "stdout": "SAFE OFF: VPP off, VCC off\n"
+  },
+  {
+    "session": "rf2-original-20261110-controlread",
+    "programmer_stats": {
+      "exec_elapsed_ms": 29205,
+      "execution_id": 4060139501
+    },
+    "artifacts": [
+      {
+        "crc32": "f22a166d",
+        "name": "executions.json",
+        "sha256": "1878bf0aafebd6443a604897a44365fee737e4b89ae5059f5c2503a40c672eb2",
+        "size": 212
+      },
+      {
+        "crc32": "2b47f8ca",
+        "name": "STDOUT.TXT",
+        "sha256": "5716c0f6397e6a5cde7c53e7348325172e0c945592e2e02d34e45e904d282801",
+        "size": 2078
+      },
+      {
+        "crc32": "00000000",
+        "name": "STDERR.TXT",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 0
+      },
+      {
+        "crc32": "b5203a2c",
+        "name": "ORGCTRL.BIN",
+        "sha256": "8079a4bd4408ef26a5ac1faf7bdfce143fdadd2b7bf1214ae480b5ad153ea466",
+        "size": 2048
+      }
+    ],
+    "stdout": "[1980-01-01 02:14:09.27] ================ BEGIN RUN ================\n[1980-01-01 02:14:09.33] Willem V30 version 0.2.0-dev; 8086-compatible; 24-bit address build\n[1980-01-01 02:14:09.33] Command-line argc=5\n[1980-01-01 02:14:09.38] argv[0]=<C>\n[1980-01-01 02:14:09.38] argv[1]=<RRF5>\n[1980-01-01 02:14:09.38] argv[2]=<ORGCTRL.BIN>\n[1980-01-01 02:14:09.44] argv[3]=<378>\n[1980-01-01 02:14:09.44] argv[4]=</PROFILE:conservative>\n[1980-01-01 02:14:09.55] DOSRAVI_PROFILE name=conservative address_setup_us=4 oe_settle_us=4 input_latch_us=4 input_clock_us=4 power_on_ms=5 build_id=dosravi-m2764a-write-v1\n[1980-01-01 02:14:09.60] Operation=READ device=K573RF5/2716 image=ORGCTRL.BIN LPT=378h trace=off\n[1980-01-01 02:14:09.66] Required DIP mask=1a3h; VPP MUST remain off\n[1980-01-01 02:14:09.66] DIP number:  1  2  3  4  5  6  7  8  9 10 11 12\n[1980-01-01 02:14:09.71] DIP ON :   [X][X][ ][ ][ ][X][ ][X][X][ ][ ][ ]\n[1980-01-01 02:14:09.71] DIP OFF:   [ ][ ][X][X][X][ ][X][ ][ ][X][X][X]\n[1980-01-01 02:14:09.77] Set each numbered lever toward the row containing X\n[1980-01-01 02:14:09.77] ZIF pair: lever/notch -> [--][--][--][--][1/24] ... [12/13]\n[1980-01-01 02:14:09.82] Leave FOUR rows empty at lever end; place chip at far end\n[1980-01-01 02:14:09.82] Use SPECIAL 2716 route; notch faces empty rows and lever\n[1980-01-01 02:14:09.88] Initial raw DATA=00 STATUS=7f CONTROL=0b\n[1980-01-01 02:14:09.88] Power transition: enabling VCC, VPP off\n[1980-01-01 02:14:16.91] Scan progress: 512/2048 bytes\n[1980-01-01 02:14:23.88] Scan progress: 1024/2048 bytes\n[1980-01-01 02:14:30.91] Scan progress: 1536/2048 bytes\n[1980-01-01 02:14:37.89] Scan progress: 2048/2048 bytes\n[1980-01-01 02:14:37.89] DOSRAVI_METRIC read_ms=28050 profile=conservative\n[1980-01-01 02:14:37.94] Power transition: safe shutdown begins\n[1980-01-01 02:14:38.00] Safe shutdown complete: VCC off, VPP off\n[1980-01-01 02:14:38.27] Read complete: bytes=2048 CRC16-CCITT=ce07\n[1980-01-01 02:14:38.27] Result code=0\n[1980-01-01 02:14:38.27] ================= END RUN =================\n"
+  }
+]

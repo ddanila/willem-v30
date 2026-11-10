@@ -1,0 +1,50 @@
+{
+  "trace_sha256": "e7723d86cba3ee9f32dca540b8f6929bfa8b4db5195ef6d42b731eca9d269a48",
+  "pulses": [
+    {
+      "address": 0,
+      "value": 195,
+      "emulated_host_ms": 41.749
+    },
+    {
+      "address": 1,
+      "value": 6,
+      "emulated_host_ms": 41.512
+    },
+    {
+      "address": 64,
+      "value": 221,
+      "emulated_host_ms": 41.907
+    },
+    {
+      "address": 512,
+      "value": 85,
+      "emulated_host_ms": 41.749
+    },
+    {
+      "address": 513,
+      "value": 170,
+      "emulated_host_ms": 41.762
+    },
+    {
+      "address": 1024,
+      "value": 51,
+      "emulated_host_ms": 42.988
+    },
+    {
+      "address": 2047,
+      "value": 15,
+      "emulated_host_ms": 41.402
+    }
+  ],
+  "read_bytes": 2055,
+  "read_control": "0D",
+  "final_rails_off": true,
+  "verified_image_sha256": "d392dabd25bc4b1d7d549b054c4af2a45e788445d06ca634bc17d48a815d44b8",
+  "events": {
+    "W 0378": 113576,
+    "W 037A": 89,
+    "R 0379": 16442
+  },
+  "limitations": "Synthetic replies; emulator host timing is not a physical CE measurement."
+}
