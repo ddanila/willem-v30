@@ -1,0 +1,30 @@
+{
+  "firmware": {
+    "protocol": "W2",
+    "build_id": "4f81c5516ba23bbc",
+    "size": 2048,
+    "used": 1760,
+    "free_bytes": 286,
+    "crc16": "11a5"
+  },
+  "baseline_sha256": "646d9b812b277b967024d2b31aff7c567b5004823d07ea1f7dbb1cae319b09e7",
+  "passed": true,
+  "emulator_commit": "fa0d121ebb0a5d040b0d44b629938baa858beac8",
+  "emulator_sources": {
+    "machines/robotron1715m/robotron.c": "04cf0cdb7ab185d7501a77f192ef798f35438df4993c3fa7ec55372be8f81aa2",
+    "machines/robotron1715m/sio.c": "c529ed469f77064fa6395af8359f5de91ad1d38931c9a6a7ac293d9f4d51f0c4",
+    "tests/integration/robotron_rom_monitor.c": "9a79d694450e1e82be5402571b81705909e89d4aaecfe10db9bae539e0dbfbe1",
+    "common/cpu/z80.c": "d7329a9a116f49441b9ed4f23c0c2fdbb8cb338f74e327cc3344442a355461cf",
+    "third_party/cpu/chips/z80.h": "6ca70ffd91b1bdbaf00f7a41e7092b326145fd1c95dcdd7bb01183370de734f3"
+  },
+  "rom_sha256": "b03bb180a0cc72e632756579f7c691e1310899b44c0a015c9be6903d194056bf",
+  "cas_sha256": "dcb936b284cee0e753997fbce917fe080892500c1db695f7fddaf759b41ffc67",
+  "cas_kind": "synthetic reference-layout test data",
+  "physical_qualification": false,
+  "limits": [
+    "No PC001 ROM/PROM or wiring identity inferred.",
+    "No analog DRAM retention/refresh or CPU bus-stall proof.",
+    "CTC1/CTC2 both programmed; physical serial clock route unverified.",
+    "Uncooperative snippet needs external reset."
+  ]
+}

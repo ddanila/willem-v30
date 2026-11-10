@@ -1,0 +1,33 @@
+test_alias_uart_and_transmit_recovery (test_robotron1715w.FirmwareTests.test_alias_uart_and_transmit_recovery) ... ok
+test_banked_helper_and_call (test_robotron1715w.FirmwareTests.test_banked_helper_and_call) ... ok
+test_block_wire_size_and_legacy_read (test_robotron1715w.FirmwareTests.test_block_wire_size_and_legacy_read) ... ok
+test_bounded_diagnostic_snippets (test_robotron1715w.FirmwareTests.test_bounded_diagnostic_snippets) ... ok
+test_captured_transient_mismatch (test_robotron1715w.FirmwareTests.test_captured_transient_mismatch) ... ok
+test_changed_helper_stops_before_run (test_robotron1715w.FirmwareTests.test_changed_helper_stops_before_run) ... ok
+test_cli_upload_read_run_and_logs (test_robotron1715w.FirmwareTests.test_cli_upload_read_run_and_logs) ... ok
+test_corrupt_and_incomplete (test_robotron1715w.FirmwareTests.test_corrupt_and_incomplete) ... ok
+test_corrupt_block_reply_is_not_retried (test_robotron1715w.FirmwareTests.test_corrupt_block_reply_is_not_retried) ... ok
+test_corrupt_diagnostic_result_stops_session (test_robotron1715w.FirmwareTests.test_corrupt_diagnostic_result_stops_session) ... ok
+test_damaged_reply_no_mutation_replay (test_robotron1715w.FirmwareTests.test_damaged_reply_no_mutation_replay) ... ok
+test_diagnostic_workspace_and_artifacts (test_robotron1715w.FirmwareTests.test_diagnostic_workspace_and_artifacts) ... ok
+test_dropped_and_duplicated_command_bytes (test_robotron1715w.FirmwareTests.test_dropped_and_duplicated_command_bytes) ... ok
+test_fault_recovery_and_survey (test_robotron1715w.FirmwareTests.test_fault_recovery_and_survey) ... ok
+test_identity_and_no_ram (test_robotron1715w.FirmwareTests.test_identity_and_no_ram) ... ok
+test_lost_execution_replies_are_never_replayed (test_robotron1715w.FirmwareTests.test_lost_execution_replies_are_never_replayed) ... ok
+test_low_helper_and_failed_install (test_robotron1715w.FirmwareTests.test_low_helper_and_failed_install) ... ok
+test_payload_loss_duplication_and_reset_boundaries (test_robotron1715w.FirmwareTests.test_payload_loss_duplication_and_reset_boundaries) ... ok
+test_reset_during_write_invalidates_session (test_robotron1715w.FirmwareTests.test_reset_during_write_invalidates_session) ... ok
+test_serial_failure_does_not_stop_display_startup (test_robotron1715w.FirmwareTests.test_serial_failure_does_not_stop_display_startup) ... ok
+test_stack_fault_is_uncertain_and_never_replayed (test_robotron1715w.FirmwareTests.test_stack_fault_is_uncertain_and_never_replayed) ... ok
+test_stackless_return_and_hang (test_robotron1715w.FirmwareTests.test_stackless_return_and_hang) ... ok
+test_stages_build_id_and_bad_rom (test_robotron1715w.FirmwareTests.test_stages_build_id_and_bad_rom) ... ok
+test_w1_baseline_fallback (test_robotron1715w.FirmwareTests.test_w1_baseline_fallback) ... ok
+test_write_read_edges (test_robotron1715w.FirmwareTests.test_write_read_edges) ... ok
+test_block_crc_fragmentation_and_resync (test_robotron1715w.WireTests.test_block_crc_fragmentation_and_resync) ... ok
+test_crc_and_resync (test_robotron1715w.WireTests.test_crc_and_resync) ... ok
+test_reproducible_2716 (test_robotron1715w.WireTests.test_reproducible_2716) ... ok
+
+----------------------------------------------------------------------
+Ran 28 tests in 53.003s
+
+OK

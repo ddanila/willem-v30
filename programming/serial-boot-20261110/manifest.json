@@ -1,0 +1,61 @@
+{
+  "date": "2026-11-10",
+  "purpose": "Preparation only; no programming or physical serial operations performed",
+  "images": [
+    {
+      "file": "R1715MW2.BIN",
+      "size": 2048,
+      "sha256": "b03bb180a0cc72e632756579f7c691e1310899b44c0a015c9be6903d194056bf",
+      "repository": "https://github.com/ddanila/ravi.git",
+      "revision": "2491ec9559abaafe00a294f33ef97b7ec0d1e645",
+      "source": "build/programming-20261110/R1715MW2.BIN",
+      "device": "K573RF5 / standard 2716",
+      "protocol": "W2",
+      "framing": "9600 8N1",
+      "programmed": false,
+      "physical_readback_verified": false,
+      "crc32": "42053664"
+    },
+    {
+      "file": "KAYPRO2.BIN",
+      "size": 4096,
+      "sha256": "6133c46b1b31a8cc1d93d2428b716399c9c787d1ee6c5e3b785f67853e569633",
+      "repository": "https://github.com/ddanila/cpm-plus-kaypro.git",
+      "revision": "5759622491957370e83e6778faedbd42eed8cba9",
+      "source": "build/boot.rom",
+      "device": "2732, exact manufacturer/suffix pending",
+      "protocol": "KP2",
+      "framing": "19200 8O1",
+      "programmed": false,
+      "physical_readback_verified": false,
+      "crc32": "42706f83"
+    }
+  ],
+  "programmer": {
+    "model": "Willem PCB5.0E 2015 clone",
+    "repair": "Owner installed missing R11 with 15.4 kohm and adjusted adjacent trimmer",
+    "owner_measurement": "25.0 V at ZIF VPP contact in default LPT idle state; VPP asserted by that default",
+    "switched_rail_check_after_repair": false,
+    "loaded_programming_voltage_verified": false
+  },
+  "remaining": [
+    "Confirm exact 2732 manufacturer/part marking and its programming profile",
+    "Verify switched 2716 rails with empty-socket D2716 diagnostic",
+    "Implement and qualify device-specific writer paths, or select validated original software",
+    "Blank-check replacement chips, program, then compare complete readbacks"
+  ],
+  "software_validation": {
+    "robotron": {
+      "tests": 28,
+      "skipped": 0,
+      "passed": true,
+      "emulator_revision": "fa0d121ebb0a5d040b0d44b629938baa858beac8"
+    },
+    "kaypro": {
+      "boot_cases": 12,
+      "driver_groups": 6,
+      "passed": true,
+      "emulator_revision": "697369bd675748ba88e92a878919be4109609dfc"
+    }
+  }
+}
