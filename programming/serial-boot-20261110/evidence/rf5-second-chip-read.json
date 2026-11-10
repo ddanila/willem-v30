@@ -1,6 +1,6 @@
 {
   "date": "2026-11-10",
-  "device": "Second owner-installed RF5; exact marking unspecified",
+  "device": "Second owner-installed chip: K573RF2 family; corrected by owner from RF5; full marking unspecified",
   "execution_id": 3878925112,
   "exit_code": 0,
   "reader": "RD2716.COM",
@@ -15,5 +15,6 @@
   "matches_first_chip": false,
   "shutdown_log": "Safe shutdown complete: VCC off, VPP off",
   "evidence_location": "dosravi/sessions/rf5-second-chip-20261110-read1",
-  "binary_archived": false
+  "binary_archived": false,
+  "identification_correction": "Owner clarified after acquisition that the all-FF second chip is RF2; historical session filename retained"
 }

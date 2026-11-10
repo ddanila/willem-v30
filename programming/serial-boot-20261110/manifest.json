@@ -57,5 +57,12 @@
       "passed": true,
       "emulator_revision": "697369bd675748ba88e92a878919be4109609dfc"
     }
+  },
+  "current_robotron_candidate": {
+    "family": "K573RF2",
+    "owner_corrected_from": "RF5",
+    "read_result": "2048 bytes FF",
+    "programming_ready": false,
+    "reason": "No validated RF2/2716 write command; switched programming rail diagnostic pending"
   }
 }

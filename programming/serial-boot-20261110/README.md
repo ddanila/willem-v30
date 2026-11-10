@@ -108,10 +108,18 @@ archived here. Local acquisition evidence remains in
 at completion. Recheck routing, DIP settings, chip placement and contacts before
 using this read path as a programming gate.
 
-The owner substituted a second RF5, retaining the switch settings. Its complete
+The owner substituted a second chip, retaining the switch settings, and later
+identified it as RF2 (not RF5). Its complete
 2048-byte read returned FF at every address, consistent with a blank device and
 different from every byte of the first capture. This does not independently
 prove the present read path or explain the first chip's echo. Read time was
 28.050 seconds; software logged both rails off. The all-FF binary remains only
 in the local DOSRAVI session, not this repository. See
 `evidence/rf5-second-chip-read.json` for provenance.
+
+RF2 identification correction: the second all-FF device is RF2; the first device
+remains RF5. The first RF5 is suspect, not proven defective: signal echo and a
+contact/routing issue are not distinguished by an all-FF replacement read.
+The RF2 data sheet specifies the standard 2K x 8 pinout, 5 V supply and 25 V
+programming input: https://static.chipdip.ru/lib/818/DOC054818967.pdf .
+A validated RF2/2716 write path is still absent; no burn is ready or performed.
