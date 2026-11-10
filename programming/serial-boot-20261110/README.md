@@ -107,3 +107,11 @@ archived here. Local acquisition evidence remains in
 `dosravi/sessions/rf5-candidate-20261110-read1`. Software logged VCC/VPP off
 at completion. Recheck routing, DIP settings, chip placement and contacts before
 using this read path as a programming gate.
+
+The owner substituted a second RF5, retaining the switch settings. Its complete
+2048-byte read returned FF at every address, consistent with a blank device and
+different from every byte of the first capture. This does not independently
+prove the present read path or explain the first chip's echo. Read time was
+28.050 seconds; software logged both rails off. The all-FF binary remains only
+in the local DOSRAVI session, not this repository. See
+`evidence/rf5-second-chip-read.json` for provenance.

@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-10",
+  "device": "Second owner-installed RF5; exact marking unspecified",
+  "execution_id": 3878925112,
+  "exit_code": 0,
+  "reader": "RD2716.COM",
+  "reader_crc32": "d4164322",
+  "bytes_read": 2048,
+  "read_ms": 28050,
+  "counts": {
+    "FF": 2048
+  },
+  "sha256": "d0ff1b294b5288d1ae1421eadf5b2d38a8752b76d472ff30bed9028e25b1c5b8",
+  "interpretation": "Consistent with blank EPROM; all-FF alone does not independently prove current read-path operation",
+  "matches_first_chip": false,
+  "shutdown_log": "Safe shutdown complete: VCC off, VPP off",
+  "evidence_location": "dosravi/sessions/rf5-second-chip-20261110-read1",
+  "binary_archived": false
+}
