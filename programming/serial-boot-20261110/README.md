@@ -95,3 +95,15 @@ baud, execution ID 3966160539, exit code 0, elapsed 55 ms. Captured stdout confi
 the port writes. Session: `dosravi/sessions/willem-safe-off-20261110`.
 A meter check of the resulting rail voltages remains an operator measurement;
 this execution is not a completed D2716 switched-rail diagnostic.
+
+## First RF5 read after repair
+
+The owner confirmed both rails off after WLOFF, then installed a potentially blank
+RF5. The existing RD2716.COM (CRC32 d4164322, matching the successful FACIT
+2716 reader) completed a 2048-byte read, but returned 1023 bytes of 06h,
+1021 bytes of 04h, and four zero bytes. This resembles programmer signal echo;
+it does not establish that the chip is programmed or blank. No echo binary is
+archived here. Local acquisition evidence remains in
+`dosravi/sessions/rf5-candidate-20261110-read1`. Software logged VCC/VPP off
+at completion. Recheck routing, DIP settings, chip placement and contacts before
+using this read path as a programming gate.

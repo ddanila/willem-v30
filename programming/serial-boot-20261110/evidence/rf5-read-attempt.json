@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-10",
+  "device": "Owner-installed potentially blank RF5",
+  "execution_id": 2921046694,
+  "exit_code": 0,
+  "reader": "RD2716.COM",
+  "reader_crc32": "d4164322",
+  "bytes_read": 2048,
+  "read_ms": 27995,
+  "counts": {
+    "00": 4,
+    "04": 1021,
+    "06": 1023
+  },
+  "sha256": "b30429483f3247182c209b6c45e6a02ef35b01c3540562ad182ebc7dceb1222e",
+  "interpretation": "Suspected programmer signal echo; not a trustworthy chip-content or blankness determination",
+  "shutdown_log": "Safe shutdown complete: VCC off, VPP off",
+  "evidence_location": "dosravi/sessions/rf5-candidate-20261110-read1",
+  "binary_archived": false
+}
