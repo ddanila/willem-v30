@@ -40,8 +40,9 @@
     "switched_rail_confirmation": "Owner: I already measured, all good; in response to request for post-repair switched rail check, 2026-11-10. No new numeric readings supplied."
   },
   "remaining": [
-    "Resolve A6 alias on replacement chip/programmer before further programming",
-    "UV-erase affected chips before reuse",
+    "Measure zero-based A9 (RF2 datasheet A10) at chip pin22/ZIF26 under addresses0000 and0200; distinguish chip input/decode from programmer output",
+    "Fix A9 path before further boot programming",
+    "UV-erase affected test chips before reuse",
     "Complete Robotron programming and independent full readback",
     "Identify exact Kaypro 2732 part and qualify its separate writer"
   ],
@@ -60,9 +61,14 @@
     }
   },
   "current_robotron_candidate": {
-    "family": "replacement RF2/RF5-compatible chip; exact marking not restated",
+    "family": "КС573РФ2",
+    "purpose": "Owner-authorized sacrificial diagnostics; remains installed",
     "programming_ready": false,
-    "reason": "Second attempt revealed A6 alias; first 64-byte block mirrored at 0040. No full image programmed.",
-    "needs_erasure": true
+    "reason": "Stable A9 alias confirmed across all addresses, varying data, readers, timing, and access order. Exact electrical cause still requires pin measurement.",
+    "current_contents": "RF2LAB.BIN diagnostic pattern; 1024 distinct locations mirrored across A9",
+    "sha256": "eb8d23f22bd1a15359ad3030b35895857ee58904678b24ded1adb2fa36c06669",
+    "total_verified_programmed_distinct_locations": 1016,
+    "remaining_FF_distinct_locations": 8,
+    "rails": "VPP off, VCC off"
   }
 }

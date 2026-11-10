@@ -62,6 +62,8 @@ void wl_begin_at29c512_read(struct willem *wl);
 void wl_end_at29c512_read(struct willem *wl);
 void wl_begin_28c64_read(struct willem *wl);
 void wl_begin_28c64_write(struct willem *wl);
+int wl_check_2716_probe(struct willem *wl, wl_u16 address, int value,
+                        wl_u16 *bad_address, wl_u8 *actual);
 void wl_begin_2716_program(struct willem *wl);
 int wl_program_2716_byte(struct willem *wl, wl_u16 address, int value,
                           wl_u8 *verified);

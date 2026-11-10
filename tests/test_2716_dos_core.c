@@ -4,7 +4,7 @@
 #include <string.h>
 #include "willem.h"
 static unsigned data, control, clocks, address, expected, readbit;
-static unsigned pulses, errors;
+static unsigned pulses, errors, probe_mode, alias_mask;
 static unsigned long shift;
 static void data_write(ctx, value)
 void *ctx;
@@ -34,7 +34,10 @@ static wl_u8 status_read(ctx)
 void *ctx;
 {
     unsigned bit = (0x96U >> (7 - (readbit++ & 7))) & 1;
-    if (address != expected) errors++;
+    if (probe_mode) {
+        bit = ((address & ~alias_mask) == 0 ? 0x96U : 0xffU);
+        bit = (bit >> (7 - ((readbit - 1) & 7))) & 1;
+    } else if (address != expected) errors++;
     return bit ? 0 : 0x40;
 }
 static void delay(ctx, usec)
@@ -54,6 +57,7 @@ int main()
     struct wl_io io;
     struct willem wl;
     wl_u8 verified;
+    wl_u16 bad;
     unsigned i;
     memset(&io, 0, sizeof(io));
     io.data_write = data_write;
@@ -67,6 +71,12 @@ int main()
         expected = i;
         if (!wl_program_2716_byte(&wl, i, 0x96, &verified)) errors++;
     }
+    wl_vpp(&wl, 0);
+    probe_mode = 1;
+    if (!wl_check_2716_probe(&wl, 0U, 0x96, &bad, &verified)) errors++;
+    alias_mask = 0x40;
+    if (wl_check_2716_probe(&wl, 0U, 0x96, &bad, &verified) ||
+        bad != 0x40 || verified != 0x96) errors++;
     wl_end_read(&wl);
     if (pulses != 2048 || (control & 5)) errors++;
     printf("DOS core address test: errors=%u pulses=%u\n", errors, pulses);

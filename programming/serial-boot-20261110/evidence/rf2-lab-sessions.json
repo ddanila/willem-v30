@@ -1,0 +1,235 @@
+[
+  {
+    "session": "rf2-lab-20261110-allbits-read",
+    "stdout": "SAFE OFF: VPP off, VCC off\nRead 2048 bytes; pace=0 us; order=0; result=0\n",
+    "files": [
+      {
+        "file": "MARK2.BIN",
+        "size": 2048,
+        "sha256": "13895e501513a5977427c490e5705b26a8296f69893556b3c5b88a4c3f011e2e"
+      }
+    ],
+    "execution_ids": [
+      3553242682
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-allbits-slow",
+    "stdout": "SAFE OFF: VPP off, VCC off\nRead 2048 bytes; pace=100 us; order=2; result=0\n",
+    "files": [
+      {
+        "file": "MARKS.BIN",
+        "size": 2048,
+        "sha256": "13895e501513a5977427c490e5705b26a8296f69893556b3c5b88a4c3f011e2e"
+      }
+    ],
+    "execution_ids": [
+      3281285537
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-bit10",
+    "stdout": "Before 0010=ff pace=20 us\nOne pulse 0010 <- ef: high-VPP=ef normal=ef\nSAFE OFF: VPP off, VCC off\n",
+    "files": [],
+    "execution_ids": [
+      3993830397
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-bit100",
+    "stdout": "Before 0100=ff pace=100 us\nOne pulse 0100 <- aa: high-VPP=aa normal=aa\nSAFE OFF: VPP off, VCC off\n",
+    "files": [],
+    "execution_ids": [
+      3720855329
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-bit20",
+    "stdout": "Before 0020=ff pace=100 us\nOne pulse 0020 <- df: high-VPP=df normal=df\nSAFE OFF: VPP off, VCC off\n",
+    "files": [],
+    "execution_ids": [
+      660715096
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-bit40",
+    "stdout": "Before 0040=ff pace=0 us\nOne pulse 0040 <- bf: high-VPP=bf normal=bf\nSAFE OFF: VPP off, VCC off\n",
+    "files": [],
+    "execution_ids": [
+      876838560
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-bit400",
+    "stdout": "Before 0400=ff pace=20 us\nOne pulse 0400 <- 55: high-VPP=55 normal=55\nSAFE OFF: VPP off, VCC off\n",
+    "files": [],
+    "execution_ids": [
+      2362717984
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-bit8",
+    "stdout": "Before 0008=ff pace=0 us\nOne pulse 0008 <- f7: high-VPP=f7 normal=f7\nSAFE OFF: VPP off, VCC off\n",
+    "files": [],
+    "execution_ids": [
+      1850266677
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-bit80",
+    "stdout": "Before 0080=ff pace=20 us\nOne pulse 0080 <- 7f: high-VPP=7f normal=7f\nSAFE OFF: VPP off, VCC off\n",
+    "files": [],
+    "execution_ids": [
+      1724440881
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-ce-disabled",
+    "stdout": "SAFE OFF: VPP off, VCC off\nRead 2048 bytes; pace=20 us; order=3; result=0\n",
+    "files": [
+      {
+        "file": "CEOFF.BIN",
+        "size": 2048,
+        "sha256": "f97fbe91cc638a57bad0ca4fadac8a08529498d90af2166ec38bbad85d498306",
+        "histogram": {
+          "00": 1,
+          "04": 1023,
+          "06": 1024
+        }
+      }
+    ],
+    "execution_ids": [
+      1752786948
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-fill",
+    "stdout": "Fill pulses=128 last=0088\nFill pulses=256 last=0109\nFill pulses=384 last=0189\nFill pulses=512 last=040a\nFill pulses=640 last=048a\nFill pulses=768 last=050b\nFill pulses=896 last=0592\nFill pulses=1005 skipped=19 result=0\nSAFE OFF: VPP off, VCC off\n",
+    "files": [],
+    "execution_ids": [
+      1828340313
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-fill-asm",
+    "stdout": "SAFE OFF: VPP off, VCC off\nRead 2048 bytes; pace=0 us; order=4; result=0\n",
+    "files": [
+      {
+        "file": "FILLASM.BIN",
+        "size": 2048,
+        "sha256": "eb8d23f22bd1a15359ad3030b35895857ee58904678b24ded1adb2fa36c06669"
+      }
+    ],
+    "execution_ids": [
+      1993971221
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-fill-old-reader",
+    "stdout": "[1980-01-01 00:46:18.29] ================ BEGIN RUN ================\n[1980-01-01 00:46:18.29] Willem V30 version 0.2.0-dev; 8086-compatible; 24-bit address build\n[1980-01-01 00:46:18.35] Command-line argc=5\n[1980-01-01 00:46:18.35] argv[0]=<C>\n[1980-01-01 00:46:18.35] argv[1]=<RRF5>\n[1980-01-01 00:46:18.40] argv[2]=<FILLOLD.BIN>\n[1980-01-01 00:46:18.40] argv[3]=<378>\n[1980-01-01 00:46:18.40] argv[4]=</PROFILE:conservative>\n[1980-01-01 00:46:18.57] DOSRAVI_PROFILE name=conservative address_setup_us=4 oe_settle_us=4 input_latch_us=4 input_clock_us=4 power_on_ms=5 build_id=dosravi-m2764a-write-v1\n[1980-01-01 00:46:18.62] Operation=READ device=K573RF5/2716 image=FILLOLD.BIN LPT=378h trace=off\n[1980-01-01 00:46:18.68] Required DIP mask=1a3h; VPP MUST remain off\n[1980-01-01 00:46:18.68] DIP number:  1  2  3  4  5  6  7  8  9 10 11 12\n[1980-01-01 00:46:18.68] DIP ON :   [X][X][ ][ ][ ][X][ ][X][X][ ][ ][ ]\n[1980-01-01 00:46:18.73] DIP OFF:   [ ][ ][X][X][X][ ][X][ ][ ][X][X][X]\n[1980-01-01 00:46:18.73] Set each numbered lever toward the row containing X\n[1980-01-01 00:46:18.79] ZIF pair: lever/notch -> [--][--][--][--][1/24] ... [12/13]\n[1980-01-01 00:46:18.79] Leave FOUR rows empty at lever end; place chip at far end\n[1980-01-01 00:46:18.84] Use SPECIAL 2716 route; notch faces empty rows and lever\n[1980-01-01 00:46:18.84] Initial raw DATA=00 STATUS=7f CONTROL=0b\n[1980-01-01 00:46:18.90] Power transition: enabling VCC, VPP off\n[1980-01-01 00:46:25.87] Scan progress: 512/2048 bytes\n[1980-01-01 00:46:32.90] Scan progress: 1024/2048 bytes\n[1980-01-01 00:46:39.88] Scan progress: 1536/2048 bytes\n[1980-01-01 00:46:46.85] Scan progress: 2048/2048 bytes\n[1980-01-01 00:46:46.91] DOSRAVI_METRIC read_ms=28050 profile=conservative\n[1980-01-01 00:46:46.91] Power transition: safe shutdown begins\n[1980-01-01 00:46:46.96] Safe shutdown complete: VCC off, VPP off\n[1980-01-01 00:46:47.29] Read complete: bytes=2048 CRC16-CCITT=7e0a\n[1980-01-01 00:46:47.29] Result code=0\n[1980-01-01 00:46:47.29] ================= END RUN =================\n",
+    "files": [
+      {
+        "file": "FILLOLD.BIN",
+        "size": 2048,
+        "sha256": "eb8d23f22bd1a15359ad3030b35895857ee58904678b24ded1adb2fa36c06669"
+      }
+    ],
+    "execution_ids": [
+      64350933
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-fill-slow",
+    "stdout": "SAFE OFF: VPP off, VCC off\nRead 2048 bytes; pace=100 us; order=2; result=0\n",
+    "files": [
+      {
+        "file": "FILLSLOW.BIN",
+        "size": 2048,
+        "sha256": "eb8d23f22bd1a15359ad3030b35895857ee58904678b24ded1adb2fa36c06669"
+      }
+    ],
+    "execution_ids": [
+      1870040355
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-linear",
+    "stdout": "SAFE OFF: VPP off, VCC off\nRead 2048 bytes; pace=0 us; order=0; result=1\n",
+    "files": [
+      {
+        "file": "EXP0.BIN",
+        "size": 2048,
+        "sha256": "53f876473a44a4fb6d699beb535d42d7eb02b40481a32c0066d4d728e8647390"
+      }
+    ],
+    "execution_ids": [
+      2229666497
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-mark1",
+    "stdout": "Before 0001=ff pace=20 us\nOne pulse 0001 <- fe: high-VPP=fe normal=fe\nSAFE OFF: VPP off, VCC off\n",
+    "files": [],
+    "execution_ids": [
+      315492980
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-mark202",
+    "stdout": "Before 0202=ff pace=100 us\nOne pulse 0202 <- fd: high-VPP=fd normal=fd\nSAFE OFF: VPP off, VCC off\n",
+    "files": [],
+    "execution_ids": [
+      1226652825
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-mark4",
+    "stdout": "Before 0004=ff pace=0 us\nOne pulse 0004 <- fb: high-VPP=fb normal=fb\nSAFE OFF: VPP off, VCC off\n",
+    "files": [],
+    "execution_ids": [
+      1128672124
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-markers-read",
+    "stdout": "SAFE OFF: VPP off, VCC off\nRead 2048 bytes; pace=0 us; order=0; result=0\n",
+    "files": [
+      {
+        "file": "MARK1.BIN",
+        "size": 2048,
+        "sha256": "0b8b2d0fb35a9605d0dff021dc24d085276ed6c9cd33e3b21ef0c1bdf1980411"
+      }
+    ],
+    "execution_ids": [
+      2542253261
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-permuted100",
+    "stdout": "SAFE OFF: VPP off, VCC off\nRead 2048 bytes; pace=100 us; order=2; result=0\n",
+    "files": [
+      {
+        "file": "EXP100.BIN",
+        "size": 2048,
+        "sha256": "53f876473a44a4fb6d699beb535d42d7eb02b40481a32c0066d4d728e8647390"
+      }
+    ],
+    "execution_ids": [
+      2862254119
+    ]
+  },
+  {
+    "session": "rf2-lab-20261110-reverse20",
+    "stdout": "SAFE OFF: VPP off, VCC off\nRead 2048 bytes; pace=20 us; order=1; result=0\n",
+    "files": [
+      {
+        "file": "EXP20.BIN",
+        "size": 2048,
+        "sha256": "53f876473a44a4fb6d699beb535d42d7eb02b40481a32c0066d4d728e8647390"
+      }
+    ],
+    "execution_ids": [
+      3487534464
+    ]
+  }
+]

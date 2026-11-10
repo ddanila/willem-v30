@@ -1,0 +1,47 @@
+[2026-11-10 21:18:58.96] ================ BEGIN RUN ================
+[2026-11-10 21:18:58.96] Willem V30 version 0.2.0-dev; 8086-compatible; 24-bit address build
+[2026-11-10 21:18:59.02] Command-line argc=5
+[2026-11-10 21:18:59.02] argv[0]=<C>
+[2026-11-10 21:18:59.02] argv[1]=<WRF2>
+[2026-11-10 21:18:59.07] argv[2]=<R1715MW2.BIN>
+[2026-11-10 21:18:59.07] argv[3]=<378>
+[2026-11-10 21:18:59.07] argv[4]=</WRITE>
+[2026-11-10 21:18:59.13] 2716 5V/25V write gate accepted from RF2.OK
+[2026-11-10 21:18:59.13] Operation=WRITE device=K573RF2/RF5/2716 image=R1715MW2.BIN LPT=378h trace=off
+[2026-11-10 21:18:59.18] Required DIP mask=1a3h; measured VCC=5V, VPP=25V; positive 50ms CE
+[2026-11-10 21:18:59.18] DIP number:  1  2  3  4  5  6  7  8  9 10 11 12
+[2026-11-10 21:18:59.18] DIP ON :   [X][X][ ][ ][ ][X][ ][X][X][ ][ ][ ]
+[2026-11-10 21:18:59.18] DIP OFF:   [ ][ ][X][X][X][ ][X][ ][ ][X][X][X]
+[2026-11-10 21:18:59.18] Set each numbered lever toward the row containing X
+[2026-11-10 21:18:59.24] ZIF pair: lever/notch -> [--][--][--][--][1/24] ... [12/13]
+[2026-11-10 21:18:59.24] Leave FOUR rows empty at lever end; place chip at far end
+[2026-11-10 21:18:59.24] Use SPECIAL 2716 route; notch faces empty rows and lever
+[2026-11-10 21:18:59.24] Initial raw DATA=00 STATUS=c0 CONTROL=cb
+[2026-11-10 21:18:59.24] Power transition: enabling VCC, VPP off
+[2026-11-10 21:18:59.24] Pre-program blank check begins with VPP off
+[2026-11-10 21:19:00.72] Pre-program blank check complete: nonblank=0
+[2026-11-10 21:19:00.72] Safe shutdown complete after blank check: VCC off, VPP off
+[2026-11-10 21:19:00.72] 2716 programming rails enabled: VCC before VPP, CE low
+[2026-11-10 21:19:00.72] 2716 fixed 50ms programming begins: image CRC32=42053664
+[2026-11-10 21:19:00.78] 2716 address-alias check: first byte at 0000h; VPP off
+[2026-11-10 21:19:01.71] 2716 address-alias check passed: all 2048 addresses
+[2026-11-10 21:19:08.36] Write progress: 256/2048 bytes, programmed=251 FF-skipped=5
+[2026-11-10 21:19:15.11] Write progress: 512/2048 bytes, programmed=505 FF-skipped=7
+[2026-11-10 21:19:21.81] Write progress: 768/2048 bytes, programmed=757 FF-skipped=11
+[2026-11-10 21:19:28.40] Write progress: 1024/2048 bytes, programmed=1005 FF-skipped=19
+[2026-11-10 21:19:35.11] Write progress: 1280/2048 bytes, programmed=1257 FF-skipped=23
+[2026-11-10 21:19:41.92] Write progress: 1536/2048 bytes, programmed=1513 FF-skipped=23
+[2026-11-10 21:19:47.90] Write progress: 1792/2048 bytes, programmed=1737 FF-skipped=55
+[2026-11-10 21:19:48.12] Write progress: 2048/2048 bytes, programmed=1739 FF-skipped=309
+[2026-11-10 21:19:48.12] 2716 VPP off; programming failure=0
+[2026-11-10 21:19:48.12] Programming pass complete: written=1739 unchanged=309 retry-bytes=0 retries=0 late=0
+[2026-11-10 21:19:48.40] Post-write verify: 512/2048 bytes
+[2026-11-10 21:19:48.67] Post-write verify: 1024/2048 bytes
+[2026-11-10 21:19:48.89] Post-write verify: 1536/2048 bytes
+[2026-11-10 21:19:49.17] Post-write verify: 2048/2048 bytes
+[2026-11-10 21:19:49.17] DOSRAVI_WRITE_METRIC program_ms=47465 verify_ms=1045 changed=1739 unchanged=309 retry_bytes=0 retries=0 late=0 image_crc32=42053664 build_id=dosravi-rf2-program-v3
+[2026-11-10 21:19:49.17] Power transition: safe shutdown begins
+[2026-11-10 21:19:49.17] Safe shutdown complete: VCC off, VPP off
+[2026-11-10 21:19:49.17] WRITE PASSED: programmed=1739 unchanged=309 verified=2048 retry-bytes=0 retries=0 late=0
+[2026-11-10 21:19:49.17] Result code=0
+[2026-11-10 21:19:49.17] ================= END RUN =================

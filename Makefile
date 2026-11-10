@@ -2,7 +2,7 @@ CC ?= cc
 CFLAGS ?= -O2 -Wall -Wextra -Werror -std=c89 -pedantic
 DOSFLAGS = -0 -Md -ansi -O
 
-.PHONY: all test clean dos dos-test dist
+.PHONY: all test clean dos dos-test dist experiment port-model-test pulse-test fastaddr-test
 
 all: test
 
@@ -60,3 +60,18 @@ pulse-test:
 
 fastaddr-test:
 	python3 tests/test_fastaddr.py
+
+# Explicitly authorized sacrificial-chip diagnostics; never run by make test.
+build/dos/rf2_experiment.o: tools/rf2_experiment.c include/willem.h
+	mkdir -p build/dos
+	bcc $(DOSFLAGS) -Iinclude -c $< -o $@
+
+build/dos/RF2EXP.COM: build/dos/rf2_experiment.o build/dos/willem.o build/dos/dosio.o build/dos/fastaddr.o
+	bcc -0 -Md -i -o $@ $^
+
+experiment: build/dos/RF2EXP.COM
+
+port-model-test: dos experiment
+	python3 tests/test_dos_port_model.py
+	python3 tests/test_rf2_experiment.py
+	python3 tests/test_rf2_fill.py

@@ -486,3 +486,22 @@ wl_u8 *verified;
     *verified = wl_read_byte(wl, address);
     return *verified == (wl_u8)value;
 }
+
+/* Caller switches VPP off and allows it to settle before this full scan. */
+int wl_check_2716_probe(wl, address, value, bad_address, actual)
+struct willem *wl;
+wl_u16 address;
+int value;
+wl_u16 *bad_address;
+wl_u8 *actual;
+{
+    wl_u16 i;
+    for (i = 0; i < 2048U; i++) {
+        *actual = wl_read_byte(wl, i);
+        if (*actual != (i == address ? (wl_u8)value : 0xffU)) {
+            *bad_address = i;
+            return 0;
+        }
+    }
+    return 1;
+}

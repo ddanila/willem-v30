@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-10",
+  "chip_marking": "\u041a\u0421573\u0420\u04242",
+  "candidate": "third programming candidate; new chip confirmed installed",
+  "execution_id": 1513149658,
+  "writer_build": "dosravi-rf2-program-v3",
+  "result": "Stopped after first programming pulse: address-alias preflight found C3 at 0200, expected FF",
+  "blank_check_nonblank": 0,
+  "programming_pulses": 1,
+  "intended_first_byte": {
+    "address": "0000",
+    "value": "c3"
+  },
+  "suspected_alias": "A9 (0200), unlike previous candidate A6 (0040)",
+  "rails_at_end": "VPP off, VCC off",
+  "readback": {
+    "execution_id": 10157013,
+    "size": 2048,
+    "sha256": "53f876473a44a4fb6d699beb535d42d7eb02b40481a32c0066d4d728e8647390",
+    "non_ff": [
+      {
+        "address": "0000",
+        "value": "c3"
+      },
+      {
+        "address": "0200",
+        "value": "c3"
+      }
+    ],
+    "all_other_bytes": "ff"
+  }
+}

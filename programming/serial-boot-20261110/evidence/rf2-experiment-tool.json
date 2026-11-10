@@ -1,0 +1,20 @@
+{
+  "file": "RF2EXP.COM",
+  "size": 13408,
+  "sha256": "5ac0d9af98400c9a69b90f93915532e7038319730e13c82ebe1952e5bef8eba5",
+  "crc32": "6bb403ac",
+  "modes": [
+    "R",
+    "W",
+    "F",
+    "A"
+  ],
+  "notes": "Final diagnostic build adds bounded A9 meter hold; A mode tested in emulation only. Physical experiment upload hashes are retained in DOSRAVI execution identities.",
+  "tests": [
+    "marker writes and reads in actual DOS LPT model, healthy and A9 alias",
+    "nonblank and malformed-argument write refusal",
+    "assembly and CE-disabled readers",
+    "bounded address hold and final rails off",
+    "full folded fill tested before adding read-only A mode and strict numeric parsing"
+  ]
+}

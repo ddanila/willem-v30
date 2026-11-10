@@ -136,3 +136,22 @@ The first chip distinguished A6, pointing more strongly to the replacement
 chip/contact than to a permanent shared programmer fault; the exact cause
 remains unresolved. Both attempts ended with VPP/VCC off. Neither chip contains
 a usable boot image; affected chips require UV erasure before reuse.
+
+## Third candidate: КС573РФ2
+
+The owner supplied the full marking КС573РФ2 and confirmed another blank chip
+installed. Build `dosravi-rf2-program-v3` adds an initial alias check: program
+only the first intended non-FF image byte, switch VPP off, and scan all 2048
+addresses. Only that location may be non-FF. This adds no arbitrary test data
+and does not repeat the first programming pulse. A mismatch aborts before
+further programming. The actual DOS-compiled core accepts an isolated byte and
+rejects simulated A6 mirroring on both 8086 and 80186.
+
+The [RF2 family data sheet](https://static.chipdip.ru/lib/818/DOC054818967.pdf)
+also explicitly lists КС573РФ2; the existing family profile is retained.
+
+The owner then authorized unattended destructive experiments on the installed
+chip. [The complete investigation](RF2-LAB.md) isolates stable A9 aliasing:
+1005 additional one-pulse writes and three independent full readbacks passed
+when addressing the 1024 distinct locations. The exact electrical cause still
+requires measuring chip22/ZIF26. Both rails are off.

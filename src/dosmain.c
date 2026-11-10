@@ -15,7 +15,7 @@
 #define M2764A_GATE_NAME "M2764A.OK"
 #define WILLEM_VERSION "0.2.0-dev"
 #ifndef WILLEM_BUILD_ID
-#define WILLEM_BUILD_ID "dosravi-rf2-program-v2"
+#define WILLEM_BUILD_ID "dosravi-rf2-program-v3"
 #endif
 
 #define ACTION_READ 1
@@ -789,6 +789,7 @@ char **argv;
     unsigned retry_bytes, total_retries, late_bytes;
     unsigned pulse_count, total_initial_pulses, max_initial_pulses;
     unsigned overprogram_pulses, blank_mismatches;
+    wl_u16 probe_bad_address;
     unsigned power_on_ms, image_size, dip_mask, chunk;
     unsigned long read_started, read_ms, program_started, program_ms;
     unsigned long verify_started, verify_ms, image_crc32;
@@ -1104,6 +1105,22 @@ char **argv;
                     }
                     if (expected == 0xffU) unchanged++;
                     else written++;
+                    /* Probe using the first intended non-FF byte, without
+                       adding a test pattern or requiring later erasure. */
+                    if (written == 1U && expected != 0xffU) {
+                        wl_vpp(&wl, 0);
+                        dos_wait_us(10000U);
+                        logmsg("2716 address-alias check: first byte at %04Xh; VPP off", address);
+                        if (!wl_check_2716_probe(&wl, address, expected,
+                                                  &probe_bad_address, &actual)) {
+                            logmsg("ERROR: address-alias probe mismatch at %04Xh read=%02X",
+                                   probe_bad_address, actual);
+                            write_failed = 1;
+                        }
+                        if (write_failed) break;
+                        logmsg("2716 address-alias check passed: all %u addresses", image_size);
+                        wl_begin_2716_program(&wl);
+                    }
                     if ((address & 0xffU) == 0xffU)
                         logmsg("Write progress: %u/%u bytes, programmed=%u FF-skipped=%u",
                                address + 1, image_size, written, unchanged);

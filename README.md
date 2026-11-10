@@ -228,7 +228,10 @@ WILLEM W2716 R1715MW2.BIN 378 /WRITE
 
 The gate records an operator prerequisite; software cannot measure voltage.
 The writer rejects tracing, wrong image sizes, and any nonblank byte before
-VPP is enabled. It applies one positive 50 ms CE pulse per non-FF byte,
+VPP is enabled. After the first intended non-FF byte is programmed, it switches
+VPP off and scans all 2048 addresses: only that byte may differ from FF.
+An alias stops the write before any further pulses. It applies one positive
+50 ms CE pulse per non-FF byte,
 verifies each byte, and aborts on the first failure without retrying.
 After programming it disables VPP, waits 10 ms, and verifies the entire image
 at normal read voltage. Shutdown drops VPP before VCC. Perform a separate

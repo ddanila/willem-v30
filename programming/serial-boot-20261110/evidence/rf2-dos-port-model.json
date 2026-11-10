@@ -1,0 +1,17 @@
+[
+  {
+    "alias_mask": 64,
+    "pulses": 1,
+    "passed": true
+  },
+  {
+    "alias_mask": 512,
+    "pulses": 1,
+    "passed": true
+  },
+  {
+    "alias_mask": 0,
+    "pulses": 1739,
+    "passed": true
+  }
+]

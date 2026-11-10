@@ -1,0 +1,14 @@
+{
+  "build_id": "dosravi-rf2-program-v3",
+  "size": 33240,
+  "sha256": "3137e894e0e6aba2c13b675ee92d5c20211c11916188b8f0753c2d8a1a56a0c1",
+  "crc32": "613af735",
+  "change": "After programming first intended non-FF byte, switch VPP off and scan all 2048 addresses; all other locations must remain FF. Abort before further pulses if the byte aliases. No extra test pattern or duplicate pulse.",
+  "tests": {
+    "portable_core": "passed",
+    "actual_bcc_dos_core": "8086 and 80186: all 2048 write addresses; full probe accepts isolated byte and rejects simulated A6 alias at 0040",
+    "dos_guards": "8086 and 80186 passed",
+    "full_dos_matrix": "passed on 8086 and 80186",
+    "actual_DOS_LPT_model": "healthy full image: 1739 pulses, exact match; A6 and A9 injection: one pulse then abort; no pulse/data/rail errors"
+  }
+}

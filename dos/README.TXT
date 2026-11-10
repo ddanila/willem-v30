@@ -101,5 +101,7 @@ Create this gate only after measuring the switched 5V VCC / 25V VPP rails.
 DIP ON 1,2,6,8,9; J1/J2 special 2716 routing toward ZIF.
 The writer blank-checks with VPP off, applies one positive 50ms CE pulse per
 non-FF byte, verifies each byte, then switches VPP off for full verification.
+After the first programmed byte, a VPP-off scan requires every other address
+to remain FF; address mirroring aborts before more bytes are programmed.
 A failure aborts without retry. Both rails are switched off at completion.
 Read back independently and compare the entire image before installation.
