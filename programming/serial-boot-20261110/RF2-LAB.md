@@ -2,7 +2,8 @@
 
 **Finding: the installed chip/programmer combination ignores address bit A9
 (offset 0200h). Byte programming is repeatable; the unresolved fault is the
-physical A9 path, not a demonstrated random programming failure.**
+cause of the A9 alias remains unresolved. Later measurements below expose
+read-supply and timing concerns, so this is not proof of a defective chip.**
 
 The owner explicitly authorized destructive experiments on the current installed
 КС573РФ2, using cells still containing FF. All experiments ended with VPP and VCC
@@ -19,7 +20,7 @@ off. This chip now contains diagnostic data, not a Robotron boot ROM.
 | Distinct markers for every other address bit | All ten other address bits distinguish locations; only A9 mirrors |
 | Byte verification with programming VPP on and off | Identical values for every marker |
 | CE disabled, VPP off | 1024 bytes 06, 1023 bytes 04, one byte 00: programmer bus echo, not ROM data |
-| Bulk varied-pattern fill | 1005 additional single 50 ms pulses; no failed byte or retry; existing 11 markers preserved; 8 distinct FF cells left untouched |
+| Bulk varied-pattern fill | 1005 additional single nominal 50 ms pulses (duration questioned below); no failed byte or retry; existing 11 markers preserved; 8 distinct FF cells left untouched |
 | Full post-fill verification | Exact expected 2048-byte mirrored image |
 | Independent old RD2716 reader | Exact match after a fresh power cycle |
 | Separate 8086 assembly address shifter | Exact match, despite much faster address clocks |
@@ -133,4 +134,48 @@ not measure the failed RF2's pin voltage. The control ROM was compared against
 134 distinct references, including known Robotron keyboards and system ROMs;
 no exact or embedded match was found. Its acquisition and comparison evidence
 are preserved in [ddanila/dumps](https://github.com/ddanila/dumps/tree/main/unknown/u2716c35-20261110).
-Both rails are off; the U2716C35 control chip is now the last installed chip.
+Both rails were switched off after that control read. The owner subsequently
+installed three additional RF5 chips for read-only checks; RF5 #3 remains
+installed at the time of the measurements below.
+
+
+## Loaded supply measurement and timing concern
+
+With RF5 #3 installed, the owner measured **VCC 4.99 V at ZIF28** and
+**read-mode VPP 4.30 V at ZIF25**, both relative to ground ZIF16.
+These are measurements on this RF5, not measurements on the earlier RF2s.
+The approximately 0.69 V difference is consistent with a diode drop, but its
+physical cause has not been established. The [RF2 specification](https://static.chipdip.ru/lib/818/DOC054818967.pdf)
+requires 4.75–5.25 V for the read level on pin 21. This observation therefore
+requires resolving the read supply before treating RF2 verification as qualified;
+it does not by itself explain the A9 alias or invalidate the nonblank control dump.
+
+Two `RF2EXP.COM A 0000 3C 0` read-voltage holds completed with exit zero and
+`SAFE OFF: VPP off, VCC off`:
+
+| Local DOSRAVI session | Execution ID | Reported elapsed time |
+|---|---:|---:|
+| rf5-vcc-measure-20261110-1 | 1167612904 | 31625 ms |
+| rf5-vcc-measure-20261110-2 | 836151594 | 31570 ms |
+
+The first hold produced a 5.00 V VCC measurement; the subsequent zero-VPP
+report came after shutdown and is not a powered measurement. The second hold
+produced the simultaneous 4.99/4.30 V readings above. Neither command enabled
+programming VPP or sent programming pulses. Both rails were off at completion.
+
+The nominal 60-second hold lasting about 31.6 seconds exposes a timing concern.
+`dos_wait_us` treats raw PIT channel-0 decrements as 1.193182 MHz clock ticks.
+In PIT mode 3 the counter decrements by two per input clock, per the Intel 8253
+datasheet. For that mode, 1200 waits of 62500 raw decrements predict about
+31.43 seconds plus overhead, consistent with the measured holds. The 2716 pulse
+routine likewise waits 59659 raw decrements: in mode 3 this is approximately
+25 ms, not its intended 50 ms. The existing M2764A pulse routine also uses raw
+counter differences and needs the same audit.
+
+This is a source-level mode-3 timing defect with strong physical timing evidence;
+the Pocket8086 timer mode and actual CE pulse width have not been independently
+measured. Existing pulse emulation modeled raw decrements as clock ticks, and
+the full LPT model checked sequencing/data rather than physical pulse duration.
+Those tests do not qualify pulse width. Timing correction and validation remain
+pending; no new programming was performed following these findings. Current
+RF5 read-only authorization does not authorize destructive experiments on it.
