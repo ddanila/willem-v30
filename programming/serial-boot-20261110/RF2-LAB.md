@@ -181,3 +181,21 @@ the full LPT model checked sequencing/data rather than physical pulse duration.
 Those tests do not qualify pulse width. Timing correction and validation remain
 pending; no new programming was performed following these findings. The currently installed blank RF2 is being used for rail measurements; no
 programming pulses are authorized by the request to measure programming VPP.
+
+### Loaded programming-VPP measurement
+
+On the currently installed blank RF2, the owner measured **VCC 5.0 V and
+programming VPP 24.7 V** during the requested no-pulse hold. This is within
+RF2's specified programming voltage range. It does not resolve the previously
+measured 4.30 V read-mode VPP or the raw-PIT programming pulse timing defect.
+
+`tools/vpphold.asm` builds a dedicated LPT378 PCB3B meter helper. CE/PGM stays
+low, OE high, and data FF throughout the powered interval. VCC settles before
+VPP is enabled; shutdown disables VPP before VCC. A BIOS-tick hold avoids the
+known raw-PIT timing issue. `tests/test_vpphold.py` executes the actual binary
+in Unicorn, checking rail order, inactive CE, hold duration and tick wrap.
+
+Physical run: `rf2-vpp-measure-20261110-1`, execution 3307434228, exit zero,
+30250 ms. The helper reported VPP/VCC off and no programming pulses. Binary
+SHA-256: `e7537251a7b6b982e0cec90912a38d2159493c4a97dc961e7e2ac0876c3ce146`.
+This was a rail measurement, not a programming or blank-verification operation.
