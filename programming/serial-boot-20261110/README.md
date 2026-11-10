@@ -155,3 +155,13 @@ chip. [The complete investigation](RF2-LAB.md) isolates stable A9 aliasing:
 1005 additional one-pulse writes and three independent full readbacks passed
 when addressing the 1024 distinct locations. The exact electrical cause still
 requires measuring chip22/ZIF26. Both rails are off.
+
+## Three additional РФ5 chips, read only
+
+The owner supplied three further РФ5 chips, numbered 1–3 in reading order.
+Each returned exactly 2048 FF bytes in both the existing conservative reader
+and the separate assembly reader. All six executions exited zero and ended
+with VPP/VCC off. No programming pulses were sent. Blank captures cannot
+establish address-line independence or programming suitability. The binaries
+remain local; [read metadata](evidence/rf5-three-reads.json) records all six
+execution IDs. Chip #3 is the last installed chip, with both rails off.

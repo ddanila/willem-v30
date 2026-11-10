@@ -1,0 +1,62 @@
+{
+  "date": "2026-11-10",
+  "series": "Three additional РФ5 chips",
+  "read_only": true,
+  "chips": [
+    {
+      "number": 1,
+      "marking_as_reported": "РФ5",
+      "size": 2048,
+      "result": "all FF in two independent readers; consistent with blank, address independence untested",
+      "sha256": "d0ff1b294b5288d1ae1421eadf5b2d38a8752b76d472ff30bed9028e25b1c5b8",
+      "read1_execution_id": 2433629627,
+      "read2_execution_id": 3836830906,
+      "read1": "rf5-three-20261110-chip1-read1/RF5C1A.BIN",
+      "read2": "rf5-three-20261110-chip1-read2/RF5C1B.BIN",
+      "rails_at_end": "VPP off, VCC off",
+      "programming_pulses": 0
+    },
+    {
+      "number": 2,
+      "marking_as_reported": "РФ5",
+      "size": 2048,
+      "result": "all FF in two independent readers; consistent with blank, address independence untested",
+      "sha256": "d0ff1b294b5288d1ae1421eadf5b2d38a8752b76d472ff30bed9028e25b1c5b8",
+      "read1_execution_id": 2816515777,
+      "read2_execution_id": 4190192727,
+      "read1": "rf5-three-20261110-chip2-read1/RF5C2A.BIN",
+      "read2": "rf5-three-20261110-chip2-read2/RF5C2B.BIN",
+      "rails_at_end": "VPP off, VCC off",
+      "programming_pulses": 0
+    },
+    {
+      "number": 3,
+      "marking_as_reported": "РФ5",
+      "size": 2048,
+      "result": "all FF in two independent readers; consistent with blank, address independence untested",
+      "sha256": "d0ff1b294b5288d1ae1421eadf5b2d38a8752b76d472ff30bed9028e25b1c5b8",
+      "read1_execution_id": 2129959953,
+      "read2_execution_id": 3781758457,
+      "read1": "rf5-three-20261110-chip3-read1/RF5C3A.BIN",
+      "read2": "rf5-three-20261110-chip3-read2/RF5C3B.BIN",
+      "rails_at_end": "VPP off, VCC off",
+      "programming_pulses": 0
+    }
+  ],
+  "interpretation": "All three are consistent with blank EPROMs. All-FF captures cannot test address-line independence or prove programming suitability.",
+  "binary_preservation": "All-FF binaries remain only in local DOSRAVI sessions; no firmware images added to dumps repository.",
+  "last_installed": "РФ5 #3 of this series",
+  "rails": "VPP off, VCC off",
+  "readers": [
+    {
+      "file": "RD2716.COM",
+      "crc32": "d4164322",
+      "profile": "conservative"
+    },
+    {
+      "file": "RF2EXP.COM",
+      "crc32": "6bb403ac",
+      "mode": "R, assembly address shifter"
+    }
+  ]
+}
