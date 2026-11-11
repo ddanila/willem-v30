@@ -323,27 +323,40 @@ _dos_console:
     pop bp
     ret
 
-; 2716 positive pulse, timed by PIT2 mode 0 at 1.193182 MHz.
+; 2716 positive pulse, or 2732A negative pulse, timed by PIT2 mode 0.
+; Clock 1.193182 MHz. Entry points select polarity and share timing.
 ; PIT0 mode 3 decrements twice per clock: never use its raw count here.
 ; Owns the speaker timer; restores port61 but leaves PIT2 in mode 0.
 ; The no-LPT entry runs exactly the same timing path for qualification.
 GLOBAL _dos_2716_pulse
 GLOBAL _dos_timer2_50ms
+GLOBAL _dos_2732_pulse
 _dos_2716_pulse:
     push bp
     mov bp, sp
+    push si
+    mov si, 006h
+    mov ax, [bp+4]
+    add ax, 2
+    jmp short timer2_common
+_dos_2732_pulse:
+    push bp
+    mov bp, sp
+    push si
+    mov si, 00eh              ; 2732A active-low CE
     mov ax, [bp+4]
     add ax, 2
     jmp short timer2_common
 _dos_timer2_50ms:
     push bp
     mov bp, sp
+    push si
+    xor si, si
     xor ax, ax
 timer2_common:
     push bx
     push cx
     push dx
-    push si
     push di
     pushf
     cli
@@ -362,7 +375,7 @@ timer2_common:
     or di, di
     jz .start_timer
     mov dx, di
-    mov al, 006h                ; CE high, OE high, VPP/VCC on
+    mov ax, si                  ; selected CE pulse polarity
     out dx, al
 .start_timer:
     mov al, cl
@@ -375,16 +388,17 @@ timer2_common:
     or di, di
     jz .restore
     mov dx, di
-    mov al, 00eh                ; CE low ends pulse
+    mov ax, si
+    xor al, 8                   ; return CE to inactive level
     out dx, al
 .restore:
     mov al, bl
     out 061h, al
     popf
     pop di
-    pop si
     pop dx
     pop cx
     pop bx
+    pop si
     pop bp
     ret

@@ -1,0 +1,3 @@
+SAFE OFF: VPP off, VCC off
+D2732A result=0 pulses=898 address=1000 actual=ff wanted=ff
+WRITE PASSED: all 4096 bytes verified after power cycle

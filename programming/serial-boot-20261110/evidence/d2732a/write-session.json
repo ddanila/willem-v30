@@ -1,0 +1,786 @@
+{
+  "artifacts": [
+    {
+      "crc32": "96bb2860",
+      "name": "upload:PG2732A.COM",
+      "sha256": "cb07d957fdcd7ee4d3942df7b7ce61820bd48d523507173e8c608f8d0c7a9654",
+      "size": 11316
+    },
+    {
+      "crc32": "42706f83",
+      "name": "upload:KAYPRO2.BIN",
+      "sha256": "6133c46b1b31a8cc1d93d2428b716399c9c787d1ee6c5e3b785f67853e569633",
+      "size": 4096
+    },
+    {
+      "crc32": "01723513",
+      "name": "upload:2732A.OK",
+      "sha256": "0dcf9dcc4a27694eba5f0a620f1f48ea67942ca747669c7250bcaeee5016d826",
+      "size": 19
+    },
+    {
+      "crc32": "74f072d4",
+      "name": "executions.json",
+      "sha256": "ea72b4165c33b8920c9e66ed49283b14352e4a2417faebe59b0b77ffe00fadd8",
+      "size": 765
+    },
+    {
+      "crc32": "8ada24f8",
+      "name": "STDOUT.TXT",
+      "sha256": "b9aa9e763ee130c643d2b62be55076eb67932929bcd5231f7cb0b2b7250c7629",
+      "size": 146
+    },
+    {
+      "crc32": "00000000",
+      "name": "STDERR.TXT",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  ],
+  "command_line": [
+    "/home/ddanila/fun/dosravi/dosravi/cli.py",
+    "--serial",
+    "/dev/ttyUSB0",
+    "--baud",
+    "57600",
+    "--timeout",
+    "5",
+    "--exec-timeout",
+    "900",
+    "--retries",
+    "2",
+    "--session-dir",
+    "sessions/d2732a-kaypro-20261111-write",
+    "run",
+    "--put",
+    "/home/ddanila/fun/willem-v30-programming/build/dos/PG2732A.COM:PG2732A.COM",
+    "--put",
+    "/home/ddanila/fun/willem-v30-programming/programming/serial-boot-20261110/KAYPRO2.BIN:KAYPRO2.BIN",
+    "--put",
+    "/home/ddanila/fun/willem-v30-programming/programming/serial-boot-20261110/evidence/d2732a/2732A.OK:2732A.OK",
+    "--exec",
+    "PG2732A.COM KAYPRO2.BIN /WRITE21",
+    "--note",
+    "machine=Pocket8086",
+    "--note",
+    "cable-adapter=CP2102 Willem PCB5.0E LPT378",
+    "--note",
+    "device=D2732A-3; owner confirms 21V label and measured VPP21V; blank4096FF; authorized Kaypro burn; single50ms negativeCE pulses and initial alias scan"
+  ],
+  "completed_utc": "2026-11-11T05:57:37.617485+00:00",
+  "error": null,
+  "exit_status": 0,
+  "hardware_notes": {
+    "cable-adapter": "CP2102 Willem PCB5.0E LPT378",
+    "device": "D2732A-3; owner confirms 21V label and measured VPP21V; blank4096FF; authorized Kaypro burn; single50ms negativeCE pulses and initial alias scan",
+    "machine": "Pocket8086"
+  },
+  "host_version": "0.1.1",
+  "negotiated": {
+    "agent": "DOSRAVI.COM",
+    "bios_equipment_word": 21613,
+    "build": "crc8088-v1",
+    "capabilities": [
+      "replay",
+      "resume",
+      "exec-capture",
+      "self-update"
+    ],
+    "chunk_size": 512,
+    "com_base": 1016,
+    "conventional_kb": 639,
+    "dos": "6.22",
+    "free_disk": 407052288,
+    "free_memory": 477936,
+    "protocol": 1,
+    "rejected_frames": 1,
+    "uart_fifo_bits": 192,
+    "uart_fifo_enabled": 1,
+    "uart_line_errors": 0,
+    "uart_overruns": 0,
+    "version": "0.1.1"
+  },
+  "programmer_stats": {
+    "exec_elapsed_ms": 219230,
+    "execution_id": 2258485794
+  },
+  "serial_stats": {
+    "get:E9dc222.ERR": {
+      "bytes": 0,
+      "bytes_per_second": 0.0,
+      "crc32": "00000000",
+      "elapsed_seconds": 0.11020869389176369,
+      "payload_bytes": 0,
+      "resumed_bytes": 0,
+      "skipped": false
+    },
+    "get:O9dc222.OUT": {
+      "bytes": 146,
+      "bytes_per_second": 910.917935269769,
+      "crc32": "8ada24f8",
+      "elapsed_seconds": 0.16027788491919637,
+      "payload_bytes": 146,
+      "resumed_bytes": 0,
+      "skipped": false
+    },
+    "put:2732A.OK": {
+      "bytes": 19,
+      "bytes_per_second": 28.342593578818704,
+      "crc32": "01723513",
+      "elapsed_seconds": 0.6703691370785236,
+      "payload_bytes": 19,
+      "resumed_bytes": 0,
+      "skipped": false
+    },
+    "put:KAYPRO2.BIN": {
+      "bytes": 4096,
+      "bytes_per_second": 1718.1356646528739,
+      "crc32": "42706f83",
+      "elapsed_seconds": 2.383979381993413,
+      "payload_bytes": 4096,
+      "resumed_bytes": 0,
+      "skipped": false
+    },
+    "put:PG2732A.COM": {
+      "bytes": 11316,
+      "bytes_per_second": 1954.8110041371694,
+      "crc32": "96bb2860",
+      "elapsed_seconds": 5.788794914726168,
+      "payload_bytes": 11316,
+      "resumed_bytes": 0,
+      "skipped": false
+    }
+  },
+  "session_id": "d2732a-kaypro-20261111-write",
+  "source_commit": "a6275b3ba5ac775a39baf40a95665d959b7497d3",
+  "source_dirty": false,
+  "started_utc": "2026-11-11T05:53:29.156203+00:00",
+  "transactions": [
+    {
+      "attempt": 0,
+      "command": "INFO",
+      "direction": "tx",
+      "transaction": 2883860876
+    },
+    {
+      "command": "INFO",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860876
+    },
+    {
+      "attempt": 0,
+      "command": "CRC",
+      "direction": "tx",
+      "transaction": 2883860877
+    },
+    {
+      "command": "CRC",
+      "direction": "rx",
+      "replay": false,
+      "status": "NOT_FOUND",
+      "transaction": 2883860877
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_BEGIN",
+      "direction": "tx",
+      "transaction": 2883860878
+    },
+    {
+      "command": "PUT_BEGIN",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860878
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860879
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860879
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860880
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860880
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860881
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860881
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860882
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860882
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860883
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860883
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860884
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860884
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860885
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860885
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860886
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860886
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860887
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860887
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860888
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860888
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860889
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860889
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860890
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860890
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860891
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860891
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860892
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860892
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860893
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860893
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860894
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860894
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860895
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860895
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860896
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860896
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860897
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860897
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860898
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860898
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860899
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860899
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860900
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860900
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860901
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860901
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_COMMIT",
+      "direction": "tx",
+      "transaction": 2883860902
+    },
+    {
+      "command": "PUT_COMMIT",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860902
+    },
+    {
+      "attempt": 0,
+      "command": "CRC",
+      "direction": "tx",
+      "transaction": 2883860903
+    },
+    {
+      "command": "CRC",
+      "direction": "rx",
+      "replay": false,
+      "status": "NOT_FOUND",
+      "transaction": 2883860903
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_BEGIN",
+      "direction": "tx",
+      "transaction": 2883860904
+    },
+    {
+      "command": "PUT_BEGIN",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860904
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860905
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860905
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860906
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860906
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860907
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860907
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860908
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860908
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860909
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860909
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860910
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860910
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860911
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860911
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860912
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860912
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_COMMIT",
+      "direction": "tx",
+      "transaction": 2883860913
+    },
+    {
+      "command": "PUT_COMMIT",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860913
+    },
+    {
+      "attempt": 0,
+      "command": "CRC",
+      "direction": "tx",
+      "transaction": 2883860914
+    },
+    {
+      "command": "CRC",
+      "direction": "rx",
+      "replay": false,
+      "status": "NOT_FOUND",
+      "transaction": 2883860914
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_BEGIN",
+      "direction": "tx",
+      "transaction": 2883860915
+    },
+    {
+      "command": "PUT_BEGIN",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860915
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2883860916
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860916
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_COMMIT",
+      "direction": "tx",
+      "transaction": 2883860917
+    },
+    {
+      "command": "PUT_COMMIT",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860917
+    },
+    {
+      "attempt": 0,
+      "command": "EXEC",
+      "direction": "tx",
+      "transaction": 2883860918
+    },
+    {
+      "command": "EXEC",
+      "direction": "event",
+      "message": "STARTED",
+      "status": "OK",
+      "transaction": 2883860918
+    },
+    {
+      "command": "EXEC",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860918
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 2883860919
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860919
+    },
+    {
+      "attempt": 0,
+      "command": "CRC",
+      "direction": "tx",
+      "transaction": 2883860920
+    },
+    {
+      "command": "CRC",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860920
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 2883860921
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860921
+    },
+    {
+      "attempt": 0,
+      "command": "CRC",
+      "direction": "tx",
+      "transaction": 2883860922
+    },
+    {
+      "command": "CRC",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2883860922
+    }
+  ],
+  "transport": {
+    "baud": 57600,
+    "device": "/dev/ttyUSB0",
+    "exec_timeout_seconds": 900.0,
+    "retries": 2,
+    "timeout_seconds": 5.0,
+    "type": "serial"
+  }
+}

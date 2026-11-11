@@ -386,7 +386,8 @@ rows at the lever end, notch toward lever, chip pin 1 at ZIF5.
 
 `R2732 FILE.BIN 378 /PROFILE:conservative` reads exactly 4096 bytes
 (0000h–0FFFh), including A11, and shuts down VCC/VPP afterward. No 2732
-write command is provided. Build ID: `dosravi-2732-read-v1`. Software checks
+write command is provided by that read-only build; the separate 21 V D2732A
+writer is documented below. Build ID: `dosravi-2732-read-v1`. Software checks
 cover full-address readback and DOS command handling; physical validation
 is pending. Do not use R2716, which reads only 2048 bytes.
 
@@ -485,3 +486,39 @@ DIP `1A3`, with measured **5 V VCC and 25 V programming VPP**. The positive
 50 ms pulse is specific to this family. See the root README for the write
 gate and verification procedure. Do not use this command for a 2732 or the
 three-supply TI TMS2716.
+
+## Intel D2732A programming (21 V)
+
+`make build/dos/PG2732A.COM` builds a dedicated, fixed-LPT378 writer. It reuses
+`willem.c` for 24-bit address shifting and reading, and the PIT2 mode-0 timer
+for a 50 ms **active-low** CE pulse. The 2716 entry retains its positive pulse.
+This is specifically for the Intel 21 V D2732A, not arbitrary 2732 variants.
+Use special 2732 J1/J2, DIP ON 7,8,9, J9/J10 toward DB25, VCC 5 V,
+VPP 21 V. VPP/OE is chip20/ZIF24; VCC chip24/ZIF28; ground chip12/ZIF16.
+
+After confirming the part, routing and measured supply, create `2732A.OK`
+containing the single line `D2732A-5V-21V-50MS` (newline terminated).
+Run `PG2732A IMAGE.BIN /WRITE21` with an exactly 4096-byte image. The program
+checks the whole chip for FF, programs the first intended non-FF byte, and scans
+all addresses for unexpected changes before continuing. It skips FF image
+bytes, uses one pulse per programmed byte without retries, verifies each byte
+with VPP off, then power-cycles and verifies all 4096 bytes. Any mismatch stops
+with both rails off. No file or console operations occur while VPP is enabled.
+Result codes: 1 arguments/files/gate, 2 nonblank, 3 initial probe mismatch,
+4 byte mismatch, 5 final verification mismatch; zero means complete match.
+An independent read with the established RD2732.COM should follow programming.
+
+The Intel datasheet specifies 5 V ±5%, VPP 21 V ±0.5 V, and a 45–55 ms CE
+pulse (50 ms nominal). Address/data and OE hold/setup requirements are respected
+with conservative delays. The legacy PIT0 setup delays remain shorter than their
+nominal arguments but comfortably exceed the 2 µs minimum; pulse width uses
+PIT2, not that routine. The timer owns the speaker channel and restores port61.
+Software cannot measure the actual rails or analog edge shape.
+
+Sources: [Intel 2732A datasheet](https://www.ecbazis.hu/pdf/2732-intel.pdf),
+[Geepro 2732 programming controls](https://github.com/danielg4/geepro/blob/a08efcaf6479730d552c5f96bad0a2a01bf0635f/chips/27xx.cpp).
+Validation: `make 2732a-test` executes the actual DOS binary with a virtual
+4096-byte socket, including full Kaypro programming, A6/A9/A11 aliases, a chip
+that does not program, nonblank refusal, and invalid gate/image handling.
+`tests/test_2716_pulse.py` uses Unicorn to verify both actual assembly pulse
+polarities, duration, preserved registers/flags and speaker state.

@@ -1,0 +1,61 @@
+{
+  "date": "2026-11-11",
+  "marking": "D2732A-3",
+  "owner_confirmation": "Chip states 21V programming; VPP measured21V; 2732 settings made; authorized blank check and Kaypro programming without further questions",
+  "vcc_setting_volts": 5,
+  "vpp_owner_measured_volts": 21,
+  "blank": {
+    "size": 4096,
+    "all_ff": true,
+    "execution_id": 3761075360,
+    "reader_sha256": "eece740b613644a470712eb1d550aafe45875ac9d3cf13b4ebbca4f87a9a8969",
+    "session": "d2732a-kaypro-20261111-blank"
+  },
+  "writer": {
+    "file": "PG2732A.COM",
+    "sha256": "cb07d957fdcd7ee4d3942df7b7ce61820bd48d523507173e8c608f8d0c7a9654",
+    "pulse": "single active-low CE pulse per nonFF byte; PIT2 59659 clocks, nominal50ms",
+    "first_byte_probe": "full4096-byte scan after first intended byte; abort on alias",
+    "retries": 0
+  },
+  "image": {
+    "file": "KAYPRO2.BIN",
+    "sha256": "6133c46b1b31a8cc1d93d2428b716399c9c787d1ee6c5e3b785f67853e569633",
+    "non_ff_bytes": 898
+  },
+  "software_tests": {
+    "actual_dos_image_match": true,
+    "alias_masks_rejected": [
+      64,
+      512,
+      2048
+    ],
+    "failed_programming_rejected": true,
+    "nonblank_rejected": true,
+    "invalid_gate_and_size_rejected": true,
+    "pit2_polarity_timing_register_flags": true,
+    "old_2716_sequence_regression": true,
+    "portable_suite": true,
+    "8086_and_80186_address_regression": true
+  },
+  "r22_replacement": "not reported; no physical modification assumed",
+  "programming": {
+    "execution_id": 2258485794,
+    "exit_code": 0,
+    "pulses": 898,
+    "reported_elapsed_ms": 219230,
+    "elapsed_note": "DOS timer reporting can undercount while interrupts are masked during pulses; not a wall-clock qualification",
+    "internal_power_cycle_verify": true,
+    "session": "d2732a-kaypro-20261111-write",
+    "rails_after": "VPP off, VCC off"
+  },
+  "independent_readback": {
+    "execution_id": 2088047637,
+    "exit_code": 0,
+    "size": 4096,
+    "sha256": "6133c46b1b31a8cc1d93d2428b716399c9c787d1ee6c5e3b785f67853e569633",
+    "exact_image_match": true,
+    "session": "d2732a-kaypro-20261111-readback",
+    "rails_after": "VPP off, VCC off"
+  }
+}

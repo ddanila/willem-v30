@@ -8,7 +8,7 @@ subprocess.run(['cc','-shared','-fPIC','-O2','-Wall','-Wextra','-Werror',str(ROO
 shutil.copy(shutil.which('dosbox-x'),WORK/'dosbox-x')
 def run_model(name, commands, mask=0, extra_files=()):
  d=WORK/name;d.mkdir(exist_ok=True)
- (d/'port').touch();(d/'chip.bin').write_bytes(b'\xff'*2048)
+ (d/'port').touch();(d/'chip.bin').write_bytes(b'\xff'*(4096 if os.environ.get('WL_2732') else 2048))
  shutil.copy(ROOT/'build/dos/WILLEM.COM',d)
  if (ROOT/'build/dos/RF2EXP.COM').exists(): shutil.copy(ROOT/'build/dos/RF2EXP.COM',d)
  shutil.copy(ROOT/'programming/serial-boot-20261110/R1715MW2.BIN',d)

@@ -1,0 +1,9 @@
+{
+  "execution_ids": [
+    3761075360
+  ],
+  "identities": [
+    "{\"execution\":\"RD2732.COM R2732 KBLANK.BIN 378 /PROFILE:conservative\",\"stdin_sha256\":null,\"uploads\":[{\"mapping\":\"/home/ddanila/fun/willem-v30/build/dos/RD2732.COM:RD2732.COM\",\"sha256\":\"eece740b613644a470712eb1d550aafe45875ac9d3cf13b4ebbca4f87a9a8969\"}]}"
+  ],
+  "kind": "generic-run-v1"
+}

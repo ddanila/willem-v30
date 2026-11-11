@@ -6,7 +6,7 @@ results remain pending until a complete readback matches.
 | Target | DOS filename | EPROM | Bytes | Serial protocol |
 |---|---|---|---:|---|
 | Robotron PC1715M/W | `R1715MW2.BIN` | K573RF5 / standard 2716 | 2048 | W2 monitor, 9600 8N1 |
-| Kaypro 2 PC81-240A / PC003 | `KAYPRO2.BIN` | 2732; exact marking pending | 4096 | KP2 bootstrap, 19200 8O1 |
+| Kaypro 2 PC81-240A / PC003 | `KAYPRO2.BIN` | Intel D2732A-3, 21 V | 4096 | KP2 bootstrap, 19200 8O1 |
 
 Both filenames fit DOS 8.3. These complete chip images were copied without
 truncation, repetition, byte swapping or additional padding. `SHA256SUMS` and
@@ -25,7 +25,8 @@ CP/M platform and disk were built alongside it; their sizes and hashes are in
 `/home/ddanila/fun/cpm-plus-kaypro/build/platform.cim` and
 `/home/ddanila/fun/cpm-plus-kaypro/out/kaypro.img` with that repository's launcher.
 The owner confirms that a 2732 is required. Do not truncate this image for a
-2716. Physical acceptance remains pending.
+2716. Programming and independent full readback passed on 2026-11-11;
+booting the physical Kaypro remains untested.
 
 ## Verification
 
@@ -67,8 +68,8 @@ The owner confirmed the post-repair switched-rail measurements during this
 programming session. No automated D2716 measurement is claimed.
 
 The custom programmer now provides `W2716` / `WRF2` / `WRF5` programming.
-The Kaypro 2732 still needs an identified part and a separately qualified writer;
-do not inherit the RF2 voltage or pulse polarity for that chip.
+The Kaypro D2732A-3 now has a separately qualified 21 V writer, `PG2732A.COM`;
+see the completed programming record below. It uses active-low CE, unlike RF2.
 
 ## Safe idle command executed after preparation
 
@@ -165,3 +166,26 @@ with VPP/VCC off. No programming pulses were sent. Blank captures cannot
 establish address-line independence or programming suitability. The binaries
 remain local; [read metadata](evidence/rf5-three-reads.json) records all six
 execution IDs. Chip #3 is the last installed chip, with both rails off.
+
+## Kaypro D2732A-3 programmed — 2026-11-11
+
+The owner installed a D2732A-3 marked for 21 V programming, confirmed the
+2732 settings, and measured VPP at 21 V. The established RD2732.COM reader
+returned 4096 FF bytes. The dedicated writer repeated the full blank check,
+programmed the first intended byte and scanned for aliases, then programmed
+the remaining image with one PIT2-timed 50 ms negative CE pulse per non-FF
+byte. All 898 pulses succeeded; all 4096 bytes matched after power-cycling.
+
+A separate RD2732.COM read then matched KAYPRO2.BIN byte-for-byte:
+`6133c46b1b31a8cc1d93d2428b716399c9c787d1ee6c5e3b785f67853e569633`.
+Both rails were switched off after verification. The chip now contains the
+KP2 serial boot ROM (19200 8O1); operation in the physical Kaypro is untested.
+This successful 2732A burn does not settle the earlier RF2 A9 electrical fault.
+No R22 replacement was reported.
+
+[Evidence and writer identity](evidence/d2732a/manifest.json) include execution
+IDs, source image and binary hashes, blank-read metadata, write report, and
+the independent readback. Actual DOS emulation passed full-image programming,
+A6/A9/A11 alias rejection, failed-chip and nonblank refusal, and file/gate
+guards. Pulse assembly tests cover timing, both polarities, and saved state;
+the old 2716 path and portable core checks also passed.

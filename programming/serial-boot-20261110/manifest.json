@@ -23,12 +23,13 @@
       "repository": "https://github.com/ddanila/cpm-plus-kaypro.git",
       "revision": "5759622491957370e83e6778faedbd42eed8cba9",
       "source": "build/boot.rom",
-      "device": "2732, exact manufacturer/suffix pending",
+      "device": "Intel D2732A-3, 21 V",
       "protocol": "KP2",
       "framing": "19200 8O1",
-      "programmed": false,
-      "physical_readback_verified": false,
-      "crc32": "42706f83"
+      "programmed": true,
+      "physical_readback_verified": true,
+      "crc32": "42706f83",
+      "evidence": "evidence/d2732a/manifest.json"
     }
   ],
   "programmer": {
@@ -41,10 +42,9 @@
   },
   "remaining": [
     "Measure zero-based A9 (RF2 datasheet A10) at chip pin22/ZIF26 under addresses0000 and0200; distinguish chip input/decode from programmer output",
-    "Fix A9 path before further boot programming",
+    "Resolve RF2 A9 path before further Robotron boot programming",
     "UV-erase affected test chips before reuse",
-    "Complete Robotron programming and independent full readback",
-    "Identify exact Kaypro 2732 part and qualify its separate writer"
+    "Complete Robotron programming and independent full readback"
   ],
   "software_validation": {
     "robotron": {
@@ -61,7 +61,7 @@
     }
   },
   "current_robotron_candidate": {
-    "family": "КС573РФ2",
+    "family": "\u041a\u0421573\u0420\u04242",
     "purpose": "Owner-authorized sacrificial RF2 diagnostics; later removed for U2716C35 control read",
     "programming_ready": false,
     "reason": "Stable A9 alias confirmed across all addresses, varying data, readers, timing, and access order. Exact electrical cause still requires pin measurement.",

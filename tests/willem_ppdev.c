@@ -14,7 +14,8 @@
 #include <time.h>
 static struct stat target;
 static int ready, sample_oracle;
-static unsigned address_bits=24;
+static unsigned address_bits=24, capacity=2048;
+static int negative_ce, no_program;
 static uint8_t *rom, data, control, read_byte, read_mask;
 static uint32_t shift;
 static unsigned clocks, address, loaded, alias, pulses, errors;
@@ -28,9 +29,12 @@ __attribute__((constructor)) static void setup(void) {
  const char *ep=getenv("WL_ENDPOINT"), *path=getenv("WL_IMAGE"), *log=getenv("WL_LOG");
  struct stat sb;
  if (!ep || !path || !log || stat(ep,&target) || !S_ISREG(target.st_mode)) return;
+ negative_ce=getenv("WL_2732")!=NULL;
+ no_program=getenv("WL_NO_PROGRAM")!=NULL;
+ capacity=negative_ce?4096:2048;
  int fd=open(path,O_RDWR|O_NOFOLLOW);
- if(fd<0 || fstat(fd,&sb) || !S_ISREG(sb.st_mode) || sb.st_size!=2048) _exit(2);
- rom=mmap(NULL,2048,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0); close(fd);
+ if(fd<0 || fstat(fd,&sb) || !S_ISREG(sb.st_mode) || sb.st_size!=capacity) _exit(2);
+ rom=mmap(NULL,capacity,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0); close(fd);
  if(rom==MAP_FAILED) _exit(2);
  logfile=fopen(log,"w"); if(!logfile) _exit(2);
  setvbuf(logfile,NULL,_IOLBF,0);
@@ -40,7 +44,7 @@ __attribute__((constructor)) static void setup(void) {
  if(getenv("WL_ADDRESS_BITS")) address_bits=strtoul(getenv("WL_ADDRESS_BITS"),NULL,0);
  ready=1;
 }
-static unsigned selected(void) { return address & 2047U & ~alias; }
+static unsigned selected(void) { return address & (capacity-1U) & ~alias; }
 static void out_data(uint8_t v) {
  uint8_t old=data; data=v;
  if(active && v!=old) { ++errors; fprintf(logfile,"ERROR data changed during pulse\n"); }
@@ -60,12 +64,16 @@ static void out_control(uint8_t raw) {
   address=shift&0xffffff; clocks=0;
  }
  if((control&5)==1) { ++errors; fprintf(logfile,"ERROR VPP without VCC\n"); }
- if(!(old&8)&&(control&8)&&(control&5)==5) {
+ if(negative_ce && !(old&1) && (control&1) && !(control&8)) {
+  ++errors; fprintf(logfile,"ERROR 2732 VPP enabled with CE low\n");
+ }
+ if((negative_ce ? ((old&8)&&!(control&8)) : (!(old&8)&&(control&8))) && (control&5)==5) {
   if(control&2) { ++errors; fprintf(logfile,"ERROR OE enabled at pulse\n"); }
   pulse_addr=selected(); pulse_data=data; active=1;
  }
- if((old&8)&&!(control&8)&&active) {
-  rom[pulse_addr]&=pulse_data; active=0; ++pulses;
+ if((negative_ce ? (!(old&8)&&(control&8)) : ((old&8)&&!(control&8))) && active) {
+  if(!no_program) rom[pulse_addr]&=pulse_data;
+  active=0; ++pulses;
   fprintf(logfile,"PULSE %04x %02x\n",pulse_addr,pulse_data);
  }
 }

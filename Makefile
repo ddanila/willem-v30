@@ -97,3 +97,14 @@ original-2716-test: dos experiment build/dos/ORG2716.COM
 	python3 tests/test_original_2716_lab.py
 	python3 tools/check_original_2716_trace.py programming/serial-boot-20261110/evidence/original-2716/pcb3-clean.log.gz programming/serial-boot-20261110/evidence/original-2716/PATTERN.BIN
 	python3 tools/check_original_2716_trace.py programming/serial-boot-20261110/evidence/original-2716/plain-program.log.gz programming/serial-boot-20261110/evidence/original-2716/PATTERN.BIN
+
+build/dos/program_2732a.o: tools/program_2732a.c include/willem.h
+	mkdir -p build/dos
+	bcc $(DOSFLAGS) -Iinclude -c $< -o $@
+
+build/dos/PG2732A.COM: build/dos/program_2732a.o build/dos/willem.o build/dos/dosio.o
+	bcc -0 -Md -i -o $@ $^
+
+.PHONY: 2732a-test
+2732a-test: dos build/dos/PG2732A.COM
+	python3 tests/test_2732a.py

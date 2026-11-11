@@ -1,0 +1,9 @@
+{
+  "execution_ids": [
+    2258485794
+  ],
+  "identities": [
+    "{\"execution\":\"PG2732A.COM KAYPRO2.BIN /WRITE21\",\"stdin_sha256\":null,\"uploads\":[{\"mapping\":\"/home/ddanila/fun/willem-v30-programming/build/dos/PG2732A.COM:PG2732A.COM\",\"sha256\":\"cb07d957fdcd7ee4d3942df7b7ce61820bd48d523507173e8c608f8d0c7a9654\"},{\"mapping\":\"/home/ddanila/fun/willem-v30-programming/programming/serial-boot-20261110/KAYPRO2.BIN:KAYPRO2.BIN\",\"sha256\":\"6133c46b1b31a8cc1d93d2428b716399c9c787d1ee6c5e3b785f67853e569633\"},{\"mapping\":\"/home/ddanila/fun/willem-v30-programming/programming/serial-boot-20261110/evidence/d2732a/2732A.OK:2732A.OK\",\"sha256\":\"0dcf9dcc4a27694eba5f0a620f1f48ea67942ca747669c7250bcaeee5016d826\"}]}"
+  ],
+  "kind": "generic-run-v1"
+}

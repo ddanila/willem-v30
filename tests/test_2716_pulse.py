@@ -9,8 +9,9 @@ source = (ROOT/'src/dosio.asm').read_text().split('; 2716 positive pulse,', 1)[1
 source = '; 2716 positive pulse,' + source
 with tempfile.TemporaryDirectory() as name:
     tmp = Path(name)
-    for probe in (False, True):
-        entry = '_dos_timer2_50ms' if probe else '_dos_2716_pulse'
+    for kind in ("2716", "2732", "probe"):
+        probe = kind == "probe"
+        entry = '_dos_timer2_50ms' if probe else '_dos_'+kind+'_pulse'
         (tmp/'pulse.asm').write_text('BITS 16\njmp '+entry+'\n'+source)
         subprocess.run(['nasm','-f','bin',str(tmp/'pulse.asm'),'-o',str(tmp/'pulse.bin')],check=True)
         for initial in (0, 1, 2, 3):
@@ -59,7 +60,7 @@ with tempfile.TemporaryDirectory() as name:
                 if probe:
                     assert state['edges']==[]
                 else:
-                    assert [v for _,v in state['edges']]==[6,14]
+                    assert [v for _,v in state['edges']]==([14,6] if kind == "2732" else [6,14])
                     elapsed=state['edges'][1][0]-state['edges'][0][0]
                     assert 59659<=elapsed<=59727,elapsed
-    print('2716 PIT2 mode-0: 50ms positive pulse, no-LPT probe, gate/speaker/flags/registers PASS')
+    print('2716/2732A PIT2 mode-0: 50ms positive/negative pulses, no-LPT probe, gate/speaker/flags/registers PASS')
