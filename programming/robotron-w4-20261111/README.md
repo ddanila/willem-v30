@@ -34,7 +34,7 @@ all4096 bytes after power-cycling. Execution2637388255 exited0.
 
 Independent RD2732.COM readback, execution1630888582, also exited0 and matched
 the complete4 KiB image. Both2 KiB halves independently match the qualified
-W4 source. **VPP and VCC are off.** Physical chip label is not yet reported.
+W4 source. **VPP and VCC are off.** Owner-applied physical chip label: **1715MNETv4**.
 
 Burn/readback SHA-256:
 `53222fd157d93b83c381df78c707d8a047b140b098368c307cd7c388a79bd97a`.

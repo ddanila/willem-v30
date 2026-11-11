@@ -1,7 +1,7 @@
 {
   "date": "2026-11-11",
   "chip_marking": "Fujitsu MBM2732A-30",
-  "physical_label": null,
+  "physical_label": "1715MNETv4",
   "target": "Robotron1715M/W W4 firmware4.0.0",
   "source": {
     "inventory_revision": "e748f44",
