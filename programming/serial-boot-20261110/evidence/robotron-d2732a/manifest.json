@@ -1,0 +1,62 @@
+{
+  "date": "2026-11-11",
+  "marking": "D2732A-3",
+  "physical_label": null,
+  "owner_confirmation": "New chip of absolutely same type installed; all settings unchanged from successful21V Kaypro burn; proceed unattended",
+  "target": "Robotron PC1715M/W serial monitor W2, 9600 8N1",
+  "image": {
+    "file": "R1715M4K.BIN",
+    "size": 4096,
+    "sha256": "35504bdb70052987701b7f26069b83dd7ab4b96927893e572f1ddd1bbb544750",
+    "crc32": "62fed5e6",
+    "construction": "R1715MW2.BIN concatenated with itself; identical2048-byte halves",
+    "half_sha256": "b03bb180a0cc72e632756579f7c691e1310899b44c0a015c9be6903d194056bf",
+    "expected_non_ff_bytes": 3478
+  },
+  "writer": {
+    "file": "PG2732A.COM",
+    "sha256": "cb07d957fdcd7ee4d3942df7b7ce61820bd48d523507173e8c608f8d0c7a9654",
+    "unchanged_from_verified_kaypro_burn": true
+  },
+  "settings": {
+    "vcc_volts": 5,
+    "vpp_volts": 21,
+    "basis": "Owner retained setup and previous21V measurement; no new loaded measurement claimed",
+    "DIP_ON": [
+      7,
+      8,
+      9
+    ],
+    "routing": "special2732",
+    "J9_J10": "towardDB25"
+  },
+  "socket_compatibility": "2732 pin21 is A11 instead of2716 VPP; duplicate both halves for either stable logic level; target machine boot not yet tested",
+  "socket_reference": "https://www.dataman.com/pages/dataman-s4-programming-the-2716",
+  "blank": {
+    "execution_id": 3188773423,
+    "size": 4096,
+    "all_ff": true,
+    "session": "d2732a-robotron-20261111-blank",
+    "rails_after": "off"
+  },
+  "programming": {
+    "execution_id": 1896515974,
+    "exit_code": 0,
+    "pulses": 3478,
+    "reported_elapsed_ms": 379610,
+    "elapsed_note": "DOS elapsed time can undercount while pulse IRQs are masked; not wall-clock timing",
+    "internal_power_cycle_verify": true,
+    "session": "d2732a-robotron-20261111-write",
+    "rails_after": "VPP off, VCC off"
+  },
+  "independent_readback": {
+    "execution_id": 1708914321,
+    "exit_code": 0,
+    "size": 4096,
+    "sha256": "35504bdb70052987701b7f26069b83dd7ab4b96927893e572f1ddd1bbb544750",
+    "full_image_match": true,
+    "both_halves_match_original": true,
+    "session": "d2732a-robotron-20261111-readback",
+    "rails_after": "VPP off, VCC off"
+  }
+}

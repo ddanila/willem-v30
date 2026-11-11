@@ -31,6 +31,23 @@
       "crc32": "42706f83",
       "evidence": "evidence/d2732a/manifest.json",
       "physical_label": "KP2NETv1"
+    },
+    {
+      "file": "R1715M4K.BIN",
+      "size": 4096,
+      "sha256": "35504bdb70052987701b7f26069b83dd7ab4b96927893e572f1ddd1bbb544750",
+      "repository": "https://github.com/ddanila/ravi.git",
+      "revision": "2491ec9559abaafe00a294f33ef97b7ec0d1e645",
+      "source": "build/programming-20261110/R1715MW2.BIN",
+      "device": "Intel D2732A-3, 21 V; second chip after KP2NETv1",
+      "protocol": "W2",
+      "framing": "9600 8N1",
+      "programmed": true,
+      "physical_readback_verified": true,
+      "crc32": "62fed5e6",
+      "construction": "Two exact copies of R1715MW2.BIN at offsets0000 and0800",
+      "evidence": "evidence/robotron-d2732a/manifest.json",
+      "physical_label": null
     }
   ],
   "programmer": {
@@ -43,9 +60,9 @@
   },
   "remaining": [
     "Measure zero-based A9 (RF2 datasheet A10) at chip pin22/ZIF26 under addresses0000 and0200; distinguish chip input/decode from programmer output",
-    "Resolve RF2 A9 path before further Robotron boot programming",
+    "Investigate RF2 A9 path separately; Robotron image successfully programmed into D2732A",
     "UV-erase affected test chips before reuse",
-    "Complete Robotron programming and independent full readback"
+    "Boot-test verified D2732A Robotron and Kaypro ROMs in their target machines"
   ],
   "software_validation": {
     "robotron": {
@@ -61,7 +78,16 @@
       "emulator_revision": "697369bd675748ba88e92a878919be4109609dfc"
     }
   },
-  "current_robotron_candidate": {
+  "later_control": {
+    "marking": "U2716C35",
+    "matching_reads": 2,
+    "all_address_bits_distinguished": true,
+    "programming_pulses": 0,
+    "sha256": "b97cfb4b68b56690c27730daaa347a8780579c8aa75d0169979cc63e33044b34",
+    "dump_repository": "https://github.com/ddanila/dumps/tree/main/unknown/u2716c35-20261110",
+    "rails": "VPP off, VCC off"
+  },
+  "historical_rf2_diagnostic_candidate": {
     "family": "\u041a\u0421573\u0420\u04242",
     "purpose": "Owner-authorized sacrificial RF2 diagnostics; later removed for U2716C35 control read",
     "programming_ready": false,
@@ -72,13 +98,13 @@
     "remaining_FF_distinct_locations": 8,
     "rails": "VPP off, VCC off"
   },
-  "later_control": {
-    "marking": "U2716C35",
-    "matching_reads": 2,
-    "all_address_bits_distinguished": true,
-    "programming_pulses": 0,
-    "sha256": "b97cfb4b68b56690c27730daaa347a8780579c8aa75d0169979cc63e33044b34",
-    "dump_repository": "https://github.com/ddanila/dumps/tree/main/unknown/u2716c35-20261110",
-    "rails": "VPP off, VCC off"
+  "current_robotron_candidate": {
+    "family": "Intel D2732A-3",
+    "contents": "R1715M4K.BIN; two exact copies of1715M W2 serial monitor",
+    "sha256": "35504bdb70052987701b7f26069b83dd7ab4b96927893e572f1ddd1bbb544750",
+    "physical_readback_verified": true,
+    "physical_label": null,
+    "rails": "VPP off, VCC off",
+    "target_machine_boot_tested": false
   }
 }

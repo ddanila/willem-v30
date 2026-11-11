@@ -1,15 +1,18 @@
 # Serial boot EPROM preparation — 2026-11-10
 
-Prepared images and subsequent physical work are recorded below. Programming
-results remain pending until a complete readback matches.
+Prepared images and subsequent physical work are recorded below. Kaypro and
+Robotron D2732A programming now have matching independent readbacks; target
+machine boot tests remain pending.
 
 | Target | DOS filename | EPROM | Bytes | Serial protocol |
 |---|---|---|---:|---|
 | Robotron PC1715M/W | `R1715MW2.BIN` | K573RF5 / standard 2716 | 2048 | W2 monitor, 9600 8N1 |
+| Robotron PC1715M/W (doubled) | `R1715M4K.BIN` | Intel D2732A-3, 21 V | 4096 | W2 monitor, 9600 8N1 |
 | Kaypro 2 PC81-240A / PC003 | `KAYPRO2.BIN` | Intel D2732A-3, 21 V | 4096 | KP2 bootstrap, 19200 8O1 |
 
-Both filenames fit DOS 8.3. These complete chip images were copied without
-truncation, repetition, byte swapping or additional padding. `SHA256SUMS` and
+All filenames fit DOS 8.3. The original 2 KiB Robotron and 4 KiB Kaypro images were copied without
+truncation, repetition, byte swapping or additional padding. `R1715M4K.BIN`
+is the later, explicitly doubled Robotron image for a 2732A. `SHA256SUMS` and
 `manifest.json` identify them and their source revisions. ROM source licenses
 are included in `LICENSE-ROM-SOURCES`.
 
@@ -191,3 +194,26 @@ the independent readback. Actual DOS emulation passed full-image programming,
 A6/A9/A11 alias rejection, failed-chip and nonblank refusal, and file/gate
 guards. Pulse assembly tests cover timing, both polarities, and saved state;
 the old 2716 path and portable core checks also passed.
+
+## Robotron 1715M W2 in D2732A-3 — 2026-11-11
+
+A second D2732A-3 was installed with the same 21 V programming setup used for
+KP2NETv1. `R1715M4K.BIN` is exactly `R1715MW2.BIN` concatenated with itself:
+0000–07FF and 0800–0FFF each contain the complete 2048-byte W2 monitor, including
+its original checksum. Serial framing is **9600 8N1**.
+
+The independent initial read returned 4096 FF bytes. The unchanged, qualified
+PG2732A.COM then passed its own blank check, first-byte alias scan, all 3478
+single-pulse writes, and complete power-cycle verification. A separate read
+with RD2732.COM matched all 4096 bytes; each half also matches the original
+2 KiB image independently. Both rails are off. No physical label has yet been
+reported for this chip. Actual booting in the Robotron remains untested.
+
+Full-image SHA-256:
+`35504bdb70052987701b7f26069b83dd7ab4b96927893e572f1ddd1bbb544750`.
+[Programming and readback evidence](evidence/robotron-d2732a/manifest.json).
+
+The 2732 uses pin21 as A11 where a standard 2716 uses its read-mode VPP input.
+Duplicating the image supplies the same code for either stable A11 logic level;
+[Dataman documents this doubled-image arrangement](https://www.dataman.com/pages/dataman-s4-programming-the-2716).
+This does not resolve the earlier RF2 programming fault.

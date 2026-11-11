@@ -1,0 +1,9 @@
+{
+  "execution_ids": [
+    1896515974
+  ],
+  "identities": [
+    "{\"execution\":\"PG2732A.COM R1715M4K.BIN /WRITE21\",\"stdin_sha256\":null,\"uploads\":[{\"mapping\":\"/home/ddanila/fun/willem-v30-programming/programming/serial-boot-20261110/R1715M4K.BIN:R1715M4K.BIN\",\"sha256\":\"35504bdb70052987701b7f26069b83dd7ab4b96927893e572f1ddd1bbb544750\"}]}"
+  ],
+  "kind": "generic-run-v1"
+}
