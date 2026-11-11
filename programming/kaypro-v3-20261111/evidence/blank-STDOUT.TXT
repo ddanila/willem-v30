@@ -1,0 +1,35 @@
+Archived full WILLEM.LOG as WILL0002.LOG
+[1980-01-01 22:16:28.52] ================ BEGIN RUN ================
+[1980-01-01 22:16:28.58] Willem V30 version 0.2.0-dev; 8086-compatible; 24-bit address build
+[1980-01-01 22:16:28.58] Command-line argc=5
+[1980-01-01 22:16:28.58] argv[0]=<C>
+[1980-01-01 22:16:28.63] argv[1]=<R2732>
+[1980-01-01 22:16:28.63] argv[2]=<K3BLANK.BIN>
+[1980-01-01 22:16:28.63] argv[3]=<378>
+[1980-01-01 22:16:28.69] argv[4]=</PROFILE:conservative>
+[1980-01-01 22:16:28.85] DOSRAVI_PROFILE name=conservative address_setup_us=4 oe_settle_us=4 input_latch_us=4 input_clock_us=4 power_on_ms=5 build_id=dosravi-2732-read-v1
+[1980-01-01 22:16:28.91] Operation=READ device=2732 image=K3BLANK.BIN LPT=378h trace=off
+[1980-01-01 22:16:28.91] Required DIP mask=1c0h; VPP MUST remain off
+[1980-01-01 22:16:28.96] DIP number:  1  2  3  4  5  6  7  8  9 10 11 12
+[1980-01-01 22:16:28.96] DIP ON :   [ ][ ][ ][ ][ ][ ][X][X][X][ ][ ][ ]
+[1980-01-01 22:16:29.02] DIP OFF:   [X][X][X][X][X][X][ ][ ][ ][X][X][X]
+[1980-01-01 22:16:29.02] Set each numbered lever toward the row containing X
+[1980-01-01 22:16:29.02] ZIF pair: lever/notch -> [--][--][--][--][1/24] ... [12/13]
+[1980-01-01 22:16:29.07] Leave FOUR rows empty at lever end; place chip at far end
+[1980-01-01 22:16:29.07] Use SPECIAL 2732 route; notch faces empty rows and lever
+[1980-01-01 22:16:29.13] Initial raw DATA=00 STATUS=7f CONTROL=0b
+[1980-01-01 22:16:29.13] Power transition: enabling VCC, VPP off
+[1980-01-01 22:16:36.16] Scan progress: 512/4096 bytes
+[1980-01-01 22:16:43.13] Scan progress: 1024/4096 bytes
+[1980-01-01 22:16:50.16] Scan progress: 1536/4096 bytes
+[1980-01-01 22:16:57.14] Scan progress: 2048/4096 bytes
+[1980-01-01 22:17:04.17] Scan progress: 2560/4096 bytes
+[1980-01-01 22:17:11.15] Scan progress: 3072/4096 bytes
+[1980-01-01 22:17:18.18] Scan progress: 3584/4096 bytes
+[1980-01-01 22:17:25.15] Scan progress: 4096/4096 bytes
+[1980-01-01 22:17:25.21] DOSRAVI_METRIC read_ms=56100 profile=conservative
+[1980-01-01 22:17:25.21] Power transition: safe shutdown begins
+[1980-01-01 22:17:25.26] Safe shutdown complete: VCC off, VPP off
+[1980-01-01 22:17:25.81] Read complete: bytes=4096 CRC16-CCITT=0fe1
+[1980-01-01 22:17:25.87] Result code=0
+[1980-01-01 22:17:25.87] ================= END RUN =================

@@ -1,0 +1,9 @@
+{
+  "execution_ids": [
+    4072183558
+  ],
+  "identities": [
+    "{\"execution\":\"PG2732A.COM KAYPROV3.BIN /WRITE21\",\"stdin_sha256\":null,\"uploads\":[{\"mapping\":\"/home/ddanila/fun/willem-v30-programming/programming/kaypro-v3-20261111/KAYPROV3.BIN:KAYPROV3.BIN\",\"sha256\":\"b101752648933fb78918d2131ca6e15932719badce20ac1469be71aad59ec408\"}]}"
+  ],
+  "kind": "generic-run-v1"
+}

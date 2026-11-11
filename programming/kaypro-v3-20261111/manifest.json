@@ -1,0 +1,56 @@
+{
+  "date": "2026-11-11",
+  "chip_marking": "AMD AM2732A-DC",
+  "physical_label": null,
+  "target": "Kaypro2 PC003; V3 firmware3.0.0",
+  "source": {
+    "qualified_revision": "164f4973fb0bfec1ecc40b4e40db434f490d66b5",
+    "path": "/home/ddanila/fun/vintage-computer-inventory/items/PC003-kaypro-2/evidence/20261111-rom-v3/boot.rom",
+    "size": 4096,
+    "sha256": "b101752648933fb78918d2131ca6e15932719badce20ac1469be71aad59ec408"
+  },
+  "image": {
+    "file": "KAYPROV3.BIN",
+    "size": 4096,
+    "sha256": "b101752648933fb78918d2131ca6e15932719badce20ac1469be71aad59ec408",
+    "construction": "exact qualified4096-byte image; no modification",
+    "non_ff_bytes": 3618
+  },
+  "programmer": {
+    "settings": "special2732 routing; DIP7,8,9;5V VCC;21V VPP",
+    "voltage_basis": "retained previously measured21V setup; no new measurement claimed",
+    "writer": "PG2732A.COM",
+    "writer_sha256": "cb07d957fdcd7ee4d3942df7b7ce61820bd48d523507173e8c608f8d0c7a9654",
+    "gate_note": "Historical D2732A token retained for datasheet-compatible AMD21V50ms algorithm",
+    "datasheet": "https://archive.decromancer.ca/bitsavers.org/components/amd/_dataBooks/1984_AMD_Bipolar_MOS_Memories_Data_Book.pdf",
+    "datasheet_pages": "6-21 through6-24; programming6-22/6-23"
+  },
+  "blank": {
+    "execution_id": 3128897123,
+    "exit_code": 0,
+    "size": 4096,
+    "all_ff": true,
+    "session": "am2732a-kayprov3-20261111-blank",
+    "rails_after": "off"
+  },
+  "target_hardware_tested": false,
+  "programming": {
+    "execution_id": 4072183558,
+    "exit_code": 0,
+    "pulses": 3618,
+    "reported_elapsed_ms": 388080,
+    "elapsed_note": "DOS clock undercounts while pulse interrupts are masked; not wall-clock timing",
+    "internal_power_cycle_verify": true,
+    "session": "am2732a-kayprov3-20261111-write",
+    "rails_after": "VPP off,VCC off"
+  },
+  "independent_readback": {
+    "execution_id": 303614877,
+    "exit_code": 0,
+    "session": "am2732a-kayprov3-20261111-readback",
+    "size": 4096,
+    "sha256": "b101752648933fb78918d2131ca6e15932719badce20ac1469be71aad59ec408",
+    "exact_image_match": true,
+    "rails_after": "VPP off,VCC off"
+  }
+}

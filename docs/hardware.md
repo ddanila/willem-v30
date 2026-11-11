@@ -530,3 +530,9 @@ polarities, duration, preserved registers/flags and speaker state.
 Fujitsu MBM2732A-30 reference: [1982 Fujitsu Memory Data Book, pp.4-14–4-19](https://deramp.com/downloads/mfe_archive/050-Component%20Specifications/Fujitsu/Memory%20Components/1982_Fujitsu_Memory_Data_Book.pdf#page=136).
 The -30 requires 21 V; do not apply the 25 V allowance of the -35/-35X to it.
 VPP transitions occur with CE high, and VPP is removed before VCC.
+
+AMD AM2732A-DC uses the same unchanged 21 V/50 ms writer and historical
+D2732A gate token. The [AMD 1984 Bipolar/MOS Memories Data Book](https://archive.decromancer.ca/bitsavers.org/components/amd/_dataBooks/1984_AMD_Bipolar_MOS_Memories_Data_Book.pdf),
+printed pages 6-22–6-23, specifies 21 V programming and a single active-low
+CE/PGM pulse of 50 ms (45–55 ms limits). Verify with OE/VPP and CE low.
+This qualification does not extend to the original 25 V Am2732 or Am2732B.
