@@ -1,0 +1,4 @@
+ADC VPP=11.07 VCC=4.85 USB=4.84 VCCIO=3.24
+ADC VPP=24.23 VCC=4.90 USB=4.73 VCCIO=3.25
+0001 old=ff want=06 got=06 host-pulse-window=50.142ms
+Reset pin drivers: OK; changed=1 remaining=1869

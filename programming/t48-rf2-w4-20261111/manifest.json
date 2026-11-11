@@ -1,0 +1,61 @@
+{
+  "date": "2026-11-11",
+  "device": "RF2, owner identification; full marking unconfirmed",
+  "programmer": "XGecu T48",
+  "serial": "6MNNWV7B0LLRDYCAA5PF5744",
+  "firmware": "00.1.03 (0x103)",
+  "image": "Robotron 1715M W4 4.0.0, 2048 bytes",
+  "image_sha256": "2a60fcc34fd3782696ced9ba7fd64382d991cffa133a6d30e25930e51ae0a50b",
+  "result": "PASS; complete image matches through two fresh pin-controlled read paths",
+  "initial_native_attempt": "Failed verification at 0000; later independent read proved C3 programmed there",
+  "native_read_after_success": "All FF (false result); do not use this algorithm to blank-check/verify this RF2",
+  "direct_one_byte_trial": {
+    "address": 1,
+    "old": "FF",
+    "new": "06",
+    "pulses": 1,
+    "host_pulse_ms": 50.142
+  },
+  "direct_full_run": {
+    "exit_code": 0,
+    "changed_bytes": 1869,
+    "remaining": 0,
+    "elapsed_seconds": 177.4478868758306,
+    "host_pulse_ms_range": [
+      50.099,
+      50.503
+    ],
+    "programming_internal_adc_ranges": {
+      "VPP": [
+        24.23,
+        24.92
+      ],
+      "VCC": [
+        4.88,
+        4.93
+      ],
+      "USB": [
+        4.72,
+        4.91
+      ],
+      "VCCIO": [
+        3.24,
+        3.25
+      ]
+    }
+  },
+  "reset": "Pin driver reset succeeded after direct programming and both independent pin-controlled reads; final native diagnostic ended its transaction",
+  "qualification_limits": [
+    "ADC measurements are internal rails, not chip-pin meter measurements",
+    "Host pulse windows are not oscilloscope measurements",
+    "Native algorithm timing versus read VPP routing not isolated",
+    "RF2 not installed or boot-tested in Robotron",
+    "Physical label not yet supplied"
+  ],
+  "minipro_base": "whaslbeck/minipro cfe2171ca1b23399558b8d2a603a2ac3fa3faf5d",
+  "tested_binaries": {
+    "minipro": "ebb1f1ef7de646c69e5f4f03853865b4113383635ab8aefa900c2e19ba8d5d93",
+    "rf2-direct": "404479e46bb637d9e77fd747bba1143398965a5061dfbf8009588c0e11746f0e"
+  },
+  "local_session": "/home/ddanila/fun/minipro-sessions/t48-rf2-w4-20261111"
+}

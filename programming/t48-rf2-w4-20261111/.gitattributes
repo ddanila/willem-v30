@@ -1,0 +1,5 @@
+# Preserve raw programmer transcripts and patch context verbatim.
+*.log -text -whitespace
+*.patch -text -whitespace
+*.bin -text
+*.BIN -text

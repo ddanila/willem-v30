@@ -1,0 +1,16 @@
+Found T48 00.1.03 (0x103)
+Warning: T48 support is not yet complete!
+Warning: Firmware is out of date.
+  Expected  01.1.39 (0x127)
+  Found     00.1.03 (0x103)
+Device code: 68A45587
+Serial code: 6MNNWV7B0LLRDYCAA5PF5744
+Manufactured: 2026-08-1809:05
+USB speed: 480Mbps (USB 2.0)
+Supply voltage: 4.87 V 
+
+WARNING: skipping Chip ID test
+DIAG BEGIN: 03 0b 00 00 f1 00 06 17 00 00 00 00 50 c3 00 00 00 08 00 00 00 00 f1 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 18 00 01 00 00 00 00 00 00 00 00 00 00 48 00 00 00 00 00 00 00
+[KReading Code...  
+DIAG after read: VPP=25.75 USB=4.89 VCC=4.96 VCCIO=3.47 V
+[KReading Code...   0%[KReading Code...  12%[KReading Code...  25%[KReading Code...  37%[KReading Code...  50%[KReading Code...  62%[KReading Code...  75%[KReading Code...  87%[KReading Code...  95.5 ms  OK

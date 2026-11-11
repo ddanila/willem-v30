@@ -1,0 +1,213 @@
+diff --git a/infoic.xml b/infoic.xml
+index 01e70fb..d162e55 100644
+--- a/infoic.xml
++++ b/infoic.xml
+@@ -526160,6 +526160,28 @@
+           package_details="0x18000000"
+           config="NULL"
+       />
++<ic
++          name="RF2_READ_DIAG@DIP24"
++          type="1"
++          protocol_id="0x80000001"
++          variant="0x0d"
++          read_buffer_size="0x10"
++          write_buffer_size="0x00"
++          code_memory_size="0x800"
++          data_memory_size="0x00"
++          data_memory2_size="0x00"
++          page_size="0x0000"
++          pages_per_block="0x0000"
++          chip_id="0x00000000"
++          voltages="0x0900"
++          pulse_delay="0x0000"
++          flags="0x00000000"
++          chip_info="0x0000"
++          pin_map="0x0017"
++          blank_value="0xff"
++          package_details="0x18000000"
++          config="NULL"
++      />
+     </custom
+     >
+     <custom
+@@ -620380,6 +620402,28 @@
+           package_details="0x18000000"
+           config="NULL"
+       />
++<ic
++          name="RF2_READ_DIAG@DIP24"
++          type="1"
++          protocol_id="0x80000001"
++          variant="0x0d"
++          read_buffer_size="0x10"
++          write_buffer_size="0x00"
++          code_memory_size="0x800"
++          data_memory_size="0x00"
++          data_memory2_size="0x00"
++          page_size="0x0000"
++          pages_per_block="0x0000"
++          chip_id="0x00000000"
++          voltages="0x0900"
++          pulse_delay="0x0000"
++          flags="0x00000000"
++          chip_info="0x0000"
++          pin_map="0x0017"
++          blank_value="0xff"
++          package_details="0x18000000"
++          config="NULL"
++      />
+     </custom
+     >
+     <custom
+diff --git a/src/main.c b/src/main.c
+index 04a69db..1f20df4 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -1182,7 +1182,7 @@ int parse_options(minipro_handle_t *handle, int argc, char **argv)
+ 					return EXIT_FAILURE;
+ 				handle->device->pulse_delay = (uint16_t)v;
+ 			}
+-			if (!strcasecmp(option, "address")) {
++			else if (!strcasecmp(option, "address")) {
+ 				handle->cmdopts->set_i2c_addr = 1;
+ 				if (!device->flags.can_adjust_address)
+ 					break;
+diff --git a/src/prom.c b/src/prom.c
+index 7118eea..0d7d2cc 100644
+--- a/src/prom.c
++++ b/src/prom.c
+@@ -162,6 +162,13 @@ static prom_t prom_table[] = {
+ 		  (uint8_t[]){ 8, 7, 6, 5, 4, 3, 2, 1, 23, 22, 19, 18, 21, 0 },
+ 	  .ce_lo_pins = (uint8_t[]){ 20, 0 },
+ 	  .compare_mask = 0xff },
++	/* Type 13; standard 2716 read-only diagnostic; VPP tied to 5 V. */
++	{ .gnd_pins = (uint8_t[]){ 12, 0 },
++	  .vcc_pins = (uint8_t[]){ 24, 21, 0 },
++	  .data_bus_pins = (uint8_t[]){ 9, 10, 11, 13, 14, 15, 16, 17, 0 },
++	  .addr_bus_pins = (uint8_t[]){ 8, 7, 6, 5, 4, 3, 2, 1, 23, 22, 19, 0 },
++	  .ce_lo_pins = (uint8_t[]){ 18, 20, 0 },
++	  .compare_mask = 0xff },
+ };
+ 
+ static mask_prom_t mask_prom_table[] = {
+@@ -186,9 +193,9 @@ static mask_prom_t mask_prom_table[] = {
+ };
+ 
+ /* Persistent state */
+-static uint8_t zif_dir[40];
+-static uint8_t zif_state[40];
+-static pin_driver_t pin_drivers[40];
++static uint8_t zif_dir[56];
++static uint8_t zif_state[56];
++static pin_driver_t pin_drivers[56];
+ 
+ /* Set the initial state */
+ static int mask_prom_init(minipro_handle_t *handle)
+@@ -320,7 +327,7 @@ static int is_empty(uint8_t *buffer, size_t length)
+ /* Read bytes from Hitachi mask PROMs */
+ static int prom_read_mask_prom(minipro_handle_t *handle, uint32_t address,
+ 	                uint8_t *buffer, size_t length) {
+-	static uint8_t zif[40];
++	static uint8_t zif[56];
+ 	uint8_t type = (uint8_t)handle->device->variant & ~HITACHI_MASK_PROM_MASK;
+ 	uint8_t pin_count = handle->device->package_details.pin_count;
+ 	uint8_t ce_pin_count = strlen((const char *) mask_prom_table[type].ce_pins);
+@@ -387,16 +394,17 @@ int prom_read(minipro_handle_t *handle, uint32_t address, uint8_t *buffer,
+ 	if ((uint8_t)handle->device->variant & HITACHI_MASK_PROM_MASK)
+ 		return prom_read_mask_prom(handle, address, buffer, lenght);
+ 
+-	static uint8_t zif[40];
++	static uint8_t zif[56];
+ 	uint8_t type = (uint8_t)handle->device->variant;
+ 	uint8_t pin_count = handle->device->package_details.pin_count;
+ 
+ 	/* Set data bus direction to input with pull-up resistors */
+ 	set_io_pins(zif_dir, prom_table[type].data_bus_pins,
+-		    MP_PIN_DIRECTION_IN | MP_PIN_PULLUP, pin_count);
++		    MP_PIN_DIRECTION_IN | ((type == 13 && getenv("RF2_PULLDOWN")) ? 0 : MP_PIN_PULLUP), pin_count);
+ 
+ 	/* Set chip enable pins state to enabled */
+-	set_io_pins(zif_state, prom_table[type].ce_lo_pins, 0, pin_count);
++	set_io_pins(zif_state, prom_table[type].ce_lo_pins,
++		    (type == 13 && getenv("RF2_DISABLED")) ? 1 : 0, pin_count);
+ 	set_io_pins(zif_state, prom_table[type].ce_hi_pins, 1, pin_count);
+ 
+ 	if (minipro_set_zif_direction(handle, zif_dir))
+@@ -404,6 +412,7 @@ int prom_read(minipro_handle_t *handle, uint32_t address, uint8_t *buffer,
+ 	if (minipro_set_zif_state(handle, zif_state))
+ 		return EXIT_FAILURE;
+ 
++	if (address == 0) fprintf(stderr, "DIAG PROM type=%u CE=%u OE=%u pull=%s\n", type,zif_state[33],zif_state[35],getenv("RF2_PULLDOWN")?"down":"up");
+ 	/* Read length bytes */
+ 	for (int i = 0; i < lenght; i++) {
+ 		/* Set address value to zif pins */
+@@ -416,6 +425,11 @@ int prom_read(minipro_handle_t *handle, uint32_t address, uint8_t *buffer,
+ 		if (minipro_get_zif_state(handle, zif))
+ 			return EXIT_FAILURE;
+ 
++		if (address == 0 && i < 2 && type == 13) {
++			fprintf(stderr, "DIAG pins addr=%d:", i);
++			for (int j=0;j<40;j++) fprintf(stderr,"%u",zif[j]);
++			fprintf(stderr,"\n");
++		}
+ 		/* Convert zif data bus value and write it to buffer */
+ 		buffer[i] = get_bits(zif, prom_table[type].data_bus_pins,
+ 				     pin_count);
+diff --git a/src/t48.c b/src/t48.c
+index f341d73..bb1f99e 100644
+--- a/src/t48.c
++++ b/src/t48.c
+@@ -243,6 +243,9 @@ static int wrap_msg_send(void *handle, uint8_t *buffer, size_t size)
+ #endif
+ 
+ /* clang-format on */
++int t48_measure_voltages(minipro_handle_t *handle, float *voltages);
++int t48_get_zif_state(minipro_handle_t *handle, uint8_t *zif);
++
+ int t48_begin_transaction(minipro_handle_t *handle)
+ {
+ 	uint8_t msg[64];
+@@ -320,6 +323,11 @@ int t48_begin_transaction(minipro_handle_t *handle)
+ 				   MP_LITTLE_ENDIAN);
+ 		}
+ 
++		if (getenv("T48_DIAG")) {
++			fprintf(stderr, "DIAG BEGIN:");
++			for (unsigned i = 0; i < sizeof(msg); i++) fprintf(stderr, " %02x", msg[i]);
++			fprintf(stderr, "\n");
++		}
+ 		if (msg_send(handle->usb_handle, msg, sizeof(msg)))
+ 			return EXIT_FAILURE;
+ 	} else {
+@@ -371,7 +379,19 @@ int t48_read_block(minipro_handle_t *handle, data_set_t *ds)
+ 	if (msg_send(handle->usb_handle, msg, 8))
+ 		return EXIT_FAILURE;
+ 
+-	return read_payload2(handle->usb_handle, ds->data, ds->size, 0);
++	int result = read_payload2(handle->usb_handle, ds->data, ds->size, 0);
++	if (getenv("T48_DIAG") && ds->address == 0) {
++		uint8_t pins[56];
++		if (!t48_get_zif_state(handle, pins)) {
++			fprintf(stderr,"DIAG native pins:");
++			for(int i=0;i<40;i++) fprintf(stderr,"%u",pins[i]);
++			fprintf(stderr,"\n");
++		}
++		float v[4];
++		if (!t48_measure_voltages(handle, v))
++			fprintf(stderr, "\nDIAG after read: VPP=%.2f USB=%.2f VCC=%.2f VCCIO=%.2f V\n", v[0], v[1], v[2], v[3]);
++	}
++	return result;
+ }
+ 
+ int t48_write_block(minipro_handle_t *handle, data_set_t *ds)
+@@ -1372,7 +1392,8 @@ int t48_set_input_and_pulldown(minipro_handle_t *handle)
+    */
+ 	uint8_t msg[48];
+ 	memset(last_direction, 0, sizeof(last_direction));
+-	/* Set last_output to invalid value so we always change it if not set before */
++	/* Pull configuration releases outputs: invalidate the cached levels. */
++	memset(last_output, 0xff, sizeof(last_output));
+ 	memset(msg, 0, sizeof(msg));
+ 	/* Reset pin drivers state */
+ 	msg[0] = T48_SET_PULLDOWNS;

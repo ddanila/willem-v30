@@ -1,0 +1,11 @@
+{
+  "command": [
+    "./rf2-direct",
+    "write",
+    "/home/ddanila/fun/minipro-sessions/t48-rf2-w4-20261111/W4.BIN",
+    "/home/ddanila/fun/minipro-sessions/t48-rf2-w4-20261111/direct-full-readback.bin",
+    "2048"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 177.4478868758306
+}

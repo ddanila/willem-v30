@@ -1,0 +1,22 @@
+{
+  "command": [
+    "./minipro",
+    "-p",
+    "M2716@DIP24",
+    "-c",
+    "code",
+    "-e",
+    "--vpp",
+    "25",
+    "--vdd",
+    "5",
+    "--vcc",
+    "5",
+    "--pulse",
+    "50000",
+    "-w",
+    "/home/ddanila/fun/minipro-sessions/t48-rf2-w4-20261111/W4.BIN"
+  ],
+  "exit_code": 1,
+  "wall_seconds": 3.004860568791628
+}
