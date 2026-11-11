@@ -1,5 +1,11 @@
 # Willem V30
 
+Shared bench commands, pinned tool builds and new session records live in
+[rom-programmers](https://github.com/ddanila/rom-programmers). This repository
+continues to own the DOS executables, LPT implementation and hardware models.
+Existing commands and historical programming evidence remain supported.
+
+
 Current development version: `0.2.0-dev`
 
 Small, auditable MS-DOS tools for classic LPT-connected Willem EPROM
