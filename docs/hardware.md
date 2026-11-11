@@ -492,7 +492,11 @@ three-supply TI TMS2716.
 `make build/dos/PG2732A.COM` builds a dedicated, fixed-LPT378 writer. It reuses
 `willem.c` for 24-bit address shifting and reading, and the PIT2 mode-0 timer
 for a 50 ms **active-low** CE pulse. The 2716 entry retains its positive pulse.
-This is specifically for the Intel 21 V D2732A, not arbitrary 2732 variants.
+Originally qualified for Intel 21 V D2732A. The Fujitsu MBM2732A-30 also
+specifies 5 V VCC, 21 V VPP and a 45–55 ms active-low CE pulse, so it uses
+the same unchanged binary and gate token. The printed `D2732A` identifier is
+the historical profile name; acquisition records identify the actual part.
+This does not qualify arbitrary 2732 variants.
 Use special 2732 J1/J2, DIP ON 7,8,9, J9/J10 toward DB25, VCC 5 V,
 VPP 21 V. VPP/OE is chip20/ZIF24; VCC chip24/ZIF28; ground chip12/ZIF16.
 
@@ -522,3 +526,7 @@ Validation: `make 2732a-test` executes the actual DOS binary with a virtual
 that does not program, nonblank refusal, and invalid gate/image handling.
 `tests/test_2716_pulse.py` uses Unicorn to verify both actual assembly pulse
 polarities, duration, preserved registers/flags and speaker state.
+
+Fujitsu MBM2732A-30 reference: [1982 Fujitsu Memory Data Book, pp.4-14–4-19](https://deramp.com/downloads/mfe_archive/050-Component%20Specifications/Fujitsu/Memory%20Components/1982_Fujitsu_Memory_Data_Book.pdf#page=136).
+The -30 requires 21 V; do not apply the 25 V allowance of the -35/-35X to it.
+VPP transitions occur with CE high, and VPP is removed before VCC.

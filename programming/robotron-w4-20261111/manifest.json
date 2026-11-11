@@ -1,0 +1,61 @@
+{
+  "date": "2026-11-11",
+  "chip_marking": "Fujitsu MBM2732A-30",
+  "physical_label": null,
+  "target": "Robotron1715M/W W4 firmware4.0.0",
+  "source": {
+    "inventory_revision": "e748f44",
+    "path": "/home/ddanila/fun/vintage-computer-inventory/items/PC001-robotron-1715m/evidence/20261111-w4-candidate/rom-w4.bin",
+    "ravi_revision": "3de77aca760155c1c8f6b0f2bcde336cde785523",
+    "size": 2048,
+    "sha256": "2a60fcc34fd3782696ced9ba7fd64382d991cffa133a6d30e25930e51ae0a50b",
+    "build_id": "ac6dcf19b54cb668",
+    "crc16": "2ef5"
+  },
+  "image": {
+    "file": "R1715W4.BIN",
+    "size": 4096,
+    "sha256": "53222fd157d93b83c381df78c707d8a047b140b098368c307cd7c388a79bd97a",
+    "crc32": "f79626af",
+    "construction": "two identical2048-byte copies of qualified W4 image",
+    "non_ff_bytes": 3742
+  },
+  "programmer": {
+    "profile": "2732; 5V VCC;21V VPP; DIP7,8,9; special2732 routing",
+    "voltage_basis": "retained previously measured21V setup; no new voltage measurement claimed",
+    "writer": "PG2732A.COM",
+    "writer_sha256": "cb07d957fdcd7ee4d3942df7b7ce61820bd48d523507173e8c608f8d0c7a9654",
+    "algorithm": "single50ms active-low CE pulse; no retry; initial alias scan; power-cycle verify",
+    "gate_note": "Existing D2732A gate token reused after Fujitsu datasheet confirms identical21V50ms programming requirements; binary unchanged",
+    "datasheet": "https://deramp.com/downloads/mfe_archive/050-Component%20Specifications/Fujitsu/Memory%20Components/1982_Fujitsu_Memory_Data_Book.pdf#page=140"
+  },
+  "blank": {
+    "session": "mbm2732a-w4-20261111-blank",
+    "execution_id": 857856748,
+    "exit_code": 0,
+    "size": 4096,
+    "all_ff": true,
+    "rails_after": "off"
+  },
+  "target_hardware_tested": false,
+  "programming": {
+    "execution_id": 2637388255,
+    "exit_code": 0,
+    "pulses": 3742,
+    "reported_elapsed_ms": 395340,
+    "elapsed_note": "DOS clock undercounts when interrupts are masked during pulses; not wall-clock timing",
+    "internal_power_cycle_verify": true,
+    "session": "mbm2732a-w4-20261111-write",
+    "rails_after": "VPP off,VCC off"
+  },
+  "independent_readback": {
+    "execution_id": 1630888582,
+    "exit_code": 0,
+    "session": "mbm2732a-w4-20261111-readback",
+    "size": 4096,
+    "sha256": "53222fd157d93b83c381df78c707d8a047b140b098368c307cd7c388a79bd97a",
+    "full_image_match": true,
+    "both_halves_match_original": true,
+    "rails_after": "VPP off,VCC off"
+  }
+}

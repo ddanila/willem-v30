@@ -1,0 +1,362 @@
+{
+  "artifacts": [
+    {
+      "crc32": "f79626af",
+      "name": "upload:R1715W4.BIN",
+      "sha256": "53222fd157d93b83c381df78c707d8a047b140b098368c307cd7c388a79bd97a",
+      "size": 4096
+    },
+    {
+      "crc32": "3a1f4b5d",
+      "name": "executions.json",
+      "sha256": "b42d192019af69911952bef1402ac5b2ce99d19a11988ec2da93d5861d3d99d5",
+      "size": 386
+    },
+    {
+      "crc32": "acc23d32",
+      "name": "STDOUT.TXT",
+      "sha256": "746f2e3f5a26882bd0624bd6b01d5d1c0e12e882bbe4d7bae430d90109e84428",
+      "size": 147
+    },
+    {
+      "crc32": "00000000",
+      "name": "STDERR.TXT",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  ],
+  "command_line": [
+    "/home/ddanila/fun/dosravi/dosravi/cli.py",
+    "--serial",
+    "/dev/ttyUSB0",
+    "--baud",
+    "57600",
+    "--timeout",
+    "5",
+    "--exec-timeout",
+    "1200",
+    "--retries",
+    "2",
+    "--session-dir",
+    "sessions/mbm2732a-w4-20261111-write",
+    "run",
+    "--put",
+    "/home/ddanila/fun/willem-v30-programming/programming/robotron-w4-20261111/R1715W4.BIN:R1715W4.BIN",
+    "--exec",
+    "PG2732A.COM R1715W4.BIN /WRITE21",
+    "--note",
+    "machine=Pocket8086",
+    "--note",
+    "cable-adapter=CP2102 Willem PCB5.0E LPT378",
+    "--note",
+    "device=Fujitsu MBM2732A-30; datasheet21V50ms matches retained setup; blank4096FF; W4 4.0.0 doubled; reuse tested writer"
+  ],
+  "completed_utc": "2026-11-11T16:59:10.383008+00:00",
+  "error": null,
+  "exit_status": 0,
+  "hardware_notes": {
+    "cable-adapter": "CP2102 Willem PCB5.0E LPT378",
+    "device": "Fujitsu MBM2732A-30; datasheet21V50ms matches retained setup; blank4096FF; W4 4.0.0 doubled; reuse tested writer",
+    "machine": "Pocket8086"
+  },
+  "host_version": "0.1.1",
+  "negotiated": {
+    "agent": "DOSRAVI.COM",
+    "bios_equipment_word": 21613,
+    "build": "crc8088-v1",
+    "capabilities": [
+      "replay",
+      "resume",
+      "exec-capture",
+      "self-update"
+    ],
+    "chunk_size": 512,
+    "com_base": 1016,
+    "conventional_kb": 639,
+    "dos": "6.22",
+    "free_disk": 406921216,
+    "free_memory": 477936,
+    "protocol": 1,
+    "rejected_frames": 1,
+    "uart_fifo_bits": 192,
+    "uart_fifo_enabled": 1,
+    "uart_line_errors": 0,
+    "uart_overruns": 0,
+    "version": "0.1.1"
+  },
+  "programmer_stats": {
+    "exec_elapsed_ms": 395340,
+    "execution_id": 2637388255
+  },
+  "serial_stats": {
+    "get:E3359df.ERR": {
+      "bytes": 0,
+      "bytes_per_second": 0.0,
+      "crc32": "00000000",
+      "elapsed_seconds": 0.1116476752795279,
+      "payload_bytes": 0,
+      "resumed_bytes": 0,
+      "skipped": false
+    },
+    "get:O3359df.OUT": {
+      "bytes": 147,
+      "bytes_per_second": 906.1111138392156,
+      "crc32": "acc23d32",
+      "elapsed_seconds": 0.16223175916820765,
+      "payload_bytes": 147,
+      "resumed_bytes": 0,
+      "skipped": false
+    },
+    "put:R1715W4.BIN": {
+      "bytes": 4096,
+      "bytes_per_second": 1688.5585605155798,
+      "crc32": "f79626af",
+      "elapsed_seconds": 2.425737605895847,
+      "payload_bytes": 4096,
+      "resumed_bytes": 0,
+      "skipped": false
+    }
+  },
+  "session_id": "mbm2732a-w4-20261111-write",
+  "source_commit": "a6275b3ba5ac775a39baf40a95665d959b7497d3",
+  "source_dirty": false,
+  "started_utc": "2026-11-11T16:51:07.899322+00:00",
+  "transactions": [
+    {
+      "attempt": 0,
+      "command": "INFO",
+      "direction": "tx",
+      "transaction": 3020635349
+    },
+    {
+      "command": "INFO",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635349
+    },
+    {
+      "attempt": 0,
+      "command": "CRC",
+      "direction": "tx",
+      "transaction": 3020635350
+    },
+    {
+      "command": "CRC",
+      "direction": "rx",
+      "replay": false,
+      "status": "NOT_FOUND",
+      "transaction": 3020635350
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_BEGIN",
+      "direction": "tx",
+      "transaction": 3020635351
+    },
+    {
+      "command": "PUT_BEGIN",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635351
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 3020635352
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635352
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 3020635353
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635353
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 3020635354
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635354
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 3020635355
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635355
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 3020635356
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635356
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 3020635357
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635357
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 3020635358
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635358
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 3020635359
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635359
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_COMMIT",
+      "direction": "tx",
+      "transaction": 3020635360
+    },
+    {
+      "command": "PUT_COMMIT",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635360
+    },
+    {
+      "attempt": 0,
+      "command": "EXEC",
+      "direction": "tx",
+      "transaction": 3020635361
+    },
+    {
+      "command": "EXEC",
+      "direction": "event",
+      "message": "STARTED",
+      "status": "OK",
+      "transaction": 3020635361
+    },
+    {
+      "command": "EXEC",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635361
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 3020635362
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635362
+    },
+    {
+      "attempt": 0,
+      "command": "CRC",
+      "direction": "tx",
+      "transaction": 3020635363
+    },
+    {
+      "command": "CRC",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635363
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 3020635364
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635364
+    },
+    {
+      "attempt": 0,
+      "command": "CRC",
+      "direction": "tx",
+      "transaction": 3020635365
+    },
+    {
+      "command": "CRC",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3020635365
+    }
+  ],
+  "transport": {
+    "baud": 57600,
+    "device": "/dev/ttyUSB0",
+    "exec_timeout_seconds": 1200.0,
+    "retries": 2,
+    "timeout_seconds": 5.0,
+    "type": "serial"
+  }
+}

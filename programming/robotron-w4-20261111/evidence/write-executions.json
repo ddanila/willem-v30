@@ -1,0 +1,9 @@
+{
+  "execution_ids": [
+    2637388255
+  ],
+  "identities": [
+    "{\"execution\":\"PG2732A.COM R1715W4.BIN /WRITE21\",\"stdin_sha256\":null,\"uploads\":[{\"mapping\":\"/home/ddanila/fun/willem-v30-programming/programming/robotron-w4-20261111/R1715W4.BIN:R1715W4.BIN\",\"sha256\":\"53222fd157d93b83c381df78c707d8a047b140b098368c307cd7c388a79bd97a\"}]}"
+  ],
+  "kind": "generic-run-v1"
+}
