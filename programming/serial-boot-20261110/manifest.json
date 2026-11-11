@@ -47,7 +47,7 @@
       "crc32": "62fed5e6",
       "construction": "Two exact copies of R1715MW2.BIN at offsets0000 and0800",
       "evidence": "evidence/robotron-d2732a/manifest.json",
-      "physical_label": null
+      "physical_label": "1715MNETv1"
     }
   ],
   "programmer": {
@@ -103,7 +103,7 @@
     "contents": "R1715M4K.BIN; two exact copies of1715M W2 serial monitor",
     "sha256": "35504bdb70052987701b7f26069b83dd7ab4b96927893e572f1ddd1bbb544750",
     "physical_readback_verified": true,
-    "physical_label": null,
+    "physical_label": "1715MNETv1",
     "rails": "VPP off, VCC off",
     "target_machine_boot_tested": false
   }

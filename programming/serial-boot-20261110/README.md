@@ -206,8 +206,7 @@ The independent initial read returned 4096 FF bytes. The unchanged, qualified
 PG2732A.COM then passed its own blank check, first-byte alias scan, all 3478
 single-pulse writes, and complete power-cycle verification. A separate read
 with RD2732.COM matched all 4096 bytes; each half also matches the original
-2 KiB image independently. Both rails are off. No physical label has yet been
-reported for this chip. Actual booting in the Robotron remains untested.
+2 KiB image independently. Both rails are off. Owner-applied physical chip label: **1715MNETv1**. Actual booting in the Robotron remains untested.
 
 Full-image SHA-256:
 `35504bdb70052987701b7f26069b83dd7ab4b96927893e572f1ddd1bbb544750`.

@@ -1,7 +1,7 @@
 {
   "date": "2026-11-11",
   "marking": "D2732A-3",
-  "physical_label": null,
+  "physical_label": "1715MNETv1",
   "owner_confirmation": "New chip of absolutely same type installed; all settings unchanged from successful21V Kaypro burn; proceed unattended",
   "target": "Robotron PC1715M/W serial monitor W2, 9600 8N1",
   "image": {
