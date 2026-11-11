@@ -29,7 +29,8 @@
       "programmed": true,
       "physical_readback_verified": true,
       "crc32": "42706f83",
-      "evidence": "evidence/d2732a/manifest.json"
+      "evidence": "evidence/d2732a/manifest.json",
+      "physical_label": "KP2NETv1"
     }
   ],
   "programmer": {

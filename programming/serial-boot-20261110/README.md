@@ -169,6 +169,8 @@ execution IDs. Chip #3 is the last installed chip, with both rails off.
 
 ## Kaypro D2732A-3 programmed — 2026-11-11
 
+Owner-applied physical chip label: **KP2NETv1**.
+
 The owner installed a D2732A-3 marked for 21 V programming, confirmed the
 2732 settings, and measured VPP at 21 V. The established RD2732.COM reader
 returned 4096 FF bytes. The dedicated writer repeated the full blank check,

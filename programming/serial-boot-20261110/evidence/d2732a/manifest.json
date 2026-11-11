@@ -57,5 +57,6 @@
     "exact_image_match": true,
     "session": "d2732a-kaypro-20261111-readback",
     "rails_after": "VPP off, VCC off"
-  }
+  },
+  "physical_label": "KP2NETv1"
 }
