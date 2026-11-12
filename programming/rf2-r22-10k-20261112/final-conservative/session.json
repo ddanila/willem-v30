@@ -1,0 +1,332 @@
+{
+  "artifacts": [
+    {
+      "crc32": "62546ef4",
+      "name": "executions.json",
+      "sha256": "96994bf76e8c0db8f3223d5b956fe3ce1f628b45a4283cbc862318b4d9413146",
+      "size": 211
+    },
+    {
+      "crc32": "2707a5f8",
+      "name": "STDOUT.TXT",
+      "sha256": "108c80a5f24b782d4dc2b63ba6840f2ff3edea2ce4e2eee962e1edef26416c42",
+      "size": 2078
+    },
+    {
+      "crc32": "00000000",
+      "name": "STDERR.TXT",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "crc32": "563e01d1",
+      "name": "A9CHECK.BIN",
+      "sha256": "8a2727cc2c1423778b458410adc038b93b7a3e9ced57cb36c34806851b1f73b3",
+      "size": 2048
+    }
+  ],
+  "command_line": [
+    "/home/ddanila/fun/dosravi/dosravi/cli.py",
+    "--serial",
+    "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0",
+    "--baud",
+    "57600",
+    "--timeout",
+    "20",
+    "--session-dir",
+    "sessions/rf2-r22-10k-20261112-final-conservative",
+    "run",
+    "--exec",
+    "READER.COM RRF5 A9CHECK.BIN 378 /PROFILE:conservative",
+    "--get",
+    "A9CHECK.BIN",
+    "--note",
+    "machine=Pocket8086",
+    "--note",
+    "cable-adapter=CP2102; Willem PCB5.0E",
+    "--note",
+    "purpose=Independent conservative reader validation of A9 test pattern after R22 10k replacement"
+  ],
+  "completed_utc": "2026-11-12T18:18:06.143695+00:00",
+  "error": null,
+  "exit_status": 0,
+  "hardware_notes": {
+    "cable-adapter": "CP2102; Willem PCB5.0E",
+    "machine": "Pocket8086",
+    "purpose": "Independent conservative reader validation of A9 test pattern after R22 10k replacement"
+  },
+  "host_version": "0.1.1",
+  "negotiated": {
+    "agent": "DOSRAVI.COM",
+    "bios_equipment_word": 21613,
+    "build": "crc8088-v1",
+    "capabilities": [
+      "replay",
+      "resume",
+      "exec-capture",
+      "self-update"
+    ],
+    "chunk_size": 512,
+    "com_base": 1016,
+    "conventional_kb": 639,
+    "dos": "6.22",
+    "free_disk": 406691840,
+    "free_memory": 477936,
+    "protocol": 1,
+    "rejected_frames": 1,
+    "uart_fifo_bits": 192,
+    "uart_fifo_enabled": 1,
+    "uart_line_errors": 0,
+    "uart_overruns": 0,
+    "version": "0.1.1"
+  },
+  "programmer_stats": {
+    "exec_elapsed_ms": 29260,
+    "execution_id": 335732870
+  },
+  "serial_stats": {
+    "get:A9CHECK.BIN": {
+      "bytes": 2048,
+      "bytes_per_second": 2126.6026384542765,
+      "crc32": "563e01d1",
+      "elapsed_seconds": 0.9630383988842368,
+      "payload_bytes": 2048,
+      "resumed_bytes": 0,
+      "skipped": false
+    },
+    "get:E02e086.ERR": {
+      "bytes": 0,
+      "bytes_per_second": 0.0,
+      "crc32": "00000000",
+      "elapsed_seconds": 0.11462793219834566,
+      "payload_bytes": 0,
+      "resumed_bytes": 0,
+      "skipped": false
+    },
+    "get:O02e086.OUT": {
+      "bytes": 2078,
+      "bytes_per_second": 1973.9782060420523,
+      "crc32": "2707a5f8",
+      "elapsed_seconds": 1.0526965260505676,
+      "payload_bytes": 2078,
+      "resumed_bytes": 0,
+      "skipped": false
+    }
+  },
+  "session_id": "rf2-r22-10k-20261112-final-conservative",
+  "source_commit": "89f2081656c59cf4f3da115ba22844f53e69a251",
+  "source_dirty": false,
+  "started_utc": "2026-11-12T18:17:34.458686+00:00",
+  "transactions": [
+    {
+      "attempt": 0,
+      "command": "INFO",
+      "direction": "tx",
+      "transaction": 3401533438
+    },
+    {
+      "command": "INFO",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3401533438
+    },
+    {
+      "attempt": 0,
+      "command": "EXEC",
+      "direction": "tx",
+      "transaction": 3401533439
+    },
+    {
+      "command": "EXEC",
+      "direction": "event",
+      "message": "STARTED",
+      "status": "OK",
+      "transaction": 3401533439
+    },
+    {
+      "command": "EXEC",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3401533439
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 3401533440
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3401533440
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 3401533441
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3401533441
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 3401533442
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3401533442
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 3401533443
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3401533443
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 3401533444
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3401533444
+    },
+    {
+      "attempt": 0,
+      "command": "CRC",
+      "direction": "tx",
+      "transaction": 3401533445
+    },
+    {
+      "command": "CRC",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3401533445
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 3401533446
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3401533446
+    },
+    {
+      "attempt": 0,
+      "command": "CRC",
+      "direction": "tx",
+      "transaction": 3401533447
+    },
+    {
+      "command": "CRC",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3401533447
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 3401533448
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3401533448
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 3401533449
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3401533449
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 3401533450
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3401533450
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 3401533451
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3401533451
+    },
+    {
+      "attempt": 0,
+      "command": "CRC",
+      "direction": "tx",
+      "transaction": 3401533452
+    },
+    {
+      "command": "CRC",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 3401533452
+    }
+  ],
+  "transport": {
+    "baud": 57600,
+    "device": "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0",
+    "exec_timeout_seconds": 300.0,
+    "retries": 5,
+    "timeout_seconds": 20.0,
+    "type": "serial"
+  }
+}

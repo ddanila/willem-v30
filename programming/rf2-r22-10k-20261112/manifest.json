@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-12",
+  "hardware": "Willem PCB5.0E; R22 replaced 2.2k with 10k by owner",
+  "chip": "RF2, exact marking and relationship to previous failed specimens unconfirmed",
+  "vpp": "Owner reported good before insertion; no numeric measurement provided this session",
+  "programming_pulses": 2,
+  "pulse_nominal_ms": 50,
+  "final_non_ff": {
+    "0000": "5A",
+    "0200": "A5"
+  },
+  "final_sha256": "8a2727cc2c1423778b458410adc038b93b7a3e9ced57cb36c34806851b1f73b3",
+  "writer_sha256": "5bae095644389390545c83aedfd42181a06ae12bc2643b95a55f2d59c7dfd911",
+  "reader_sha256": "93069972fe2386ceaa55242ea97d82d9e7ff1fbadda44636835cc9d82abdc6d6",
+  "shutdown": "Both readers and both writes reported rails off",
+  "result": "No A9 mirroring at tested 0000/0200 pair; exact full-chip agreement in two readers"
+}

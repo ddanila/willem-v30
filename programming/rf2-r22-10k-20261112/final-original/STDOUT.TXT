@@ -1,0 +1,1 @@
+SAFE OFF: VPP off, VCC off

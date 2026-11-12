@@ -1,0 +1,2 @@
+ORIGINAL sequence 0000 <- 5a read=5a; one PIT2 50ms pulse
+SAFE OFF: VPP off, VCC off

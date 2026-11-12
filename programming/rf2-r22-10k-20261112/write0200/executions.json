@@ -1,0 +1,9 @@
+{
+  "execution_ids": [
+    1123414706
+  ],
+  "identities": [
+    "{\"execution\":\"ORG2716.COM W 200 A5 B\",\"stdin_sha256\":null,\"uploads\":[{\"mapping\":\"/home/ddanila/fun/willem-v30-programming/build/dos/ORG2716.COM:ORG2716.COM\",\"sha256\":\"5bae095644389390545c83aedfd42181a06ae12bc2643b95a55f2d59c7dfd911\"},{\"mapping\":\"/tmp/rf2-r22-10k/RF2.OK:RF2.OK\",\"sha256\":\"3f499fcde3994db7f7d60326b197d2306f78da20d657374b9a6140fdb46f0c30\"}]}"
+  ],
+  "kind": "generic-run-v1"
+}
