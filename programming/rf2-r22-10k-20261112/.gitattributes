@@ -1,1 +1,2 @@
-*.TXT -text
+*.TXT -text whitespace=cr-at-eol
+*.BIN binary
