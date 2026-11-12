@@ -1,0 +1,9 @@
+{
+  "execution_ids": [
+    1968924947
+  ],
+  "identities": [
+    "{\"execution\":\"READER.COM RRF5 READ.BIN 378 /PROFILE:conservative\",\"stdin_sha256\":null,\"uploads\":[{\"mapping\":\"/home/ddanila/fun/rom-programmers/.tools/willem/build/dos/WILLEM.COM:READER.COM\",\"sha256\":\"93069972fe2386ceaa55242ea97d82d9e7ff1fbadda44636835cc9d82abdc6d6\"}]}"
+  ],
+  "kind": "generic-run-v1"
+}

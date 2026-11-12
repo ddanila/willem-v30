@@ -1,0 +1,611 @@
+{
+  "artifacts": [
+    {
+      "crc32": "0d343880",
+      "name": "upload:ORG2716.COM",
+      "sha256": "062961d1088151265d9a906084a55cd77e9ac4e42087784dc95b2f3ea6873558",
+      "size": 9612
+    },
+    {
+      "crc32": "883ea2db",
+      "name": "upload:A9TEST.BIN",
+      "sha256": "cb1b834eee6c47e76e5bb2bcff418cc10725c1d59c02947ca5049272491f874a",
+      "size": 2048
+    },
+    {
+      "crc32": "13f57e45",
+      "name": "executions.json",
+      "sha256": "dc8ceb4261b1ab17d068be526b024f7e06b93e93ebcb0731989072acb7b3bf5b",
+      "size": 565
+    },
+    {
+      "crc32": "67e553bf",
+      "name": "STDOUT.TXT",
+      "sha256": "b14cabaf1b70e5069d12ad697aae3df9ab60d0b023b7f1d3e7e195134b3314e0",
+      "size": 479
+    },
+    {
+      "crc32": "00000000",
+      "name": "STDERR.TXT",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  ],
+  "command_line": [
+    "/home/ddanila/fun/dosravi/dosravi/cli.py",
+    "--serial",
+    "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0",
+    "--baud",
+    "57600",
+    "--timeout",
+    "20",
+    "--exec-timeout",
+    "900",
+    "--session-dir",
+    "sessions/rf2-r22-10k-20261112-full-fill",
+    "run",
+    "--put",
+    "/home/ddanila/fun/willem-v30-programming/build/dos/ORG2716.COM:ORG2716.COM",
+    "--put",
+    "/home/ddanila/fun/willem-v30-programming/programming/rf2-r22-10k-20261112/full-pattern/A9TEST.BIN:A9TEST.BIN",
+    "--exec",
+    "ORG2716.COM F A9TEST.BIN B 0",
+    "--note",
+    "machine=Pocket8086",
+    "--note",
+    "cable-adapter=CP2102; Willem PCB5.0E",
+    "--note",
+    "purpose=Authorized full diagnostic fill; same RF2 and 25V setup; R22 10k; preserves 0000=5A 0200=A5; only FF cells programmed; no retries"
+  ],
+  "completed_utc": "2026-11-12T18:28:39.950707+00:00",
+  "error": null,
+  "exit_status": 0,
+  "hardware_notes": {
+    "cable-adapter": "CP2102; Willem PCB5.0E",
+    "machine": "Pocket8086",
+    "purpose": "Authorized full diagnostic fill; same RF2 and 25V setup; R22 10k; preserves 0000=5A 0200=A5; only FF cells programmed; no retries"
+  },
+  "host_version": "0.1.1",
+  "negotiated": {
+    "agent": "DOSRAVI.COM",
+    "bios_equipment_word": 21613,
+    "build": "crc8088-v1",
+    "capabilities": [
+      "replay",
+      "resume",
+      "exec-capture",
+      "self-update"
+    ],
+    "chunk_size": 512,
+    "com_base": 1016,
+    "conventional_kb": 639,
+    "dos": "6.22",
+    "free_disk": 406675456,
+    "free_memory": 477936,
+    "protocol": 1,
+    "rejected_frames": 1,
+    "uart_fifo_bits": 192,
+    "uart_fifo_enabled": 1,
+    "uart_line_errors": 0,
+    "uart_overruns": 0,
+    "version": "0.1.1"
+  },
+  "programmer_stats": {
+    "exec_elapsed_ms": 99605,
+    "execution_id": 957746587
+  },
+  "serial_stats": {
+    "get:E160d9b.ERR": {
+      "bytes": 0,
+      "bytes_per_second": 0.0,
+      "crc32": "00000000",
+      "elapsed_seconds": 0.11582257086411119,
+      "payload_bytes": 0,
+      "resumed_bytes": 0,
+      "skipped": false
+    },
+    "get:O160d9b.OUT": {
+      "bytes": 479,
+      "bytes_per_second": 1744.486026797147,
+      "crc32": "67e553bf",
+      "elapsed_seconds": 0.27457944210618734,
+      "payload_bytes": 479,
+      "resumed_bytes": 0,
+      "skipped": false
+    },
+    "put:A9TEST.BIN": {
+      "bytes": 2048,
+      "bytes_per_second": 1381.975223497548,
+      "crc32": "883ea2db",
+      "elapsed_seconds": 1.4819368431344628,
+      "payload_bytes": 2048,
+      "resumed_bytes": 0,
+      "skipped": false
+    },
+    "put:ORG2716.COM": {
+      "bytes": 9612,
+      "bytes_per_second": 1798.8024320927695,
+      "crc32": "0d343880",
+      "elapsed_seconds": 5.343555150087923,
+      "payload_bytes": 9612,
+      "resumed_bytes": 0,
+      "skipped": false
+    }
+  },
+  "session_id": "rf2-r22-10k-20261112-full-fill",
+  "source_commit": "89f2081656c59cf4f3da115ba22844f53e69a251",
+  "source_dirty": false,
+  "started_utc": "2026-11-12T18:26:06.745416+00:00",
+  "transactions": [
+    {
+      "attempt": 0,
+      "command": "INFO",
+      "direction": "tx",
+      "transaction": 2464489238
+    },
+    {
+      "command": "INFO",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489238
+    },
+    {
+      "attempt": 0,
+      "command": "CRC",
+      "direction": "tx",
+      "transaction": 2464489239
+    },
+    {
+      "command": "CRC",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489239
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_BEGIN",
+      "direction": "tx",
+      "transaction": 2464489240
+    },
+    {
+      "command": "PUT_BEGIN",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489240
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489241
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489241
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489242
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489242
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489243
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489243
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489244
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489244
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489245
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489245
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489246
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489246
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489247
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489247
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489248
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489248
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489249
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489249
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489250
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489250
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489251
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489251
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489252
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489252
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489253
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489253
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489254
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489254
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489255
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489255
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489256
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489256
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489257
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489257
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489258
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489258
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489259
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489259
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_COMMIT",
+      "direction": "tx",
+      "transaction": 2464489260
+    },
+    {
+      "command": "PUT_COMMIT",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489260
+    },
+    {
+      "attempt": 0,
+      "command": "CRC",
+      "direction": "tx",
+      "transaction": 2464489261
+    },
+    {
+      "command": "CRC",
+      "direction": "rx",
+      "replay": false,
+      "status": "NOT_FOUND",
+      "transaction": 2464489261
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_BEGIN",
+      "direction": "tx",
+      "transaction": 2464489262
+    },
+    {
+      "command": "PUT_BEGIN",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489262
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489263
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489263
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489264
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489264
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489265
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489265
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_DATA",
+      "direction": "tx",
+      "transaction": 2464489266
+    },
+    {
+      "command": "PUT_DATA",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489266
+    },
+    {
+      "attempt": 0,
+      "command": "PUT_COMMIT",
+      "direction": "tx",
+      "transaction": 2464489267
+    },
+    {
+      "command": "PUT_COMMIT",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489267
+    },
+    {
+      "attempt": 0,
+      "command": "EXEC",
+      "direction": "tx",
+      "transaction": 2464489268
+    },
+    {
+      "command": "EXEC",
+      "direction": "event",
+      "message": "STARTED",
+      "status": "OK",
+      "transaction": 2464489268
+    },
+    {
+      "command": "EXEC",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489268
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 2464489269
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489269
+    },
+    {
+      "attempt": 0,
+      "command": "CRC",
+      "direction": "tx",
+      "transaction": 2464489270
+    },
+    {
+      "command": "CRC",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489270
+    },
+    {
+      "attempt": 0,
+      "command": "GET",
+      "direction": "tx",
+      "transaction": 2464489271
+    },
+    {
+      "command": "GET",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489271
+    },
+    {
+      "attempt": 0,
+      "command": "CRC",
+      "direction": "tx",
+      "transaction": 2464489272
+    },
+    {
+      "command": "CRC",
+      "direction": "rx",
+      "replay": false,
+      "status": "OK",
+      "transaction": 2464489272
+    }
+  ],
+  "transport": {
+    "baud": 57600,
+    "device": "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0",
+    "exec_timeout_seconds": 900.0,
+    "retries": 5,
+    "timeout_seconds": 20.0,
+    "type": "serial"
+  }
+}

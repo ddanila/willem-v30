@@ -95,6 +95,7 @@ build/dos/ORG2716.COM: build/dos/original_2716_lab.o build/dos/dosio.o
 
 original-2716-test: dos experiment build/dos/ORG2716.COM
 	python3 tests/test_original_2716_lab.py
+	python3 tests/test_original_2716_fill.py
 	python3 tools/check_original_2716_trace.py programming/serial-boot-20261110/evidence/original-2716/pcb3-clean.log.gz programming/serial-boot-20261110/evidence/original-2716/PATTERN.BIN
 	python3 tools/check_original_2716_trace.py programming/serial-boot-20261110/evidence/original-2716/plain-program.log.gz programming/serial-boot-20261110/evidence/original-2716/PATTERN.BIN
 

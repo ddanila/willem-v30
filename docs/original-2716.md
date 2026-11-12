@@ -162,3 +162,22 @@ Regression validation: `make port-model-test` passed the healthy full-image
 probe tests and the 1016-pulse folded-pattern fill. The new original-style
 helper tests passed with healthy and injected-A9 models. Both archived original
 trace checkers passed, and the final physical read matched the saved capture.
+
+## Filling a partially programmed diagnostic chip
+
+`ORG2716 F IMAGE.BIN B 0` accepts an exact 2048-byte image and the same
+`RF2.OK` 5 V/25 V gate. Numeric arguments are hexadecimal: B means 11
+address bits; the last argument must be zero. It scans the whole chip before
+programming, refusing any existing non-FF byte that differs from the image.
+Matching bytes (including FF) are skipped; only FF cells receive one nominal
+PIT2 50 ms pulse, with no retry. Each byte is verified after programming VPP
+is removed using the original DOS sequence. A power cycle and complete
+read-mode verification follow. Failure paths switch both rails off.
+
+This intentionally does not support further programming an already non-FF
+byte, even where its remaining one-bits might permit the desired value.
+It is a sacrificial-chip diagnostic, not a general adaptive EPROM algorithm.
+Do not automatically replay an interrupted run; recover its status and inspect
+the chip first. `tests/test_original_2716_fill.py` checks full completion with
+preserved bytes, repeat-fill skipping, A6/A9 alias preflight refusal, failure to
+program, and invalid image/mode/gate rejection through the DOS port model.

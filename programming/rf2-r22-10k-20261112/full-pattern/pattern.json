@@ -1,0 +1,23 @@
+{
+  "size": 2048,
+  "sha256": "cb1b834eee6c47e76e5bb2bcff418cc10725c1d59c02947ca5049272491f874a",
+  "different_pairs_per_address_bit": {
+    "A0": 1020,
+    "A1": 1022,
+    "A2": 1018,
+    "A3": 1021,
+    "A4": 1021,
+    "A5": 1017,
+    "A6": 1021,
+    "A7": 1018,
+    "A8": 1016,
+    "A9": 1021,
+    "A10": 1020
+  },
+  "new_pulses_expected": 2036,
+  "preserved": {
+    "0000": "5A",
+    "0200": "A5"
+  },
+  "purpose": "Diagnostic data, not executable firmware"
+}

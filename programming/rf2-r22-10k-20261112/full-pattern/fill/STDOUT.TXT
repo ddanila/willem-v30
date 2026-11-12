@@ -1,0 +1,17 @@
+Fill pulses=128 last=0081
+Fill pulses=256 last=0101
+Fill pulses=384 last=0182
+Fill pulses=512 last=0205
+Fill pulses=640 last=0287
+Fill pulses=768 last=0307
+Fill pulses=896 last=0387
+Fill pulses=1024 last=0408
+Fill pulses=1152 last=0488
+Fill pulses=1280 last=050a
+Fill pulses=1408 last=058a
+Fill pulses=1536 last=060a
+Fill pulses=1664 last=068a
+Fill pulses=1792 last=070a
+Fill pulses=1920 last=078a
+SAFE OFF: VPP off, VCC off
+Fill pulses=2036 skipped=12 result=0

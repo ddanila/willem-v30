@@ -2,6 +2,7 @@
  * All numeric arguments hexadecimal. R file bits highVPP; W addr byte bits.
  * Reads finish before creating a file. Writes: one FF cell, one PIT2 pulse.
  * High-VPP read is program verification with CE kept low, not a pulse.
+ * F image bits 0 fills FF cells, preserves matching cells, verifies with VPP off.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,32 +55,69 @@ static void off(void)
  /* VPP off first, CE low, then VCC off. */
  control(0x0fU);control(0x0bU);output(0U);
 }
+static unsigned program(a,v,bits) unsigned a,v,bits;
+{
+ address(a,bits);control(0x0cU);dos_wait_us(10000U);control(0x0eU);
+ output(v);dos_wait_us(1000U);dos_2716_pulse(0x378U);
+ output(0U);control(0x0fU);control(0x0dU);
+ return input();
+}
 int main(argc,argv) int argc; char **argv;
 {
- unsigned bits,high,a=0,v=0,i,actual;
- int write_mode,result=1;
+ unsigned bits,high,a=0,v=0,i,actual,count=0,skipped=0;
+ int write_mode,fill_mode,result=1;
  FILE *f;
- if(argc!=5 || (strcmp(argv[1],"R")&&strcmp(argv[1],"W")))return 1;
+ if(argc!=5 || (strcmp(argv[1],"R")&&strcmp(argv[1],"W")&&strcmp(argv[1],"F")))return 1;
  write_mode=!strcmp(argv[1],"W");
+ fill_mode=!strcmp(argv[1],"F");
  if(write_mode) {a=hex(argv[2]);v=hex(argv[3]);bits=hex(argv[4]);high=0;}
  else {bits=hex(argv[3]);high=hex(argv[4]);}
  if(bad || (bits!=11U&&bits!=24U) || high>1U || a>=2048U || v>=255U)return 1;
- if(write_mode || high) {
+ if(fill_mode && high)return 1;
+ if(write_mode || fill_mode || high) {
   char gate[48];
   f=fopen("RF2.OK","rb");if(!f)return 1;
   if(!fgets(gate,48,f)){fclose(f);return 1;}fclose(f);
   if(strncmp(gate,"WILLEM-2716-5V-25V-GATE-1",23))return 1;
  }
+ if(fill_mode) {
+  f=fopen(argv[2],"rb");if(!f)return 1;
+  i=fread(data,1,2048,f);actual=fgetc(f);fclose(f);
+  if(i!=2048U || actual!=(unsigned)EOF)return 1;
+ }
  off();control(9U);address(0U,24U); /* initialize upper address stages */
  control(0x0dU);dos_wait_us(10000U); /* VCC on, CE low, OE low */
- if(write_mode) {
+ if(fill_mode) {
+  /* Whole-chip preflight before any programming voltage or pulse. */
+  for(i=0;i<2048U;i++) {
+   address(i,bits);actual=input();
+   if(actual!=255U && actual!=data[i]) {
+    printf("REFUSED incompatible %04X=%02X wanted=%02X\n",i,actual,data[i]);goto done;
+   }
+  }
+  for(i=0;i<2048U;i++) {
+   address(i,bits);actual=input();
+   if(actual==data[i]) {skipped++;continue;}
+   if(actual!=255U) {printf("ABORT nonblank %04X=%02X\n",i,actual);goto done;}
+   actual=program(i,(unsigned)data[i],bits);count++;
+   if(actual!=data[i]) {
+    printf("VERIFY mismatch %04X=%02X wanted=%02X\n",i,actual,data[i]);result=2;goto done;
+   }
+   if(!(count&127U))printf("Fill pulses=%u last=%04X\n",count,i);
+  }
+  off();control(0x0dU);dos_wait_us(10000U);
+  for(i=0;i<2048U;i++) {
+   address(i,bits);actual=input();
+   if(actual!=data[i]) {
+    printf("FINAL mismatch %04X=%02X wanted=%02X\n",i,actual,data[i]);result=2;goto done;
+   }
+  }
+  result=0;
+ } else if(write_mode) {
   address(a,bits);actual=input();
   if(actual!=255U) {printf("REFUSED %04X=%02X not FF\n",a,actual);goto done;}
   /* Original trace: shift -> 0C -> 0E -> data -> 06 -> 0E -> 00 -> 0F -> 0D. */
-  address(a,bits);control(0x0cU);dos_wait_us(10000U);control(0x0eU);
-  output(v);dos_wait_us(1000U);dos_2716_pulse(0x378U);
-  output(0U);control(0x0fU);control(0x0dU);
-  actual=input();printf("ORIGINAL sequence %04X <- %02X read=%02X; one PIT2 50ms pulse\n",a,v,actual);
+  actual=program(a,v,bits);printf("ORIGINAL sequence %04X <- %02X read=%02X; one PIT2 50ms pulse\n",a,v,actual);
   result=(actual==v)?0:2;
  } else {
   if(high) { control(0x0cU);dos_wait_us(10000U); }
@@ -88,7 +126,8 @@ int main(argc,argv) int argc; char **argv;
  }
 done:
  off();puts("SAFE OFF: VPP off, VCC off");
- if(!write_mode && result==0) {
+ if(fill_mode)printf("Fill pulses=%u skipped=%u result=%d\n",count,skipped,result);
+ if(!write_mode && !fill_mode && result==0) {
   f=fopen(argv[2],"wb");if(!f)return 1;
   if(fwrite(data,1,2048,f)!=2048U)result=1;
   fclose(f);

@@ -1,0 +1,216 @@
+{
+  "all_ff": false,
+  "artifacts": {
+    "image.bin": {
+      "sha256": "cb1b834eee6c47e76e5bb2bcff418cc10725c1d59c02947ca5049272491f874a",
+      "size": 2048
+    },
+    "read-1.log": {
+      "sha256": "d6bf5235ff0f2410c59a3f4be6cc45ac272a9a516a22a82a0c0d11b7d6042390",
+      "size": 138
+    },
+    "read-1/READ.BIN": {
+      "sha256": "cb1b834eee6c47e76e5bb2bcff418cc10725c1d59c02947ca5049272491f874a",
+      "size": 2048
+    },
+    "read-1/STDERR.TXT": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "read-1/STDOUT.TXT": {
+      "sha256": "604a62ca0e520027f81f154fc01b75f3340c70c2dfdb4a0b311a98c10e5fdb7a",
+      "size": 2072
+    },
+    "read-1/executions.json": {
+      "sha256": "8b0f8cdbc0bfee13e5af5fcd2a39d9853acbf1e82357642864f4336fe5d7c6df",
+      "size": 386
+    },
+    "read-1/serial.rx": {
+      "sha256": "1cb24ebd42f33b0125aec662f6a7ae3d3668aaf0a996c2d7dbec432fd7da6c65",
+      "size": 5219
+    },
+    "read-1/serial.tx": {
+      "sha256": "3956eff2a379d6af50229dc83f9bf2be2e6d5bef241f3a628b89308d9e80fc3c",
+      "size": 686
+    },
+    "read-1/transactions.jsonl": {
+      "sha256": "d3bb38f49c7bd3d5058ecf587d92021015b2c7fdea554f9e08dfdd980da015f6",
+      "size": 2943
+    },
+    "read-2.log": {
+      "sha256": "604228f9eb808962ae7083b625aa85e4d5be39a79aef69c18e79dadaa79aea9e",
+      "size": 138
+    },
+    "read-2/READ.BIN": {
+      "sha256": "cb1b834eee6c47e76e5bb2bcff418cc10725c1d59c02947ca5049272491f874a",
+      "size": 2048
+    },
+    "read-2/STDERR.TXT": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "read-2/STDOUT.TXT": {
+      "sha256": "26010acc3bfd49d109869e661e8ba22715a90a3caf7c11c664bfce81dd82cf17",
+      "size": 2072
+    },
+    "read-2/executions.json": {
+      "sha256": "337c55e3fb2242e0ceca57bb7968fc2f0a7ff0189ddeb47ea06e17b743b21c0f",
+      "size": 386
+    },
+    "read-2/serial.rx": {
+      "sha256": "7d7a2df29cfaf5ecf440ed483d72435986d1689b2cd888ba89461c4e47ad8030",
+      "size": 5219
+    },
+    "read-2/serial.tx": {
+      "sha256": "851687b97bfce118bd363d8ac562a56629d0f95ea9c21069c492c0a099d9b567",
+      "size": 686
+    },
+    "read-2/transactions.jsonl": {
+      "sha256": "09ff3256d9259675f84315a252029b23642344754cefee4f3d28be6e330a083b",
+      "size": 3009
+    },
+    "readback.bin": {
+      "sha256": "cb1b834eee6c47e76e5bb2bcff418cc10725c1d59c02947ca5049272491f874a",
+      "size": 2048
+    }
+  },
+  "comparison": "two matching fresh reads",
+  "experimental": true,
+  "finished_utc": "2026-11-12T18:29:54.541183+00:00",
+  "request": {
+    "action": "verify",
+    "config": {
+      "baud": 57600,
+      "cwd": "/home/ddanila/fun/rom-programmers/.tools/dosravi",
+      "dosravi": [
+        "/usr/bin/python3.14",
+        "-m",
+        "dosravi.cli"
+      ],
+      "exec_timeout": 1800,
+      "lpt": "378",
+      "port": "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0",
+      "program_vpp": 21,
+      "reader": "/home/ddanila/fun/rom-programmers/.tools/willem/build/dos/WILLEM.COM",
+      "sha256": {
+        "reader": "93069972fe2386ceaa55242ea97d82d9e7ff1fbadda44636835cc9d82abdc6d6",
+        "writer": "cb07d957fdcd7ee4d3942df7b7ce61820bd48d523507173e8c608f8d0c7a9654"
+      },
+      "source_revisions": {
+        "dosravi": "a6275b3ba5ac775a39baf40a95665d959b7497d3",
+        "willem": "ff2a7c35571caebb3ecece6087b6f62db8afa88b"
+      },
+      "writer": "/home/ddanila/fun/rom-programmers/.tools/willem/build/dos/PG2732A.COM"
+    },
+    "image": {
+      "path": "/home/ddanila/fun/willem-v30-programming/programming/rf2-r22-10k-20261112/full-pattern/A9TEST.BIN",
+      "sha256": "cb1b834eee6c47e76e5bb2bcff418cc10725c1d59c02947ca5049272491f874a"
+    },
+    "profile": "willem-2716-read",
+    "profile_definition": {
+      "backend": "willem",
+      "experimental": true,
+      "program": false,
+      "read_command": "RRF5",
+      "setup": "J9/J10 toward DB25; special 2716 routing, both shunts ZIF-side; DIP ON 1,2,6,8,9. Pin1 at ZIF5, notch toward lever. VCC 5 V, read VPP=VCC.",
+      "size": 2048,
+      "voltage": null
+    },
+    "setup_confirmed": false,
+    "tools": {
+      "reader": {
+        "path": "/home/ddanila/fun/rom-programmers/.tools/willem/build/dos/WILLEM.COM",
+        "sha256": "93069972fe2386ceaa55242ea97d82d9e7ff1fbadda44636835cc9d82abdc6d6"
+      }
+    },
+    "version": "0.1.0",
+    "workflow_sha256": "2dde40b6fe7b74baf5becdcc023db16ffc0110fa1e756ffbb786710725fdf5bc"
+  },
+  "result_sha256": "cb1b834eee6c47e76e5bb2bcff418cc10725c1d59c02947ca5049272491f874a",
+  "schema": 1,
+  "shutdown": "reported-off",
+  "started_utc": "2026-11-12T18:28:50.131883+00:00",
+  "status": "verified",
+  "steps": [
+    {
+      "command": [
+        "/usr/bin/python3.14",
+        "-m",
+        "dosravi.cli",
+        "--serial",
+        "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0",
+        "--baud",
+        "57600",
+        "--timeout",
+        "20",
+        "--retries",
+        "2",
+        "--exec-timeout",
+        "1800",
+        "--session-dir",
+        "/home/ddanila/fun/rom-programmers/sessions/rf2-r22-10k-full-verify-20261112/read-1",
+        "run",
+        "--exec",
+        "READER.COM RRF5 READ.BIN 378 /PROFILE:conservative",
+        "--note",
+        "machine=Pocket8086",
+        "--note",
+        "cable-adapter=CP2102; Willem PCB5.0E LPT",
+        "--put",
+        "/home/ddanila/fun/rom-programmers/.tools/willem/build/dos/WILLEM.COM:READER.COM",
+        "--get",
+        "READ.BIN"
+      ],
+      "cwd": "/home/ddanila/fun/rom-programmers/.tools/dosravi",
+      "exit_code": 0,
+      "log": "read-1.log",
+      "name": "read-1",
+      "outputs": {
+        "read-1.log": "d6bf5235ff0f2410c59a3f4be6cc45ac272a9a516a22a82a0c0d11b7d6042390",
+        "read-1/READ.BIN": "cb1b834eee6c47e76e5bb2bcff418cc10725c1d59c02947ca5049272491f874a",
+        "read-1/STDOUT.TXT": "604a62ca0e520027f81f154fc01b75f3340c70c2dfdb4a0b311a98c10e5fdb7a"
+      },
+      "status": "complete"
+    },
+    {
+      "command": [
+        "/usr/bin/python3.14",
+        "-m",
+        "dosravi.cli",
+        "--serial",
+        "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0",
+        "--baud",
+        "57600",
+        "--timeout",
+        "20",
+        "--retries",
+        "2",
+        "--exec-timeout",
+        "1800",
+        "--session-dir",
+        "/home/ddanila/fun/rom-programmers/sessions/rf2-r22-10k-full-verify-20261112/read-2",
+        "run",
+        "--exec",
+        "READER.COM RRF5 READ.BIN 378 /PROFILE:conservative",
+        "--note",
+        "machine=Pocket8086",
+        "--note",
+        "cable-adapter=CP2102; Willem PCB5.0E LPT",
+        "--put",
+        "/home/ddanila/fun/rom-programmers/.tools/willem/build/dos/WILLEM.COM:READER.COM",
+        "--get",
+        "READ.BIN"
+      ],
+      "cwd": "/home/ddanila/fun/rom-programmers/.tools/dosravi",
+      "exit_code": 0,
+      "log": "read-2.log",
+      "name": "read-2",
+      "outputs": {
+        "read-2.log": "604228f9eb808962ae7083b625aa85e4d5be39a79aef69c18e79dadaa79aea9e",
+        "read-2/READ.BIN": "cb1b834eee6c47e76e5bb2bcff418cc10725c1d59c02947ca5049272491f874a",
+        "read-2/STDOUT.TXT": "26010acc3bfd49d109869e661e8ba22715a90a3caf7c11c664bfce81dd82cf17"
+      },
+      "status": "complete"
+    }
+  ]
+}

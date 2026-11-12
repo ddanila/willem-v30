@@ -1,0 +1,9 @@
+{
+  "execution_ids": [
+    957746587
+  ],
+  "identities": [
+    "{\"execution\":\"ORG2716.COM F A9TEST.BIN B 0\",\"stdin_sha256\":null,\"uploads\":[{\"mapping\":\"/home/ddanila/fun/willem-v30-programming/build/dos/ORG2716.COM:ORG2716.COM\",\"sha256\":\"062961d1088151265d9a906084a55cd77e9ac4e42087784dc95b2f3ea6873558\"},{\"mapping\":\"/home/ddanila/fun/willem-v30-programming/programming/rf2-r22-10k-20261112/full-pattern/A9TEST.BIN:A9TEST.BIN\",\"sha256\":\"cb1b834eee6c47e76e5bb2bcff418cc10725c1d59c02947ca5049272491f874a\"}]}"
+  ],
+  "kind": "generic-run-v1"
+}
